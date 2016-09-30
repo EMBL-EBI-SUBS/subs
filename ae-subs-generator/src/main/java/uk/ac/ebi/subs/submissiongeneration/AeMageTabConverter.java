@@ -46,6 +46,10 @@ public class AeMageTabConverter {
 
         MAGETABInvestigation investigation = parser.parse(mageTabUrl);
 
+        if (investigation.IDF.sdrfFile.size() > 1){
+            return null; //TODO parser doesn't seem to work properly where there is more than one
+        }
+
         Submission submission = mageTabToSubmission(investigation);
 
         return submission;
@@ -66,14 +70,22 @@ public class AeMageTabConverter {
         }
 
         Optional<Contact> firstContact = study.getContacts().stream().filter(c -> c.getEmail() != null).findFirst();
-        if (firstContact.isPresent()) {
-            submission.getDomain().setName(firstContact.get().getEmail());
-            submission.getSubmitter().setEmail(firstContact.get().getEmail());
-            study.setDomain(submission.getDomain());
+        String domainName;
+        String email;
+        if (firstContact.isPresent() && firstContact.get().getEmail() != null) {
+            domainName = firstContact.get().getEmail();
+            email = firstContact.get().getEmail();
+        }
+        else {
+            domainName = investigation.getAccession();
+            email = domainName+"@noemail.ac.uk";
         }
 
-        submission.getStudies().add(study);
+        submission.getDomain().setName(domainName);
+        submission.getSubmitter().setEmail(email);
+        study.setDomain(submission.getDomain());
 
+        submission.getStudies().add(study);
         convertSdrf(investigation.SDRF, submission, (StudyRef)study.asRef(), protocolTypes);
 
         return submission;
