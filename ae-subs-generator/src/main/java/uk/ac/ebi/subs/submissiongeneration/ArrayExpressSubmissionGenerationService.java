@@ -101,12 +101,17 @@ public class ArrayExpressSubmissionGenerationService implements SubmissionGenera
 
 
     public void processAccDate(String accession, Date releaseDate, Path targetDir) throws IOException, uk.ac.ebi.arrayexpress2.magetab.exception.ParseException, ParseException {
-        logger.debug(String.join("\t", accession, releaseDate.toString(), targetDir.toString()));
+        logger.info("Converting {} of {} into {}",accession, releaseDate, targetDir);
 
         String url = "http://www.ebi.ac.uk/arrayexpress/json/v2/files/" + accession;
         ArrayExpressFilesResponse response = restTemplate.getForObject(url, ArrayExpressFilesResponse.class);
 
         Submission submission = aeMageTabConverter.mageTabToSubmission(response.idfUrl(accession));
+
+        if (submission == null){
+            logger.info("Skipping submission {}",accession); //TODO parser can't handle multi-SDRF magetab
+            return;
+        }
 
         writeSubmission(submission, accession, targetDir, releaseDate);
     }

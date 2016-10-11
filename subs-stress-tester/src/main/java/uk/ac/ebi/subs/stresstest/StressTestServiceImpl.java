@@ -28,7 +28,7 @@ public class StressTestServiceImpl implements StressTestService {
     @Value("${port:8080}")
     Integer port;
 
-    @Value("${urlPath:submit}")
+    @Value("${urlPath:/api/submit}")
     String urlPath;
 
     @Value("${protocol:http}")
