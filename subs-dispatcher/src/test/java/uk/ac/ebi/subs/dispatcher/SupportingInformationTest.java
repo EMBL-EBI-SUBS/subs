@@ -81,7 +81,7 @@ public class SupportingInformationTest {
 
     @Test
     public void testSupportingSamples() {
-        Map<Archive,SubmissionEnvelope> requests = dispatcherService.requestSupportingInformation(submission);
+        Map<Archive,SubmissionEnvelope> requests = dispatcherService.determineSupportingInformationRequired(submission);
 
         assertThat(requests.keySet(),hasSize(1));
         assertThat(requests.containsKey(Archive.BioSamples),is(true));

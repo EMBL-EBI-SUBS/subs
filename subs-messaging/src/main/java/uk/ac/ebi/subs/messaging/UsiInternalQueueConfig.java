@@ -79,20 +79,4 @@ public class UsiInternalQueueConfig {
         return BindingBuilder.bind(suppInfoProvidedQueue).to(submissionExchange).with(Queues.SUBMISSION_SUPPORTING_INFO_PROVIDED_ROUTING_KEY);
     }
 
-    /**
-     * Queue for submissions to be preppred for dispatch
-     *
-     * @return
-     */
-    @Bean
-    Queue onSubmitForwardToDispatchQueue() {
-        return new Queue(Queues.SUBMISSION_SUBMITTED_DO_DISPATCH, true);
-    }
-
-    @Bean
-    Binding onSubmitForwardToDispatchBinding(Queue onSubmitForwardToDispatchQueue, TopicExchange submissionExchange) {
-        return BindingBuilder.bind(onSubmitForwardToDispatchQueue).to(submissionExchange).with(Queues.SUBMISSION_SUBMITTED_ROUTING_KEY);
-    }
-
-
 }

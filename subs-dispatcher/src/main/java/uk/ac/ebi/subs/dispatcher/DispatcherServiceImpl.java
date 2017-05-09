@@ -84,7 +84,7 @@ public class DispatcherServiceImpl implements DispatcherService {
     }
 
     @Override
-    public Map<Archive, SubmissionEnvelope> requestSupportingInformation(Submission submission) {
+    public Map<Archive, SubmissionEnvelope> determineSupportingInformationRequired(Submission submission) {
         SubmissionEnvelope submissionEnvelope = submissionEnvelopeService.fetchOne(submission.getId());
 
         determineSupportingInformationRequired(submissionEnvelope);
@@ -117,18 +117,6 @@ public class DispatcherServiceImpl implements DispatcherService {
                     processingStatusRepository.save(status);
                 });
 
-    }
-
-    @Override
-    public SubmissionEnvelope inflateInitialSubmission(Submission submission) {
-        SubmissionEnvelope submissionEnvelope = submissionEnvelopeService.fetchOne(submission.getId());
-
-        uk.ac.ebi.subs.repository.model.Submission refreshedSubmission = submissionRepository.findOne(submission.getId());
-
-        refreshedSubmission.getSubmissionStatus().setStatus(SubmissionStatusEnum.Processing);
-        submissionStatusRepository.save(refreshedSubmission.getSubmissionStatus());
-
-        return submissionEnvelope;
     }
 
     public void determineSupportingInformationRequired(SubmissionEnvelope submissionEnvelope) {

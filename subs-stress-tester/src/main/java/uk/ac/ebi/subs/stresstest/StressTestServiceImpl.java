@@ -14,6 +14,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.ac.ebi.subs.data.Submission;
 import uk.ac.ebi.subs.data.client.*;
@@ -160,19 +161,27 @@ public class StressTestServiceImpl implements StressTestService {
                             throw new NullPointerException("no submission URI for " + item);
                         }
                         logger.debug("posting to {}, {}", itemUri, item);
-                        ResponseEntity<Resource> responseEntity = restTemplate.postForEntity(itemUri, item, Resource.class);
+                        try {
+                            ResponseEntity<Resource> responseEntity = restTemplate.postForEntity(itemUri, item, Resource.class);
 
-                        if (responseEntity.getStatusCodeValue() != 201) {
-                            logger.error("Unexpected status code {} when posting {} to {}; response body is",
-                                    responseEntity.getStatusCodeValue(),
-                                    item,
-                                    itemUri,
-                                    responseEntity.getBody().toString()
-                            );
-                            throw new RuntimeException("Server error " + responseEntity.toString());
+                            if (responseEntity.getStatusCodeValue() != 201) {
+                                logger.error("Unexpected status code {} when posting {} to {}; response body is",
+                                        responseEntity.getStatusCodeValue(),
+                                        item,
+                                        itemUri,
+                                        responseEntity.getBody().toString()
+                                );
+                                throw new RuntimeException("Server error " + responseEntity.toString());
+                            }
+                            URI location = responseEntity.getHeaders().getLocation();
+                            logger.debug("created {}", location);
+                        } catch (HttpClientErrorException e){
+                            logger.error("HTTP error when posting item");
+                            logger.error(item.toString());
+                            logger.error(e.toString());
+                            throw e;
                         }
-                        URI location = responseEntity.getHeaders().getLocation();
-                        logger.debug("created {}", location);
+
                     }
             );
 

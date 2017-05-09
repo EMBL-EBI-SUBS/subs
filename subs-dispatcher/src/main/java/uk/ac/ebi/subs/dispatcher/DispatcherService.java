@@ -14,9 +14,8 @@ public interface DispatcherService {
 
     Map<Archive, SubmissionEnvelope> assessDispatchReadiness(Submission submission);
 
-    Map<Archive, SubmissionEnvelope> requestSupportingInformation(Submission submission);
+    Map<Archive, SubmissionEnvelope> determineSupportingInformationRequired(Submission submission);
 
     void updateSubmittablesStatusToSubmitted(Archive archive, SubmissionEnvelope submissionEnvelope);
 
-    SubmissionEnvelope inflateInitialSubmission(Submission submission);
 }

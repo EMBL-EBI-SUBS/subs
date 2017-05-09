@@ -15,6 +15,10 @@ import uk.ac.ebi.subs.repository.model.Submission;
 
 import java.util.*;
 
+/**
+ * Dispatcher looks at the state of a submission and works out which archives need to handle it next.
+ * This can be for the purposes of getting supporting information, or for archiving
+ */
 @Service
 public class DispatcherRabbitBridge {
 
@@ -38,31 +42,15 @@ public class DispatcherRabbitBridge {
     }
 
     /**
-     * Submissions being submitted by a user causes a Submission message to be sent,
-     * but downstream work needs a SubmissionEnvelope, so transform and resend
-     *
+     * Determine what supporting information is required from the archvies
      * @param submission
      */
-    @RabbitListener(queues = Queues.SUBMISSION_SUBMITTED_DO_DISPATCH)
-    public void onSubmissionDoDispatch(Submission submission) {
-        logger.info("onSubmissionDoDispatch {}", submission);
-
-        SubmissionEnvelope submissionEnvelope = dispatcherService.inflateInitialSubmission(submission);
-
-        rabbitMessagingTemplate.convertAndSend(
-                Exchanges.SUBMISSIONS,
-                Topics.EVENT_SUBMISSION_PROCESSING_UPDATED,
-                submission
-        );
-
-    }
-
     @RabbitListener(queues = Queues.SUBMISSION_SUBMITTED_CHECK_SUPPORTING_INFO)
-    public void onSubmissionCheckSupportingInfoRequirement(Submission submission) {
-        logger.info("onSubmissionCheckSupportingInfoRequirement {}", submission);
+    public void checkSupportingInfoRequirement(Submission submission) {
+        logger.info("checkSupportingInfoRequirement {}", submission);
 
 
-        Map<Archive,SubmissionEnvelope> submissionEnvelopesForArchives = dispatcherService.requestSupportingInformation(submission);
+        Map<Archive,SubmissionEnvelope> submissionEnvelopesForArchives = dispatcherService.determineSupportingInformationRequired(submission);
 
         if (!submissionEnvelopesForArchives.containsKey(Archive.BioSamples)){
             return;
@@ -83,14 +71,16 @@ public class DispatcherRabbitBridge {
 
     }
 
-
-
-
-
+    /**
+     * For a submission, assess which archives can be sent information for archiving. Send them the information
+     * as a message
+     *
+     * @param submission
+     */
     @RabbitListener(queues = Queues.SUBMISSION_DISPATCHER)
-    public void handleSubmissionEvent(Submission submission) {
+    public void dispatchToArchives(Submission submission) {
 
-        logger.info("handleSubmissionEvent {}", submission);
+        logger.info("dispatchToArchives {}", submission);
 
 
         Map<Archive,SubmissionEnvelope> readyToDispatch = dispatcherService
