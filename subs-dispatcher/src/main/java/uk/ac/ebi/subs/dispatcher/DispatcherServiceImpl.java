@@ -12,6 +12,7 @@ import uk.ac.ebi.subs.data.status.ProcessingStatusEnum;
 import uk.ac.ebi.subs.data.status.SubmissionStatusEnum;
 import uk.ac.ebi.subs.data.submittable.Assay;
 import uk.ac.ebi.subs.data.submittable.Sample;
+import uk.ac.ebi.subs.data.submittable.Submittable;
 import uk.ac.ebi.subs.processing.SubmissionEnvelope;
 import uk.ac.ebi.subs.repository.SubmissionEnvelopeService;
 import uk.ac.ebi.subs.repository.model.StoredSubmittable;
@@ -149,6 +150,8 @@ public class DispatcherServiceImpl implements DispatcherService {
 
             }
         }
+
+        submissionEnvelopeService.processSampleReferences(submissionEnvelope);
     }
 
 

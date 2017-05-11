@@ -4,9 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.subs.data.Submission;
+import uk.ac.ebi.subs.data.component.SampleRef;
+import uk.ac.ebi.subs.data.submittable.Sample;
 import uk.ac.ebi.subs.processing.SubmissionEnvelope;
 import uk.ac.ebi.subs.repository.repos.SubmissionRepository;
 import uk.ac.ebi.subs.repository.repos.submittables.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class SubmissionEnvelopeServiceImpl implements SubmissionEnvelopeService {
@@ -60,5 +65,29 @@ public class SubmissionEnvelopeServiceImpl implements SubmissionEnvelopeService 
         submissionEnvelope.getStudies().addAll(studyRepository.findBySubmissionId(submissionId));
 
         return submissionEnvelope;
+    }
+
+    @Override
+    public SubmissionEnvelope processSampleReferences(SubmissionEnvelope submissionEnvelope) {
+        Set<SampleRef> processedReferences = new HashSet<>();
+
+        for(SampleRef ref : submissionEnvelope.getSupportingSamplesRequired()) {
+            Sample s;
+
+            if (ref.isAccessioned()) {
+                s = sampleRepository.findByAccession(ref.getAccession());
+            } else {
+                s = sampleRepository.findFirstByTeamNameAndAliasOrderByCreatedDateDesc(ref.getTeam(), ref.getAlias());
+            }
+
+            if(s != null) {
+                submissionEnvelope.getSamples().add(s);
+                processedReferences.add(ref);
+            }
+        }
+
+        submissionEnvelope.getSupportingSamplesRequired().removeAll(processedReferences);
+
+        return  submissionEnvelope;
     }
 }
