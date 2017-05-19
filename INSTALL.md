@@ -28,6 +28,7 @@ Execute the following gradle tasks in separate terminal sessions :
 gradlew subs-api:bootRun
 gradlew subs-dispatcher:bootRun
 gradlew subs-progress-monitor:bootRun
+gradlew subs-samples-prototype-agent
 ```
 
 You should then be able to point your browser to the following URL :
@@ -36,14 +37,14 @@ You should then be able to point your browser to the following URL :
 
 ## USI application properties
 
-The application is configured using spring bean application properties, all three subs components will attempt to connect to a rabbitmq and mongo instance running
+The application is configured using spring bean application properties, all four subs components will attempt to connect to a rabbitmq and mongo instance running
 on the same host.  The application can be configured using the following spring properties with the defaults given : 
 
 ```
-spring.data.mongodb.port=27017 # Mongo server port.
-spring.data.mongodb.host=localhost # Mongo server host.
-spring.rabbitmq.host=localhost # RabbitMQ host
-spring.rabbitmq.port=5672 # RabbitMQ port
+spring.data.mongodb.port=27017 # Mongo server port (not applicable to the subs-samples-prototype-agent). 
+spring.data.mongodb.host=localhost # Mongo server host (not applicable to the subs-samples-prototype-agent). 
+spring.rabbitmq.host=localhost # RabbitMQ host 
+spring.rabbitmq.port=5672 # RabbitMQ port 
 spring.data.rest.basePath=/api # the base URI for the subs REST API (only applicable to the subs-api component) 
 spring.data.mongodb.database=subs # Database name
 ```
