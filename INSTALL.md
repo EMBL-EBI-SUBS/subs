@@ -28,7 +28,7 @@ Execute the following gradle tasks in separate terminal sessions :
 gradlew subs-api:bootRun
 gradlew subs-dispatcher:bootRun
 gradlew subs-progress-monitor:bootRun
-gradlew subs-samples-prototype-agent
+gradlew subs-samples-prototype-agent:bootRun
 ```
 
 You should then be able to point your browser to the following URL :
@@ -48,3 +48,5 @@ spring.rabbitmq.port=5672 # RabbitMQ port
 spring.data.rest.basePath=/api # the base URI for the subs REST API (only applicable to the subs-api component) 
 spring.data.mongodb.database=subs # Database name
 ```
+
+The agents are designed to communicate exclusively through RabbitMQ, so they do not require a connection to the mongo database. 
