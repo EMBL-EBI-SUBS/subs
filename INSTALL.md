@@ -7,17 +7,15 @@ Git
 Mongo 3.2.6 +
 RabbitMQ 3.6.1 +
 
-# Building and testing
-
 # MongoDB and RabbitMQ
 
 Install mongo and rabbitmq on to the same server where you which to run the SUBS API.  By default the system is configured to connect to 
 a mongodb and rabbitmq server running on the same host.  For the tests to work you will need to start up a mongodb and rabbitmq server on your local machine.
 
-# Building
+# Building and testing
 
 ```bash
-git@github.com:EMBL-EBI-SUBS/subs.git
+git clone git@github.com:EMBL-EBI-SUBS/subs.git
 cd subs
 ./gradlew build
 ```
@@ -39,8 +37,7 @@ You should then be able to point your browser to the following URL :
 ## USI application properties
 
 The application is configured using spring bean application properties, all three subs components will attempt to connect to a rabbitmq and mongo instance running
-on the same host.  The application can be configured using the following spring properties with the default given : 
-
+on the same host.  The application can be configured using the following spring properties with the defaults given : 
 
 ```
 spring.data.mongodb.port=27017 # Mongo server port.
