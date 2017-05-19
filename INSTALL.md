@@ -2,10 +2,10 @@
 
 ## Requirements
 
-Java 1.8
-Git
-Mongo 3.2.6 +
-RabbitMQ 3.6.1 +
+ * Java 1.8
+ * Git
+ * Mongo 3.2.6 +
+ * RabbitMQ 3.6.1 +
 
 # MongoDB and RabbitMQ
 
