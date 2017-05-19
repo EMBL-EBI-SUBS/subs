@@ -28,6 +28,7 @@ Execute the following gradle tasks in separate terminal sessions :
 gradlew subs-api:bootRun
 gradlew subs-dispatcher:bootRun
 gradlew subs-progress-monitor:bootRun
+gradlew subs-api-support:bootRun
 gradlew subs-samples-prototype-agent:bootRun
 ```
 
@@ -37,16 +38,32 @@ You should then be able to point your browser to the following URL :
 
 ## USI application properties
 
-The application is configured using spring bean application properties, all four subs components will attempt to connect to a rabbitmq and mongo instance running
+The application is configured using spring bean application properties, all five subs components will attempt to connect to a rabbitmq and mongo instance running
 on the same host.  The application can be configured using the following spring properties with the defaults given : 
 
 ```
-spring.data.mongodb.port=27017 # Mongo server port (not applicable to the subs-samples-prototype-agent). 
-spring.data.mongodb.host=localhost # Mongo server host (not applicable to the subs-samples-prototype-agent). 
+spring.data.mongodb.port=27017 # Mongo server port 
+spring.data.mongodb.host=localhost # Mongo server host 
 spring.rabbitmq.host=localhost # RabbitMQ host 
 spring.rabbitmq.port=5672 # RabbitMQ port 
 spring.data.rest.basePath=/api # the base URI for the subs REST API (only applicable to the subs-api component) 
 spring.data.mongodb.database=subs # Database name
+server.port=8080 # the HTTP port the server will listen on (only applicable to the subs-api component) 
 ```
 
-The agents are designed to communicate exclusively through RabbitMQ, so they do not require a connection to the mongo database. 
+The project jar is an executable spring boot application and can be executed directly on a UNIX environment.  
+
+For example to start up the subs-api component execute the following :
+
+```bash
+java -jar subs-api/build/libs/subs-api-1.0.0-SNAPSHOT.jar
+```
+
+The can also overide any application properties on the command line, for example to start up the subs-api with a mongo server on different host name :
+ 
+```bash
+java -jar subs-api/build/libs/subs-api-1.0.0-SNAPSHOT.jar --spring.data.mongodb.host=example-mongo-server.com
+```
+
+
+
