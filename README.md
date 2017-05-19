@@ -6,3 +6,4 @@
 License
 -------
 This project is licensed under [Apache 2.0 license](https://github.com/EMBL-EBI-SUBS/subs/blob/master/LICENSE).
+
