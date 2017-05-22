@@ -7,12 +7,11 @@
  * Mongo 3.2.6 +
  * RabbitMQ 3.6.1 +
 
-# MongoDB and RabbitMQ
+## MongoDB and RabbitMQ
 
-Install mongo and rabbitmq on to the same server where you which to run the SUBS API.  By default the system is configured to connect to 
-a mongodb and rabbitmq server running on the same host.  For the tests to work you will need to start up a mongodb and rabbitmq server on your local machine.
+Install mongo and rabbitmq on the same server where you will run the SUBS API.  With the default configuration, the components will connect to mongodb and rabbitmq running on the same host.  For the tests to work you will need to start up a mongodb and rabbitmq server on your local machine.
 
-# Building and testing
+## Install
 
 ```bash
 git clone git@github.com:EMBL-EBI-SUBS/subs.git
@@ -23,7 +22,7 @@ cd subs
 
 This will run the API, dispatcher, progress monitor and archive agents representing BioSamples and ArrayExpress on a local server.
 
-Execute each of the following gradle tasks in a different terminal session :
+Execute each of the following gradle tasks in a different terminal session:
 
 ```bash
 ./gradlew subs-api:bootRun
@@ -61,7 +60,7 @@ For example to start up the subs-api component execute the following :
 java -jar subs-api/build/libs/subs-api-1.0.0-SNAPSHOT.jar
 ```
 
-The can also overide any application properties on the command line, for example to start up the subs-api with a mongo server on different host name :
+You can also override any application properties on the command line, for example to start up the subs-api with a mongo server on different host name:
  
 ```bash
 java -jar subs-api/build/libs/subs-api-1.0.0-SNAPSHOT.jar --spring.data.mongodb.host=example-mongo-server.com
