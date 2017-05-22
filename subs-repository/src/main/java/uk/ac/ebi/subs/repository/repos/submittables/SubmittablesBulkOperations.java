@@ -63,6 +63,7 @@ public class SubmittablesBulkOperations {
             if (certificate.getAccession() != null) {
                 update.set("accession", certificate.getAccession());
                 haveUpdates = true;
+                haveAccession = true;
             }
 
             if (haveUpdates) {
