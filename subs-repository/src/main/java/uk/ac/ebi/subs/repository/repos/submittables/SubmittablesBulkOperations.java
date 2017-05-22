@@ -49,7 +49,7 @@ public class SubmittablesBulkOperations {
         Assert.notNull(envelope.getProcessingCertificates());
 
         BulkOperations ops = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, submittableClass);
-
+        boolean haveAccession = false;
 
         for (ProcessingCertificate certificate : envelope.getProcessingCertificates()) {
             Query query = query(
@@ -71,16 +71,15 @@ public class SubmittablesBulkOperations {
 
         }
 
-
-        BulkWriteResult writeResult = ops.execute();
-
-
-        logger.info("Applying certs for {} in submission {}, {} certs, changed {}",
-                submittableClass,
-                envelope.getSubmissionId(),
-                envelope.getProcessingCertificates().size(),
-                writeResult.getModifiedCount()
-        );
+        if (haveAccession) {
+            BulkWriteResult writeResult = ops.execute();
+            logger.info("Applying certs for {} in submission {}, {} certs, changed {}",
+                    submittableClass,
+                    envelope.getSubmissionId(),
+                    envelope.getProcessingCertificates().size(),
+                    writeResult.getModifiedCount()
+            );
+        }
 
     }
 
