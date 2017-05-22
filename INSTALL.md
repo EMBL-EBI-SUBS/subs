@@ -17,19 +17,21 @@ a mongodb and rabbitmq server running on the same host.  For the tests to work y
 ```bash
 git clone git@github.com:EMBL-EBI-SUBS/subs.git
 cd subs
-./gradlew build
 ```
 
-## Running the API, dispatcher and progress monitor on a local server
+## Running on a local server
 
-Execute the following gradle tasks in separate terminal sessions :
+This will run the API, dispatcher, progress monitor and archive agents representing BioSamples and ArrayExpress on a local server.
+
+Execute each of the following gradle tasks in a different terminal session :
 
 ```bash
-gradlew subs-api:bootRun
-gradlew subs-dispatcher:bootRun
-gradlew subs-progress-monitor:bootRun
-gradlew subs-api-support:bootRun
-gradlew subs-samples-prototype-agent:bootRun
+./gradlew subs-api:bootRun
+./gradlew subs-dispatcher:bootRun
+./gradlew subs-progress-monitor:bootRun
+./gradlew subs-api-support:bootRun
+./gradlew subs-samples-prototype-agent:bootRun
+./gradlew subs-aeagent:bootRun
 ```
 
 You should then be able to point your browser to the following URL :
@@ -38,7 +40,7 @@ You should then be able to point your browser to the following URL :
 
 ## USI application properties
 
-The application is configured using spring bean application properties, all five subs components will attempt to connect to a rabbitmq and mongo instance running
+The application is configured using spring bean application properties. By default, all six components will attempt to connect to a rabbitmq and mongo instance running
 on the same host.  The application can be configured using the following spring properties with the defaults given : 
 
 ```
