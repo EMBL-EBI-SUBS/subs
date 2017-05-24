@@ -18,4 +18,6 @@ public interface DispatcherService {
 
     void updateSubmittablesStatusToSubmitted(Archive archive, SubmissionEnvelope submissionEnvelope);
 
+    void insertReferencedSamples(SubmissionEnvelope submissionEnvelope);
+
 }

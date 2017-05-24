@@ -66,28 +66,4 @@ public class SubmissionEnvelopeServiceImpl implements SubmissionEnvelopeService 
 
         return submissionEnvelope;
     }
-
-    @Override
-    public SubmissionEnvelope processSampleReferences(SubmissionEnvelope submissionEnvelope) {
-        Set<SampleRef> processedReferences = new HashSet<>();
-
-        for(SampleRef ref : submissionEnvelope.getSupportingSamplesRequired()) {
-            Sample s;
-
-            if (ref.isAccessioned()) {
-                s = sampleRepository.findByAccession(ref.getAccession());
-            } else {
-                s = sampleRepository.findFirstByTeamNameAndAliasOrderByCreatedDateDesc(ref.getTeam(), ref.getAlias());
-            }
-
-            if(s != null) {
-                submissionEnvelope.getSamples().add(s);
-                processedReferences.add(ref);
-            }
-        }
-
-        submissionEnvelope.getSupportingSamplesRequired().removeAll(processedReferences);
-
-        return  submissionEnvelope;
-    }
 }

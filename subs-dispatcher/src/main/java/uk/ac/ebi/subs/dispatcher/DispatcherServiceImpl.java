@@ -14,6 +14,7 @@ import uk.ac.ebi.subs.data.submittable.Assay;
 import uk.ac.ebi.subs.data.submittable.Sample;
 import uk.ac.ebi.subs.data.submittable.Submittable;
 import uk.ac.ebi.subs.processing.SubmissionEnvelope;
+import uk.ac.ebi.subs.repository.RefLookupService;
 import uk.ac.ebi.subs.repository.SubmissionEnvelopeService;
 import uk.ac.ebi.subs.repository.model.StoredSubmittable;
 import uk.ac.ebi.subs.repository.repos.SubmissionRepository;
@@ -22,6 +23,7 @@ import uk.ac.ebi.subs.repository.repos.status.SubmissionStatusRepository;
 import uk.ac.ebi.subs.repository.repos.submittables.SubmittableRepository;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DispatcherServiceImpl implements DispatcherService {
@@ -120,6 +122,18 @@ public class DispatcherServiceImpl implements DispatcherService {
 
     }
 
+    // only inserting Assays' SampleRefs for now
+    @Override
+    public void insertReferencedSamples(SubmissionEnvelope submissionEnvelope) {
+        Set<SampleRef> assaySampleRefs = submissionEnvelope.getAssays()
+                .stream()
+                .flatMap(assay -> assay.getSampleUses().stream())
+                .map(SampleUse::getSampleRef)
+                .collect(Collectors.toSet());
+
+        submissionEnvelope.getSupportingSamples().addAll((Set<Sample>) refLookupService.lookupRefs(assaySampleRefs));
+    }
+
     public void determineSupportingInformationRequired(SubmissionEnvelope submissionEnvelope) {
         List<Sample> samples = submissionEnvelope.getSamples();
         List<Assay> assays = submissionEnvelope.getAssays();
@@ -144,19 +158,23 @@ public class DispatcherServiceImpl implements DispatcherService {
                 }
 
                 if (s == null) {
-                    // sample referenced is not in the supporting information and is not in the submission, need to fetch it
+                    // is the sample already in the USI db
+                    s = (Sample) refLookupService.lookupRef(sampleRef);
+                }
+
+                if (s == null) {
+                    // sample referenced is not in the supporting information, nor in the submission, nor in the USI db so need to fetch it
                     suppportingSamplesRequired.add(sampleRef);
                 }
 
             }
         }
 
-        submissionEnvelopeService.processSampleReferences(submissionEnvelope);
     }
-
 
     private List<Class<? extends StoredSubmittable>> submittablesClassList;
     private SubmissionEnvelopeService submissionEnvelopeService;
+    private RefLookupService refLookupService;
     private SubmissionRepository submissionRepository;
     private SubmissionStatusRepository submissionStatusRepository;
     private ProcessingStatusRepository processingStatusRepository;
@@ -165,6 +183,7 @@ public class DispatcherServiceImpl implements DispatcherService {
 
     public DispatcherServiceImpl(
             SubmissionEnvelopeService submissionEnvelopeService,
+            RefLookupService refLookupService,
             SubmissionRepository submissionRepository,
             SubmissionStatusRepository submissionStatusRepository,
             ProcessingStatusRepository processingStatusRepository,
@@ -173,6 +192,7 @@ public class DispatcherServiceImpl implements DispatcherService {
 
     ) {
         this.submissionEnvelopeService = submissionEnvelopeService;
+        this.refLookupService = refLookupService;
         this.submissionRepository = submissionRepository;
         this.submissionStatusRepository = submissionStatusRepository;
 
