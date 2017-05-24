@@ -260,5 +260,35 @@ public class ENAExperiment extends AbstractENASubmittable<Assay> {
         getBaseObject().setStudyRef(studyRef);
     }
 
+    public void setIllumina(String illumina) {
+        this.illumina = illumina;
+    }
 
+    public void setDesignDescription(String designDescription) {
+        this.designDescription = designDescription;
+    }
+
+    public void setLibraryName(String libraryName) {
+        this.libraryName = libraryName;
+    }
+
+    public void setLibraryStrategy(String libraryStrategy) {
+        this.libraryStrategy = libraryStrategy;
+    }
+
+    public String getLibrarySource() {
+        return librarySource;
+    }
+
+    public void setLibrarySource(String librarySource) {
+        this.librarySource = librarySource;
+    }
+
+    public void setLibrarySelection(String librarySelection) {
+        this.librarySelection = librarySelection;
+    }
+
+    public void setLibraryLayout(String libraryLayout) {
+        this.libraryLayout = libraryLayout;
+    }
 }
