@@ -10,7 +10,7 @@ addons:
   apt:
     sources:
       - mongodb-upstart
-      - mongodb-3.2-precise
+      - mongodb-3.4-precise
     packages:
       - oracle-java8-installer
       - mongodb-org-server
