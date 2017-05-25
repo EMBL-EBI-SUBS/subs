@@ -73,24 +73,11 @@ public class SubmittablesAggregateSupport<T extends StoredSubmittable> {
                 sortAliasCreatedDate(),
                 groupByAliasWithFirstItem(),
                 skip((long) pageable.getOffset()),
-                limit((long) pageable.getPageSize())
+                limit((long) pageable.getPageSize()),
+                replaceRoot("first")
         ), clazz, clazz);
 
-        /*
-            TODO with a once we have mongo 3.4 db we can use ReplaceRootOperation replaceRootOp = replaceRoot("first");
-            after limit to skip the awkward extraction step below
-
-         */
-        Object results = aggregationResults.getRawResults().get("result");
-
-        if (results != null && results instanceof BasicDBList) {
-            BasicDBList resultSet = (BasicDBList) results;
-            resultSet.stream()
-                    .map(o -> (DBObject) ((DBObject) o).get("first"))
-                    .map(first -> mongoTemplate.getConverter().read(clazz, first))
-                    .forEachOrdered(o -> resultsList.add(o));
-        }
-        return resultsList;
+        return aggregationResults.getMappedResults();
     }
 
     private GroupOperation groupByAliasWithFirstItem() {
