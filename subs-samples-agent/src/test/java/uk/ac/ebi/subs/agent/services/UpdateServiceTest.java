@@ -11,9 +11,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestOperations;
-import uk.ac.ebi.biosamples.client.BioSamplesClient;
-import uk.ac.ebi.biosamples.client.BioSamplesClientConfig;
-import uk.ac.ebi.biosamples.client.ClientProperties;
 import uk.ac.ebi.subs.BioSamplesDependentTest;
 import uk.ac.ebi.subs.agent.converters.BsdAttributeToUsiAttribute;
 import uk.ac.ebi.subs.agent.converters.BsdRelationshipToUsiRelationship;
@@ -37,9 +34,6 @@ import java.util.List;
         BsdAttributeToUsiAttribute.class,
         BsdRelationshipToUsiRelationship.class,
         TestUtils.class,
-        BioSamplesClient.class,
-        ClientProperties.class,
-        BioSamplesClientConfig.class,
         RestOperations.class
 })
 @ConfigurationProperties(prefix = "test")
