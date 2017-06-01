@@ -56,7 +56,7 @@ public abstract  class AbstractSubsRef<T extends Submittable> {
 
     @JsonIgnore
     public boolean isAccessioned() {
-        return (accession != null && accession.isEmpty());
+        return (accession != null && ! accession.isEmpty());
     }
 
     /**
