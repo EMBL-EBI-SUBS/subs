@@ -20,6 +20,7 @@ dependencies {
 
     compile("com.fasterxml.jackson.module:jackson-module-afterburner:2.7.1")
 
+
     testCompile("junit:junit")
     testCompile("org.springframework.boot:spring-boot-starter-test")
     testCompile("com.google.code.gson:gson:2.7") //bug in spring boot, see https://github.com/spring-projects/spring-boot/issues/6502
@@ -29,6 +30,7 @@ dependencies {
     testCompile("com.mashape.unirest:unirest-java:1.4.9")
 
     testCompile project(':subs-test-categories')
+    compile 'de.codecentric:spring-boot-admin-starter-client:1.4.6'
 }
 
 ext {
