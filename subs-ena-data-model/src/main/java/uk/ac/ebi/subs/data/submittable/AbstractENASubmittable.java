@@ -8,6 +8,11 @@ import uk.ac.ebi.subs.data.component.Team;
 import uk.ac.ebi.subs.ena.annotation.ENAAttribute;
 import uk.ac.ebi.subs.ena.annotation.ENAValidation;
 import uk.ac.ebi.subs.ena.exception.AttributeException;
+import uk.ac.ebi.subs.ena.validation.AttributeRequiredValidationResult;
+import uk.ac.ebi.subs.ena.validation.InvalidAttributeValue;
+import uk.ac.ebi.subs.ena.validation.SingleAttributeValidationResult;
+import uk.ac.ebi.subs.validator.data.SingleValidationResult;
+import uk.ac.ebi.subs.validator.data.ValidationAuthor;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -24,6 +29,7 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
     private static final String INVALID_VALUE_ERROR_MESSAGE = "Invalid value for attribute %s value must be one of %s.";
 
     private Submittable baseSubmittable;
+    private List<SingleValidationResult> validationResultList = new ArrayList<>();
 
     public AbstractENASubmittable(Submittable baseSubmittable) throws IllegalAccessException {
         setBaseSubmittable(baseSubmittable);
@@ -81,15 +87,15 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
                     final Optional<Attribute> existingStudyTypeAttribute = getExistingAttribute(annotation.name(),false);
                     if (annotation.allowedValues().length > 0) {
                         if ( !ArrayUtils.contains( annotation.allowedValues(), existingStudyTypeAttribute.get().getValue() ) ) {
-                            throw new IllegalArgumentException(String.format(INVALID_VALUE_ERROR_MESSAGE,annotation.name(), StringUtils.join(annotation.allowedValues())));
+                            validationResultList.add(new InvalidAttributeValue(this,annotation.name(),annotation.allowedValues()));
                         }
                     }
                     field.set(obj,existingStudyTypeAttribute.get().getValue());
                     deleteAttribute(existingStudyTypeAttribute.get());
                 } else if (attributeCount > 1) {
-                    throw new AttributeException("Multiple values found for attribute " + annotation.name());
+                    validationResultList.add(new SingleAttributeValidationResult(this,annotation.name()));
                 } else if (attributeCount == 0 && annotation.required()) {
-                    throw new AttributeException("Value for attribute " + annotation.name() + " is required");
+                    validationResultList.add(new AttributeRequiredValidationResult(this,annotation.name()));
                 }
             } else if (field.getType().isMemberClass()) {
                 serialiseFields(field.getType(),field.get(obj));
@@ -240,5 +246,14 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
     @Override
     public void setAttributesXML(List<Attribute> attributeList) {
         baseSubmittable.setAttributes(attributeList);
+    }
+
+    public List<SingleValidationResult> getValidationResultList() {
+        return validationResultList;
+    }
+
+    @Override
+    public boolean isValid() {
+        return validationResultList.isEmpty();
     }
 }
