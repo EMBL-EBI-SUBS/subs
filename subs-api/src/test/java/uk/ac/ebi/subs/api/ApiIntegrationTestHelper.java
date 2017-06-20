@@ -1,5 +1,6 @@
 package uk.ac.ebi.subs.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
@@ -36,6 +37,25 @@ public class ApiIntegrationTestHelper {
     public ApiIntegrationTestHelper(ObjectMapper objectMapper, String rootUri) {
         this.objectMapper = objectMapper;
         this.rootUri = rootUri;
+
+        // initialise Unirest object
+        Unirest.setObjectMapper(new com.mashape.unirest.http.ObjectMapper() {
+            public <T> T readValue(String value, Class<T> valueType) {
+                try {
+                    return objectMapper.readValue(value, valueType);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            public String writeValue(Object value) {
+                try {
+                    return objectMapper.writeValueAsString(value);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
 
     public HttpResponse<JsonNode> postSubmission(Map<String, String> rootRels, Submission submission) throws UnirestException {
