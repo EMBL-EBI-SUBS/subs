@@ -93,8 +93,6 @@ public class SubmittableHandlerTest {
 
     @Test
     public void testValidationMessageSamplesOnSubmit() throws Exception {
-        reset(submittableValidationDispatcher);
-
         testHelper.submissionWithSamples(testHelper.rootRels());
 
         // assert that created Samples caused a validation request event
@@ -103,8 +101,6 @@ public class SubmittableHandlerTest {
 
     @Test
     public void testValidationMessageStudiesOnSubmit() throws Exception {
-        reset(submittableValidationDispatcher);
-
         testHelper.submissionWithStudies(testHelper.rootRels());
 
         verify(submittableValidationDispatcher, atLeast(1)).validateCreate(any(Study.class));
