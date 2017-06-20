@@ -29,6 +29,7 @@ public class SubmissionEventServiceImpl implements SubmissionEventService {
     @Override
     public void submissionCreated(Submission submission) {
         //TODO
+
     }
 
     @Override

@@ -1,16 +1,18 @@
 package uk.ac.ebi.subs.api;
 
 
+import uk.ac.ebi.subs.data.client.*;
 import uk.ac.ebi.subs.data.component.Team;
 import uk.ac.ebi.subs.data.component.Submitter;
 import uk.ac.ebi.subs.data.status.ProcessingStatusEnum;
 import uk.ac.ebi.subs.data.status.SubmissionStatusEnum;
-import uk.ac.ebi.subs.repository.model.ProcessingStatus;
+import uk.ac.ebi.subs.repository.model.*;
 import uk.ac.ebi.subs.repository.model.Sample;
-import uk.ac.ebi.subs.repository.model.Submission;
-import uk.ac.ebi.subs.repository.model.SubmissionStatus;
+import uk.ac.ebi.subs.repository.model.Study;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -74,6 +76,24 @@ public class Helpers {
         }
 
         return samples;
+    }
+
+    public static List<uk.ac.ebi.subs.data.client.Study> generateTestClientStudies(int numberOfStudiesRequired) {
+        List<uk.ac.ebi.subs.data.client.Study> studies = new ArrayList<>(numberOfStudiesRequired);
+
+        for (int i = 1; i <= numberOfStudiesRequired; i++) {
+            uk.ac.ebi.subs.data.client.Study s = new uk.ac.ebi.subs.data.client.Study();
+            s.setId(createId());
+            s.setAlias("D" + i);
+            s.setTitle("Study " + i);
+            s.setDescription("Human study");
+            s.setReleaseDate(new Date(LocalDate.parse("2020-12-25").toEpochDay()));
+
+            studies.add(s);
+
+        }
+
+        return studies;
     }
 
     public static Team generateTestTeam() {
