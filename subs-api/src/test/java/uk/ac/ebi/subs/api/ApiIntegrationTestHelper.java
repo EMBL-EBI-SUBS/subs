@@ -1,5 +1,6 @@
 package uk.ac.ebi.subs.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import uk.ac.ebi.subs.data.Submission;
 import uk.ac.ebi.subs.data.client.Sample;
+import uk.ac.ebi.subs.data.client.Study;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -35,6 +37,25 @@ public class ApiIntegrationTestHelper {
     public ApiIntegrationTestHelper(ObjectMapper objectMapper, String rootUri) {
         this.objectMapper = objectMapper;
         this.rootUri = rootUri;
+
+        // initialise Unirest object
+        Unirest.setObjectMapper(new com.mashape.unirest.http.ObjectMapper() {
+            public <T> T readValue(String value, Class<T> valueType) {
+                try {
+                    return objectMapper.readValue(value, valueType);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            public String writeValue(Object value) {
+                try {
+                    return objectMapper.writeValueAsString(value);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
 
     public HttpResponse<JsonNode> postSubmission(Map<String, String> rootRels, Submission submission) throws UnirestException {
@@ -85,6 +106,45 @@ public class ApiIntegrationTestHelper {
         JSONArray sampleList = payload.getJSONObject("_embedded").getJSONArray("samples");
 
         assertThat(sampleList.length(), is(equalTo(testSamples.size())));
+        return submissionLocation;
+    }
+
+    public String submissionWithStudies(Map<String, String> rootRels) throws UnirestException, IOException {
+        Submission submission = Helpers.generateSubmission();
+        HttpResponse<JsonNode> submissionResponse = postSubmission(rootRels, submission);
+
+        String submissionLocation = submissionResponse.getHeaders().get("Location").get(0).toString();
+        Map<String, String> submissionRels = relsFromPayload(submissionResponse.getBody().getObject());
+
+        assertThat(submissionRels.get("studies"), notNullValue());
+
+        List<Study> testStudies = Helpers.generateTestClientStudies(2);
+        //add samples to the submission
+        for (Study study : testStudies) {
+
+            study.setSubmission(submissionLocation);
+
+            HttpResponse<JsonNode> studyResponse = Unirest.post(rootRels.get("studies:create"))
+                    .headers(standardPostHeaders())
+                    .body(study)
+                    .asJson();
+
+            assertThat(studyResponse.getStatus(), is(equalTo(HttpStatus.CREATED.value())));
+        }
+
+        //retrieve the samples
+        String submissionStudiesUrl = submissionRels.get("studies");
+
+        HttpResponse<JsonNode> studiesQueryResponse = Unirest.get(submissionStudiesUrl)
+                .headers(standardGetHeaders())
+                .asJson();
+
+        assertThat(studiesQueryResponse.getStatus(), is(equalTo(HttpStatus.OK.value())));
+
+        JSONObject payload = studiesQueryResponse.getBody().getObject();
+        JSONArray studyList = payload.getJSONObject("_embedded").getJSONArray("studies");
+
+        assertThat(studyList.length(), is(equalTo(testStudies.size())));
         return submissionLocation;
     }
 

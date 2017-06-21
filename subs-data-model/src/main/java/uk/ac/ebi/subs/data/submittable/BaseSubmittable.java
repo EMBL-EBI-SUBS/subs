@@ -120,4 +120,5 @@ public abstract class BaseSubmittable<T extends BaseSubmittable> implements Subm
     public void setAttributes(List<Attribute> attributes) {
         this.attributes = attributes;
     }
+
 }
