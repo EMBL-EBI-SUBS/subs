@@ -1,7 +1,6 @@
 package uk.ac.ebi.subs.messaging;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
@@ -18,7 +17,7 @@ public class MappingConfig {
     @Bean
     public MessageConverter messageConverter() {
         return jackson2Converter();
-   }
+    }
 
     @Bean
     public MappingJackson2MessageConverter jackson2Converter() {
@@ -27,8 +26,6 @@ public class MappingConfig {
         ObjectMapper objectMapper = converter.getObjectMapper();
 
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectMapper.enableDefaultTyping();
         objectMapper.registerModule(new AfterburnerModule()); //MOAR SPEED
 
         return converter;

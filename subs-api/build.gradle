@@ -7,17 +7,11 @@ apply plugin: 'org.asciidoctor.convert'
 apply plugin: 'application'
 mainClassName = "uk.ac.ebi.subs.ApiApplication"
 
-repositories {
-    mavenLocal()
-    jcenter()
-}
-
 dependencies {
     compile project(':subs-repository')
     compile project(':subs-data-model')
     compile project(':subs-processing-model')
     compile project(':subs-messaging')
-    compile group: 'uk.ac.ebi.subs.validator.common', name: 'validator-common', version: '1.0.1-SNAPSHOT'
 
     compile("org.springframework.boot:spring-boot-starter-data-rest")
     compile 'org.springframework.data:spring-data-rest-hal-browser'
