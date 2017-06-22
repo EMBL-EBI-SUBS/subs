@@ -18,7 +18,6 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @RestController
-@BasePathAwareController
 public class TeamController {
 
     public TeamController(SubmissionRepository submissionRepository, PagedResourcesAssembler<Submission> pagedResourcesAssembler) {
@@ -29,7 +28,14 @@ public class TeamController {
     private SubmissionRepository submissionRepository;
     private PagedResourcesAssembler<Submission> pagedResourcesAssembler;
 
-    @RequestMapping("/teams/{teamName}")
+    /**
+     * including /api in this path is a workaround for this bug
+     * https://github.com/spring-projects/spring-hateoas/issues/434
+     *
+     * The workaround given in the ticket does not handle templated paths
+     * TODO remove /api and re-add @BasePathRestController once fixed in Spring Data REST
+     */
+     @RequestMapping("/api/teams/{teamName}")
     public Resource<Team> getTeam(@PathVariable String teamName) {
         //TODO this is a stub, we should make sure that the Teams are real and that the user is authorised
         Team d = new Team();
