@@ -79,7 +79,67 @@ springBoot {
     executable = true
 }
 
+remotes {
+    staging {
+        role('staging')
+        host = 'mac-subs-001'
+    }
+    dev {
+        role('dev')
+        host = 'wp-np2-d0'
+    }
+    test {
+        role('test')
+        host = 'wp-np2-d1'
+    }
+}
+
+task deployToDev(type: SshTask, dependsOn: 'build') {
+    doLast {
+        def deployHome = "/homes/sub_adm/tc_subs/submission-dev";
+        File jarDeployDir = new File(deployHome,"jar")
+
+        ssh.run {
+            session(remotes.dev) {
+                println "Uploading jar $jar.archivePath.name to $jarDeployDir area on $remote"
+                put(jar.archivePath.absolutePath, jarDeployDir.absolutePath)
+                println "creating symbolic link to $jar.archiveName"
+                def result = execute "ln -s -f $jarDeployDir/$jar.archiveName $jarDeployDir/$jar.baseName" + ".jar", ignoreError: true
+                println result
+
+            }
+        }
+
+    }
+    ssh.settings {
+        knownHosts = allowAnyHosts
+    }
+
+}
+
+task deployToTest(type: SshTask, dependsOn: 'build') {
+    doLast {
+        def deployHome = "/homes/sub_adm/tc_subs/submission-test";
+        File jarDeployDir = new File(deployHome,"jar")
+
+        ssh.run {
+            session(remotes.test) {
+                println "Uploading jar $jar.archivePath.name to $jarDeployDir area on $remote"
+                put(jar.archivePath.absolutePath, jarDeployDir.absolutePath)
+                println "creating symbolic link to $jar.archiveName"
+                def result = execute "ln -s -f $jarDeployDir/$jar.archiveName $jarDeployDir/$jar.baseName" + ".jar", ignoreError: true
+                println result
+
+            }
+        }
+
+    }
+    ssh.settings {
+        knownHosts = allowAnyHosts
+    }
 
 
+
+}
 
 
