@@ -7,8 +7,8 @@ import org.springframework.data.rest.webmvc.support.RepositoryEntityLinks;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceProcessor;
 import org.springframework.stereotype.Component;
-import uk.ac.ebi.subs.api.controllers.TeamController;
 import uk.ac.ebi.subs.api.controllers.StatusDescriptionController;
+import uk.ac.ebi.subs.api.controllers.TeamController;
 import uk.ac.ebi.subs.repository.model.ProcessingStatus;
 import uk.ac.ebi.subs.repository.model.Submission;
 import uk.ac.ebi.subs.repository.model.SubmissionStatus;
@@ -24,14 +24,15 @@ public class RootEndpointLinkProcessor implements ResourceProcessor<RepositoryLi
 
     private static final Logger logger = LoggerFactory.getLogger(RootEndpointLinkProcessor.class);
 
-    public RootEndpointLinkProcessor(RepositoryEntityLinks repositoryEntityLinks, LinkHelper linkHelper) {
+    public RootEndpointLinkProcessor(RepositoryEntityLinks repositoryEntityLinks, LinkHelper linkHelper, BasePathAwareLinks basePathAwareLinks) {
         this.repositoryEntityLinks = repositoryEntityLinks;
         this.linkHelper = linkHelper;
+        this.basePathAwareLinks = basePathAwareLinks;
     }
 
     private RepositoryEntityLinks repositoryEntityLinks;
     private LinkHelper linkHelper;
-
+    private BasePathAwareLinks basePathAwareLinks;
 
     private void addLinks(List<Link> links) {
 
@@ -42,7 +43,7 @@ public class RootEndpointLinkProcessor implements ResourceProcessor<RepositoryLi
         addStatusDescriptions(links);
         addStatuses(links);
         addSubmissions(links);
-        addTeam(links);
+        addTeams(links);
 
     }
 
@@ -74,9 +75,11 @@ public class RootEndpointLinkProcessor implements ResourceProcessor<RepositoryLi
     }
 
 
-    private void addTeam(List<Link> links) {
+    private void addTeams(List<Link> links) {
         links.add(
-                linkTo(methodOn(TeamController.class).getTeam(null)).withRel("team")
+                basePathAwareLinks.underBasePath(
+                        linkTo(methodOn(TeamController.class).getTeams(null))
+                ).withRel("teams")
         );
     }
 

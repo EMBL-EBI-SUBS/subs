@@ -8,8 +8,10 @@ import uk.ac.ebi.subs.repository.repos.status.ProcessingStatusRepository;
 
 import java.util.Map;
 
+
 @RestController
 @BasePathAwareController
+@RequestMapping("/submissions/{submissionId}")
 public class ProcessingStatusController {
 
     private ProcessingStatusRepository processingStatusRepository;
@@ -18,13 +20,13 @@ public class ProcessingStatusController {
         this.processingStatusRepository = processingStatusRepository;
     }
 
-    @RequestMapping("/submissions/{submissionId}/processingStatusSummaryCounts")
+    @RequestMapping("/processingStatusSummaryCounts")
     public Map<String,Integer> summariseProcessingStatusForSubmission(@PathVariable String submissionId){
 
         return processingStatusRepository.summariseSubmissionStatus(submissionId);
     }
 
-    @RequestMapping("/submissions/{submissionId}/processingStatusSummaryTypeCounts")
+    @RequestMapping("/processingStatusSummaryTypeCounts")
     public Map<String,Map<String,Integer>> summariseTypeProcessingStatusForSubmission(@PathVariable String submissionId){
 
         return processingStatusRepository.summariseSubmissionStatusAndType(submissionId);
