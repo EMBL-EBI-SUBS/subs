@@ -217,7 +217,7 @@ subprojects {
         }
     }
 
-    task deployJar(type: SshTask, dependsOn: 'build') {
+    task deployJar(type: SshTask, dependsOn: 'assemble') {
         doLast {
             def deployHome = "/data/" + project.name;
             File jarDeployDir = new File(deployHome,"jar")
