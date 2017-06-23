@@ -18,15 +18,9 @@ import uk.ac.ebi.subs.data.status.StatusDescription;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * including /api in this path is a workaround for this bug
- * https://github.com/spring-projects/spring-hateoas/issues/434
- *
- * The workaround given in the ticket does not handle templated paths
- * TODO remove /api and re-add @BasePathRestController once fixed in Spring Data REST
- */
 @RestController
-@RequestMapping("/api/statusDescriptions")
+@BasePathAwareController
+@RequestMapping("/statusDescriptions")
 public class StatusDescriptionController {
 
 

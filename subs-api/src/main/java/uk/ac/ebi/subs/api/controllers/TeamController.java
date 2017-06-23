@@ -2,9 +2,11 @@ package uk.ac.ebi.subs.api.controllers;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.BasePathAwareController;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,29 +15,38 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.ac.ebi.subs.data.component.Team;
 import uk.ac.ebi.subs.repository.repos.SubmissionRepository;
 import uk.ac.ebi.subs.repository.model.Submission;
+import uk.ac.ebi.subs.repository.repos.SubmissionRepositoryCustom;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @RestController
+@BasePathAwareController
 public class TeamController {
 
-    public TeamController(SubmissionRepository submissionRepository, PagedResourcesAssembler<Submission> pagedResourcesAssembler) {
+    public TeamController(SubmissionRepository submissionRepository,
+                          SubmissionRepositoryCustom submissionRepositoryCustom,
+                          PagedResourcesAssembler<Submission> pagedResourcesAssembler,
+                          PagedResourcesAssembler<Team> teamPagedResourcesAssembler) {
         this.submissionRepository = submissionRepository;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.teamPagedResourcesAssembler = teamPagedResourcesAssembler;
+        this.submissionRepositoryCustom = submissionRepositoryCustom;
     }
 
     private SubmissionRepository submissionRepository;
     private PagedResourcesAssembler<Submission> pagedResourcesAssembler;
+    private PagedResourcesAssembler<Team> teamPagedResourcesAssembler;
+    private SubmissionRepositoryCustom submissionRepositoryCustom;
 
-    /**
-     * including /api in this path is a workaround for this bug
-     * https://github.com/spring-projects/spring-hateoas/issues/434
-     *
-     * The workaround given in the ticket does not handle templated paths
-     * TODO remove /api and re-add @BasePathRestController once fixed in Spring Data REST
-     */
-     @RequestMapping("/api/teams/{teamName}")
+    @RequestMapping("/teams")
+    public PagedResources<Resource<Team>> getTeams(Pageable pageable){
+        Page<Team> teams = submissionRepositoryCustom.distinctTeams(pageable);
+        return teamPagedResourcesAssembler.toResource(teams);
+    }
+
+
+    @RequestMapping("/teams/{teamName}")
     public Resource<Team> getTeam(@PathVariable String teamName) {
         //TODO this is a stub, we should make sure that the Teams are real and that the user is authorised
         Team d = new Team();

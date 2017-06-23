@@ -8,15 +8,10 @@ import uk.ac.ebi.subs.repository.repos.status.ProcessingStatusRepository;
 
 import java.util.Map;
 
-/**
- * including /api in this path is a workaround for this bug
- * https://github.com/spring-projects/spring-hateoas/issues/434
- *
- * The workaround given in the ticket does not handle templated paths
- * TODO remove /api and re-add @BasePathAwareController once fixed in Spring Data REST
- */
+
 @RestController
-@RequestMapping("/api/submissions/{submissionId}")
+@BasePathAwareController
+@RequestMapping("/submissions/{submissionId}")
 public class ProcessingStatusController {
 
     private ProcessingStatusRepository processingStatusRepository;
