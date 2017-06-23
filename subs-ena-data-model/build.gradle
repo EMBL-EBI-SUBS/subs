@@ -2,7 +2,7 @@ apply plugin: 'java'
 
 dependencies {
     compile 'uk.ac.ebi.ena.sra:sra-xml:1.5.30'
-    compile("uk.ac.ebi.subs:subs-data-model:1.0.1-SNAPSHOT")
+    compile("uk.ac.ebi.subs:subs-data-model:1.0.3-SNAPSHOT")
 
     compile ("org.springframework:spring-oxm")
     compile 'org.eclipse.persistence:org.eclipse.persistence.moxy:2.6.4'

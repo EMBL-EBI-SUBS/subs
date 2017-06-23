@@ -1,13 +1,8 @@
 apply plugin: 'java'
 
 dependencies {
-        compile("uk.ac.ebi.subs:subs-data-model:1.0.1-SNAPSHOT") {
-            changing = true
-        }
-        compileOnly("org.projectlombok:lombok:1.16.12")
-
-        testCompile("junit:junit")
-//        testCompile project(':subs-test-categories')
+    compile("uk.ac.ebi.subs:subs-data-model:1.0.3-SNAPSHOT")
+    compileOnly("org.projectlombok:lombok:1.16.12")
 }
 
 bootRepackage.enabled = false

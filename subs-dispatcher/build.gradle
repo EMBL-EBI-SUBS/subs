@@ -6,8 +6,8 @@ dependencies {
     compile project(':subs-processing-model')
     compile project(':subs-repository')
 
-    compile("uk.ac.ebi.subs:subs-data-model:1.0.1-SNAPSHOT")
-    compile("uk.ac.ebi.subs:subs-messaging:1.0.1-SNAPSHOT")
+    compile("uk.ac.ebi.subs:subs-data-model:1.0.3-SNAPSHOT")
+    compile("uk.ac.ebi.subs:subs-messaging:1.0.3-SNAPSHOT")
 
     testCompile("junit:junit")
     testCompile("org.springframework.boot:spring-boot-starter-test")

@@ -9,7 +9,7 @@ jar {
 dependencies {
     compile project(':subs-processing-model')
 
-    compile("uk.ac.ebi.subs:subs-data-model:1.0.1-SNAPSHOT")
+    compile("uk.ac.ebi.subs:subs-data-model:1.0.3-SNAPSHOT")
 
     compile("org.springframework.boot:spring-boot-starter")
     compile("org.springframework.boot:spring-boot-starter-logging")

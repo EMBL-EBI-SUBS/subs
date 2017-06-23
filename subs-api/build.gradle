@@ -11,8 +11,8 @@ dependencies {
     compile project(':subs-repository')
     compile project(':subs-processing-model')
 
-    compile("uk.ac.ebi.subs:subs-data-model:1.0.1-SNAPSHOT")
-    compile("uk.ac.ebi.subs:subs-messaging:1.0.1-SNAPSHOT")
+    compile("uk.ac.ebi.subs:subs-data-model:1.0.3-SNAPSHOT")
+    compile("uk.ac.ebi.subs:subs-messaging:1.0.3-SNAPSHOT")
 
     compile("org.springframework.boot:spring-boot-starter-data-rest")
     compile 'org.springframework.data:spring-data-rest-hal-browser'
