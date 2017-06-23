@@ -12,6 +12,12 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @Component
 public class SubmissionStatusResourceProcessor implements ResourceProcessor<Resource<SubmissionStatus>> {
 
+    private BasePathAwareLinks basePathAwareLinks;
+
+    public SubmissionStatusResourceProcessor(BasePathAwareLinks basePathAwareLinks) {
+        this.basePathAwareLinks = basePathAwareLinks;
+    }
+
     @Override
     public Resource<SubmissionStatus> process(Resource<SubmissionStatus> resource) {
 
@@ -22,10 +28,11 @@ public class SubmissionStatusResourceProcessor implements ResourceProcessor<Reso
 
     private void addStatusDescriptionRel(Resource<SubmissionStatus> resource) {
         resource.add(
-                linkTo(
-                        methodOn(StatusDescriptionController.class)
-                                .submissionStatus(resource.getContent().getStatus()))
-                        .withRel("statusDescription")
+                basePathAwareLinks.underBasePath(
+                        linkTo(
+                                methodOn(StatusDescriptionController.class)
+                                        .submissionStatus(resource.getContent().getStatus()))
+                ).withRel("statusDescription")
         );
     }
 }

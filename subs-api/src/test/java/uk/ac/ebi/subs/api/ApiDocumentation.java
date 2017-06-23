@@ -761,7 +761,7 @@ public class ApiDocumentation {
 
                                         halLinks(),
                                         //team
-                                        linkWithRel("team").description("Team "),
+                                        linkWithRel("teams").description("Teams"),
                                         //submissions
                                         linkWithRel("submissions:search").description("Search resource for submissions"),
                                         linkWithRel("submissions:create").description("Create a new submission resource"),

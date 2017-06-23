@@ -25,14 +25,24 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @Component
 public class SubmissionResourceProcessor implements ResourceProcessor<Resource<Submission>> {
 
-    public SubmissionResourceProcessor(SubmissionStatusRepository submissionStatusRepository, RepositoryEntityLinks repositoryEntityLinks, List<Class<? extends StoredSubmittable>> submittablesClassList, OperationControlService operationControlService, LinkHelper linkHelper) {
+
+    public SubmissionResourceProcessor(
+            SubmissionStatusRepository submissionStatusRepository,
+            RepositoryEntityLinks repositoryEntityLinks,
+            List<Class<? extends StoredSubmittable>> submittablesClassList,
+            OperationControlService operationControlService,
+            LinkHelper linkHelper,
+            BasePathAwareLinks basePathAwareLinks
+    ) {
         this.submissionStatusRepository = submissionStatusRepository;
         this.repositoryEntityLinks = repositoryEntityLinks;
         this.submittablesClassList = submittablesClassList;
         this.operationControlService = operationControlService;
         this.linkHelper = linkHelper;
+        this.basePathAwareLinks = basePathAwareLinks;
     }
 
+    private BasePathAwareLinks basePathAwareLinks;
     private SubmissionStatusRepository submissionStatusRepository;
     private RepositoryEntityLinks repositoryEntityLinks;
     private List<Class<? extends StoredSubmittable>> submittablesClassList;
@@ -56,11 +66,11 @@ public class SubmissionResourceProcessor implements ResourceProcessor<Resource<S
     }
 
     private void addReceiptLink(Resource<Submission> resource) {
-        Link searchLink = repositoryEntityLinks.linkToSearchResource(ProcessingStatus.class,"by-submission");
+        Link searchLink = repositoryEntityLinks.linkToSearchResource(ProcessingStatus.class, "by-submission");
         Assert.notNull(searchLink);
 
-        Map<String,String> params = new HashMap<>();
-        params.put("submissionId",resource.getContent().getId());
+        Map<String, String> params = new HashMap<>();
+        params.put("submissionId", resource.getContent().getId());
 
         Link link = searchLink.expand(params).withRel("processingStatuses");
 
@@ -68,21 +78,24 @@ public class SubmissionResourceProcessor implements ResourceProcessor<Resource<S
     }
 
     private void addStatusSummaryReport(Resource<Submission> resource) {
-        Link statusSummary = linkTo(
-                methodOn(ProcessingStatusController.class)
-                        .summariseProcessingStatusForSubmission(resource.getContent().getId())
-        ).withRel("processingStatusSummary");
+        Link statusSummary =
+                basePathAwareLinks.underBasePath(
+                        linkTo(
+                                methodOn(ProcessingStatusController.class)
+                                        .summariseProcessingStatusForSubmission(resource.getContent().getId())
+                        )
+                ).withRel("processingStatusSummary");
 
 
         resource.add(statusSummary);
     }
 
     private void addTypeStatusSummaryReport(Resource<Submission> resource) {
-
-
-        Link typeStatusSummary = linkTo(
-                methodOn(ProcessingStatusController.class)
-                        .summariseTypeProcessingStatusForSubmission(resource.getContent().getId())
+        Link typeStatusSummary = basePathAwareLinks.underBasePath(
+                linkTo(
+                        methodOn(ProcessingStatusController.class)
+                                .summariseTypeProcessingStatusForSubmission(resource.getContent().getId())
+                )
         ).withRel("typeProcessingStatusSummary");
 
 
@@ -121,9 +134,11 @@ public class SubmissionResourceProcessor implements ResourceProcessor<Resource<S
     private void addTeamRel(Resource<Submission> resource) {
         if (resource.getContent().getTeam() != null && resource.getContent().getTeam().getName() != null) {
             resource.add(
-                    linkTo(
-                            methodOn(TeamController.class)
-                                    .getTeam(resource.getContent().getTeam().getName())
+                    basePathAwareLinks.underBasePath(
+                            linkTo(
+                                    methodOn(TeamController.class)
+                                            .getTeam(resource.getContent().getTeam().getName())
+                            )
                     ).withRel("team")
             );
         }

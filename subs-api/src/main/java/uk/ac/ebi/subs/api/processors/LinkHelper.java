@@ -30,10 +30,13 @@ public class LinkHelper {
         return submittablesClassList;
     }
 
-    public LinkHelper(List<Class<? extends StoredSubmittable>> submittablesClassList, RepositoryEntityLinks repositoryEntityLinks) {
+    public LinkHelper(List<Class<? extends StoredSubmittable>> submittablesClassList, RepositoryEntityLinks repositoryEntityLinks, BasePathAwareLinks basePathAwareLinks) {
         this.submittablesClassList = submittablesClassList;
         this.repositoryEntityLinks = repositoryEntityLinks;
+
     }
+
+
 
     public void addSubmittablesSearchLinks(Collection<Link> links){
         for (Class type : submittablesClassList){

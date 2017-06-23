@@ -12,6 +12,12 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @Component
 public class ProcessingStatusResourceProcessor implements ResourceProcessor<Resource<ProcessingStatus>> {
 
+    private BasePathAwareLinks basePathAwareLinks;
+
+    public ProcessingStatusResourceProcessor(BasePathAwareLinks basePathAwareLinks) {
+        this.basePathAwareLinks = basePathAwareLinks;
+    }
+
     @Override
     public Resource<ProcessingStatus> process(Resource<ProcessingStatus> resource) {
 
@@ -29,10 +35,11 @@ public class ProcessingStatusResourceProcessor implements ResourceProcessor<Reso
 
     private void addStatusDescriptionRel(Resource<ProcessingStatus> resource) {
         resource.add(
-                linkTo(
-                        methodOn(StatusDescriptionController.class)
-                                .processingStatus(resource.getContent().getStatus()))
-                        .withRel("statusDescription")
+                basePathAwareLinks.underBasePath(
+                        linkTo(
+                                methodOn(StatusDescriptionController.class)
+                                        .processingStatus(resource.getContent().getStatus()))
+                ).withRel("statusDescription")
         );
     }
 }

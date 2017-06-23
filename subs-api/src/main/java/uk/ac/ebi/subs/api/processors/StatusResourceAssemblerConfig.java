@@ -4,8 +4,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
-import uk.ac.ebi.subs.data.status.StatusDescription;
 import uk.ac.ebi.subs.api.controllers.StatusDescriptionController;
+import uk.ac.ebi.subs.data.status.StatusDescription;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -13,14 +13,22 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @Configuration
 public class StatusResourceAssemblerConfig {
 
+    private BasePathAwareLinks basePathAwareLinks;
+
+    public StatusResourceAssemblerConfig(BasePathAwareLinks basePathAwareLinks) {
+        this.basePathAwareLinks = basePathAwareLinks;
+    }
+
     @Bean
     public ResourceAssembler<StatusDescription, Resource<StatusDescription>> submissionStatusResourceAssembler() {
         return entity -> {
             Resource<StatusDescription> res = new Resource<StatusDescription>(entity);
 
             res.add(
-                    linkTo(
-                            methodOn(StatusDescriptionController.class).submissionStatus(entity.getStatusName())
+                    basePathAwareLinks.underBasePath(
+                            linkTo(
+                                    methodOn(StatusDescriptionController.class).submissionStatus(entity.getStatusName())
+                            )
                     ).withSelfRel()
             );
 
