@@ -1,10 +1,8 @@
 rootProject.name = 'subs'
 
-include "subs-data-model"
 include "subs-repository"
 include "subs-api"
 include "subs-validation"
-include "subs-messaging"
 include "subs-dispatcher"
 include "subs-enaagent"
 include 'subs-progress-monitor'
