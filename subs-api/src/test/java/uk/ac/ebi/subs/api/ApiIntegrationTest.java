@@ -136,6 +136,25 @@ public class ApiIntegrationTest {
 
     }
 
+    @Test
+    /**
+     * POSTing a sample without a submission should throw an error
+     */
+    public void submittablesMustHaveSubmissionEmbedded()throws IOException, UnirestException{
+        Map<String, String> rootRels = testHelper.rootRels();
+
+        List<Sample> testSamples = Helpers.generateTestClientSamples(1);
+        Sample sample = testSamples.get(0);
+
+        assertThat(rootRels.get("samples:create"), notNullValue());
+
+        HttpResponse<JsonNode> sampleResponse = Unirest.post(rootRels.get("samples:create"))
+                .headers(standardPostHeaders())
+                .body(sample)
+                .asJson();
+
+        assertThat(sampleResponse.getStatus(), is(equalTo(HttpStatus.BAD_REQUEST.value())));
+    }
 
     /**
      * POSTing two samples with the same alias in one submission should throw an error
