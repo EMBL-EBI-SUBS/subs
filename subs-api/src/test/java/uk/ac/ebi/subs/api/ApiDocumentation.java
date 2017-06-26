@@ -134,7 +134,7 @@ public class ApiDocumentation {
 
         docConfig.uris()
                 .withScheme("http")
-                .withHost("www.ebi.ac.uk/submissions")
+                .withHost("submission-dev.ebi.ac.uk")
                 .withPort(80);
 
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.context)
