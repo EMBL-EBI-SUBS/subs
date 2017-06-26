@@ -16,14 +16,17 @@ import uk.ac.ebi.subs.data.submittable.Submittable;
 import uk.ac.ebi.subs.processing.SubmissionEnvelope;
 import uk.ac.ebi.subs.repository.RefLookupService;
 import uk.ac.ebi.subs.repository.SubmissionEnvelopeService;
+import uk.ac.ebi.subs.repository.model.ProcessingStatus;
 import uk.ac.ebi.subs.repository.model.StoredSubmittable;
 import uk.ac.ebi.subs.repository.repos.SubmissionRepository;
+import uk.ac.ebi.subs.repository.repos.status.ProcessingStatusBulkOperations;
 import uk.ac.ebi.subs.repository.repos.status.ProcessingStatusRepository;
 import uk.ac.ebi.subs.repository.repos.status.SubmissionStatusRepository;
 import uk.ac.ebi.subs.repository.repos.submittables.SubmittableRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class DispatcherServiceImpl implements DispatcherService {
@@ -105,21 +108,18 @@ public class DispatcherServiceImpl implements DispatcherService {
 
     @Override
     public void updateSubmittablesStatusToSubmitted(Archive archive, SubmissionEnvelope submissionEnvelope) {
-
         String submissionId = submissionEnvelope.getSubmission().getId();
 
-        submissionContentsRepositories
-                .stream()
-                .flatMap(repo -> repo.streamBySubmissionId(submissionId))
-                .filter(item -> archive.equals(item.getArchive()))
-                .filter(item ->
-                        processingStatusesToAllow.contains(item.getProcessingStatus().getStatus()))
-                .map(item -> item.getProcessingStatus())
-                .forEach(status -> {
-                    status.setStatus(ProcessingStatusEnum.Dispatched);
-                    processingStatusRepository.save(status);
-                });
+        Stream<Submittable> submittables = submissionEnvelope
+                .allSubmissionItemsStream()
+                .filter(item -> archive.equals(item.getArchive()));
 
+        processingStatusBulkOperations.updateProcessingStatus(
+                processingStatusesToAllow,
+                submittables,
+                submissionEnvelope.getSubmission(),
+                ProcessingStatusEnum.Dispatched
+        );
     }
 
     // only inserting Assays' SampleRefs for now
@@ -178,6 +178,7 @@ public class DispatcherServiceImpl implements DispatcherService {
     private SubmissionRepository submissionRepository;
     private SubmissionStatusRepository submissionStatusRepository;
     private ProcessingStatusRepository processingStatusRepository;
+    private ProcessingStatusBulkOperations processingStatusBulkOperations;
     private List<SubmittableRepository<?>> submissionContentsRepositories;
     private Set<String> processingStatusesToAllow;
 
@@ -188,7 +189,8 @@ public class DispatcherServiceImpl implements DispatcherService {
             SubmissionStatusRepository submissionStatusRepository,
             ProcessingStatusRepository processingStatusRepository,
             List<Class<? extends StoredSubmittable>> submittablesClassList,
-            List<SubmittableRepository<?>> submissionContentsRepositories
+            List<SubmittableRepository<?>> submissionContentsRepositories,
+            ProcessingStatusBulkOperations processingStatusBulkOperations
 
     ) {
         this.submissionEnvelopeService = submissionEnvelopeService;
@@ -199,6 +201,7 @@ public class DispatcherServiceImpl implements DispatcherService {
         this.submittablesClassList = submittablesClassList;
         this.processingStatusRepository = processingStatusRepository;
         this.submissionContentsRepositories = submissionContentsRepositories;
+        this.processingStatusBulkOperations = processingStatusBulkOperations;
 
         processingStatusesToAllow = new HashSet<>();
         processingStatusesToAllow.add(ProcessingStatusEnum.Draft.name());
