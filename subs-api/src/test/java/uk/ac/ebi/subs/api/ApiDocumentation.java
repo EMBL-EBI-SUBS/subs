@@ -71,6 +71,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Category(DocumentationProducer.class)
 public class ApiDocumentation {
 
+    private static final String HOST = "submission-dev.ebi.ac.uk";
+    private static final String SCHEME = "http";
+
     @Rule
     public final JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation("build/generated-snippets");
 
@@ -133,8 +136,8 @@ public class ApiDocumentation {
         MockMvcRestDocumentationConfigurer docConfig = documentationConfiguration(this.restDocumentation);
 
         docConfig.uris()
-                .withScheme("http")
-                .withHost("submission-dev.ebi.ac.uk")
+                .withScheme(SCHEME)
+                .withHost(HOST)
                 .withPort(80);
 
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.context)
@@ -349,7 +352,7 @@ public class ApiDocumentation {
         Submission sub = storeSubmission();
         uk.ac.ebi.subs.data.client.Sample sample = Helpers.generateTestClientSamples(1).get(0);
 
-        sample.setSubmission("http://www.ebi.ac.uk/api/submissions/"+sub.getId());
+        sample.setSubmission(SCHEME+"://"+HOST+"/api/submissions/"+sub.getId());
 
         String jsonRepresentation = objectMapper.writeValueAsString(sample);
 
