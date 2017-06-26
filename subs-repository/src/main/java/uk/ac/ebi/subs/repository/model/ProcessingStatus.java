@@ -30,7 +30,9 @@ public class ProcessingStatus extends uk.ac.ebi.subs.data.status.ProcessingStatu
     }
 
     public void copyDetailsFromSubmittable(StoredSubmittable storedSubmittable){
-        this.setSubmissionId(storedSubmittable.getSubmission().getId());
+        if (storedSubmittable.getSubmission() != null)
+            this.setSubmissionId(storedSubmittable.getSubmission().getId());
+
         this.setSubmittableId(storedSubmittable.getId());
         this.setSubmittableType(storedSubmittable.getClass().getSimpleName());
 
