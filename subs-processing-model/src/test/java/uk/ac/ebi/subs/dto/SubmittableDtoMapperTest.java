@@ -1,13 +1,14 @@
-package uk.ac.ebi.subs.dta;
+package uk.ac.ebi.subs.dto;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import uk.ac.ebi.subs.data.component.*;
 import uk.ac.ebi.subs.data.submittable.Assay;
 import uk.ac.ebi.subs.data.submittable.Sample;
 import uk.ac.ebi.subs.data.submittable.Study;
 import uk.ac.ebi.subs.data.submittable.Submittable;
-import uk.ac.ebi.subs.dto.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Created by karoly on 26/06/2017.
  */
+@RunWith(SpringJUnit4ClassRunner.class)
 public class SubmittableDtoMapperTest {
 
     private SubmittableDtoMapper mapper;

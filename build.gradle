@@ -29,6 +29,8 @@ subprojects {
 
     dependencies {
         compile("org.springframework.boot:spring-boot-devtools")
+
+        testCompile project(':subs-test-categories')
     }
 
     configurations.all {
