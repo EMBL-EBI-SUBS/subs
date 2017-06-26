@@ -193,7 +193,7 @@ subprojects {
 
     remotes {
         dev {
-            host = 'mac-subs-001.ebi.ac.uk'
+            host = 'mac-subs-002.ebi.ac.uk'
         }
     }
 
@@ -213,7 +213,7 @@ subprojects {
     remotes {
         staging {
             role('staging')
-            host = 'mac-subs-001'
+            host = 'mac-subs-002'
         }
     }
 
