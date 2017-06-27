@@ -42,14 +42,6 @@ public class Listener {
 
         logger.info("Received submission {}", submission.getId());
 
-        // Acknowledge submission reception
-        List<ProcessingCertificate> certificatesReceived = certificatesGenerator.acknowledgeReception(envelope.getSamples());
-        ProcessingCertificateEnvelope certificateEnvelopeReceived = new ProcessingCertificateEnvelope(
-                submission.getId(),
-                certificatesReceived
-        );
-        rabbitMessagingTemplate.convertAndSend(Exchanges.SUBMISSIONS,Topics.EVENT_SUBMISSION_AGENT_RESULTS, certificateEnvelopeReceived);
-
         // Process samples
         List<ProcessingCertificate> certificatesCompleted = samplesProcessor.processSamples(envelope);
         ProcessingCertificateEnvelope certificateEnvelopeCompleted = new ProcessingCertificateEnvelope(
