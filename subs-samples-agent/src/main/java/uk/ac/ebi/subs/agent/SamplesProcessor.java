@@ -52,7 +52,7 @@ public class SamplesProcessor {
 
         // Update
         List<Sample> samplesToUpdate = envelope.getSamples().stream()
-                .filter(s -> (s.getAccession() != null || !s.getAccession().isEmpty()))
+                .filter(s -> (s.isAccessioned()))
                 .collect(Collectors.toList());
 
         List<Sample> updatedSamples = updateService.update(samplesToUpdate);
@@ -62,7 +62,7 @@ public class SamplesProcessor {
 
         // Submission
         List<Sample> samplesToSubmit = envelope.getSamples().stream()
-                .filter(s -> s.getAccession() == null || s.getAccession().isEmpty())
+                .filter(s -> !s.isAccessioned())
                 .collect(Collectors.toList());
 
         List<Sample> submittedSamples = submissionService.submit(samplesToSubmit);
