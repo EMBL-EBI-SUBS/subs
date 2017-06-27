@@ -13,9 +13,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.subs.ApiApplication;
@@ -62,6 +64,8 @@ public class ApiIntegrationTest {
     @Autowired
     private SampleRepository sampleRepository;
 
+    @MockBean
+    private RabbitMessagingTemplate rabbitMessagingTemplate;
 
     @Before
     public void buildUp() throws URISyntaxException {
