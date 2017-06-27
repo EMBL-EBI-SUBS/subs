@@ -1,7 +1,6 @@
 apply plugin: 'java'
 
 dependencies {
-    compile project(':subs-data-model')
     compile ("com.github.EMBL-EBI-SUBS:validator-common:master-SNAPSHOT") {
         changing = true
         exclude group: 'org.springframework.boot', module :'spring-boot-starter-data-mongodb'
