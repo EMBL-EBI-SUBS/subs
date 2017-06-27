@@ -14,7 +14,7 @@ import java.util.Date;
 @CompoundIndexes({
         @CompoundIndex(name = "team_alias", def = "{ 'team.name': 1, 'alias': 1 }"),
         @CompoundIndex(name = "accession", def = "{ 'accession': 1}"),
-        @CompoundIndex(name = "submissionId_status", def = "{ 'submission.$id': 1, 'status': 1}")
+        @CompoundIndex(name = "submissionId", def = "{ 'submission.$id': 1}")
 })
 @Document
 public class EgaDac extends uk.ac.ebi.subs.data.submittable.EgaDac implements StoredSubmittable {

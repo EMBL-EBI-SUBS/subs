@@ -10,7 +10,7 @@ import java.util.Date;
 @CompoundIndexes({
         @CompoundIndex(name = "team_alias", def = "{ 'team.name': 1, 'alias': 1 }"),
         @CompoundIndex(name = "accession", def = "{ 'accession': 1}"),
-        @CompoundIndex(name = "submissionId_status", def = "{ 'submission.$id': 1, 'status': 1}")
+        @CompoundIndex(name = "submissionId", def = "{ 'submission.$id': 1}")
 })
 //@Document //TODO - there is a potential cyclic reference that is flagged up when you have @Document - reconsider design
 public class Analysis extends uk.ac.ebi.subs.data.submittable.Analysis implements StoredSubmittable {
