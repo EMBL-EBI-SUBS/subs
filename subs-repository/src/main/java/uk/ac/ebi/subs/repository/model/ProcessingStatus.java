@@ -3,6 +3,8 @@ package uk.ac.ebi.subs.repository.model;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.data.annotation.*;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -11,6 +13,9 @@ import uk.ac.ebi.subs.data.status.ProcessingStatusEnum;
 
 import java.util.Date;
 
+@CompoundIndexes({
+        @CompoundIndex(name = "submissionId_submittableId", def = "{ 'submissionId': 1, 'submittableId': 1}")
+})
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Document
@@ -30,7 +35,9 @@ public class ProcessingStatus extends uk.ac.ebi.subs.data.status.ProcessingStatu
     }
 
     public void copyDetailsFromSubmittable(StoredSubmittable storedSubmittable){
-        this.setSubmissionId(storedSubmittable.getSubmission().getId());
+        if (storedSubmittable.getSubmission() != null)
+            this.setSubmissionId(storedSubmittable.getSubmission().getId());
+
         this.setSubmittableId(storedSubmittable.getId());
         this.setSubmittableType(storedSubmittable.getClass().getSimpleName());
 

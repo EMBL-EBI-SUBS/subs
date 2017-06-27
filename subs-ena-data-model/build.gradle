@@ -7,6 +7,8 @@ dependencies {
         exclude group: 'org.springframework.boot', module :'spring-boot-starter-data-mongodb'
     }
     compile 'uk.ac.ebi.ena.sra:sra-xml:1.5.30'
+    compile("uk.ac.ebi.subs:subs-data-model:1.0.3-SNAPSHOT")
+
     compile ("org.springframework:spring-oxm")
     compile 'org.eclipse.persistence:org.eclipse.persistence.moxy:2.6.4'
     compile 'commons-lang:commons-lang:2.6'

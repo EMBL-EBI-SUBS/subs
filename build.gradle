@@ -194,7 +194,7 @@ subprojects {
 
     remotes {
         dev {
-            host = 'mac-subs-001.ebi.ac.uk'
+            host = 'mac-subs-002.ebi.ac.uk'
         }
     }
 
@@ -214,11 +214,11 @@ subprojects {
     remotes {
         staging {
             role('staging')
-            host = 'mac-subs-001'
+            host = 'mac-subs-002'
         }
     }
 
-    task deployJar(type: SshTask, dependsOn: 'build') {
+    task deployJar(type: SshTask, dependsOn: 'assemble') {
         doLast {
             def deployHome = "/data/" + project.name;
             File jarDeployDir = new File(deployHome,"jar")

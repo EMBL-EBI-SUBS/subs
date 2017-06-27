@@ -4,7 +4,8 @@ mainClassName = "uk.ac.ebi.subs.FrontendApplication"
 
 dependencies {
     compile project(':subs-repository')
-    compile project(':subs-data-model')
+
+    compile("uk.ac.ebi.subs:subs-data-model:1.0.3-SNAPSHOT")
 
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.springframework.boot:spring-boot-starter-actuator")

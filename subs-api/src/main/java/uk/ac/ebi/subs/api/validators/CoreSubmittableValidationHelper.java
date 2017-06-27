@@ -57,6 +57,10 @@ public class CoreSubmittableValidationHelper {
 
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "submission", "required", "submission is required");
 
+        if (errors.hasErrors()){
+            return;
+        }
+
         if (target.getId() != null) {
             storedVersion = (StoredSubmittable) repository.findOne(target.getId());
         }

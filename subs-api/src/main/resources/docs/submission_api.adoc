@@ -11,7 +11,7 @@
 This describes the resources that make up the EMBL-EBI submissions API.
 If you have any queries or requests, please contact mailto:subs-help@ebi.ac.uk[support].
 
-All API access is over HTTP, and accessed from `http://www.ebi.ac.uk/submissions/api`.
+All API access is over HTTP, and accessed from `http://submission-dev.ebi.ac.uk/api`.
 All data is sent and received as JSON.
 
 `TODO URL and support e-mail address are provisional`
@@ -62,7 +62,7 @@ requests to the submissions API.
 
 [source,bash]
 ----
-$ curl 'http://www.ebi.ac.uk/submissions/api' -i -H 'Accept: application/hal+json' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ'
+$ curl 'http://submission-dev.ebi.ac.uk/api' -i -H 'Accept: application/hal+json' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ'
 ----
 
 The `Authorization` header has been omitted from all further example requests, for brevity.

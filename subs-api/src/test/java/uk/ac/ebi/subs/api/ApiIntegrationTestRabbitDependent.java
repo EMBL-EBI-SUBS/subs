@@ -72,6 +72,24 @@ public class ApiIntegrationTestRabbitDependent {
         sampleRepository.deleteAll();
         submissionStatusRepository.deleteAll();
 
+        Unirest.setObjectMapper(new com.mashape.unirest.http.ObjectMapper() {
+            public <T> T readValue(String value, Class<T> valueType) {
+                try {
+                    return objectMapper.readValue(value, valueType);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            public String writeValue(Object value) {
+                try {
+                    return objectMapper.writeValueAsString(value);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
         testHelper = new ApiIntegrationTestHelper(objectMapper,rootUri);
     }
 

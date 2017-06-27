@@ -25,8 +25,6 @@ before_script:
 script: ./gradlew externalCiTest
 
 after_success:
-  - test $TRAVIS_BRANCH = "master" && ./gradlew subs-data-model:uploadArchives
-  - test $TRAVIS_BRANCH = "master" && ./gradlew subs-messaging:uploadArchives
   - test $TRAVIS_BRANCH = "master" && ./gradlew subs-processing-model:uploadArchives
   - test $TRAVIS_BRANCH = "master" && ./gradlew subs-api:uploadArchives
   - test $TRAVIS_BRANCH = "master" && ./gradlew subs-repository:uploadArchives

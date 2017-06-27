@@ -49,6 +49,8 @@ public class ApiIntegrationTest {
     private int port;
     private String rootUri;
 
+
+
     private ApiIntegrationTestHelper testHelper;
 
     @Autowired
@@ -71,6 +73,24 @@ public class ApiIntegrationTest {
         submissionRepository.deleteAll();
         sampleRepository.deleteAll();
         submissionStatusRepository.deleteAll();
+
+        Unirest.setObjectMapper(new com.mashape.unirest.http.ObjectMapper() {
+            public <T> T readValue(String value, Class<T> valueType) {
+                try {
+                    return objectMapper.readValue(value, valueType);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            public String writeValue(Object value) {
+                try {
+                    return objectMapper.writeValueAsString(value);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
 
         testHelper = new ApiIntegrationTestHelper(objectMapper,rootUri);
     }
@@ -116,6 +136,25 @@ public class ApiIntegrationTest {
 
     }
 
+    @Test
+    /**
+     * POSTing a sample without a submission should throw an error
+     */
+    public void submittablesMustHaveSubmissionEmbedded()throws IOException, UnirestException{
+        Map<String, String> rootRels = testHelper.rootRels();
+
+        List<Sample> testSamples = Helpers.generateTestClientSamples(1);
+        Sample sample = testSamples.get(0);
+
+        assertThat(rootRels.get("samples:create"), notNullValue());
+
+        HttpResponse<JsonNode> sampleResponse = Unirest.post(rootRels.get("samples:create"))
+                .headers(standardPostHeaders())
+                .body(sample)
+                .asJson();
+
+        assertThat(sampleResponse.getStatus(), is(equalTo(HttpStatus.BAD_REQUEST.value())));
+    }
 
     /**
      * POSTing two samples with the same alias in one submission should throw an error
