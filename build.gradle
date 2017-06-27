@@ -191,12 +191,6 @@ subprojects {
         ssh.settings.passphrase = sshPassphrase
     }
 
-    remotes {
-        dev {
-            host = 'mac-subs-002.ebi.ac.uk'
-        }
-    }
-
     task printJarName {
         doLast {
             println "$jar.archivePath.name"
