@@ -80,6 +80,10 @@ public class MonitorServiceImpl implements MonitorService {
         for (ProcessingCertificate cert : processingCertificateEnvelope.getProcessingCertificates()) {
             ProcessingStatus processingStatus = processingStatusRepository.findBySubmittableId(cert.getSubmittableId());
 
+            if (processingStatus == null){
+                continue;
+            }
+
             if (cert.getAccession() != null) {
                 processingStatus.setAccession(cert.getAccession());
             }
