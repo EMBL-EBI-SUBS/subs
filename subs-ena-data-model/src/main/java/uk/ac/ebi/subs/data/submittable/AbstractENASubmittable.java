@@ -18,6 +18,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
@@ -72,8 +73,11 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
     }
 
     public void serialiseAttributes () throws IllegalAccessException {
-        if (this.getClass().isAnnotationPresent(ENAValidation.class))
+        if (this.getClass().isAnnotationPresent(ENAValidation.class)) {
+            if (getId() == null )
+                setId(UUID.randomUUID().toString());
             serialiseFields(this.getClass(), this);
+        }
     }
 
     private void serialiseFields(Class<?> aClass, Object obj) throws IllegalAccessException {
@@ -86,8 +90,9 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
                 if (attributeCount == 1) {
                     final Optional<Attribute> existingStudyTypeAttribute = getExistingAttribute(annotation.name(),false);
                     if (annotation.allowedValues().length > 0) {
-                        if ( !ArrayUtils.contains( annotation.allowedValues(), existingStudyTypeAttribute.get().getValue() ) ) {
-                            validationResultList.add(new InvalidAttributeValue(this,annotation.name(),annotation.allowedValues()));
+                        final String value = existingStudyTypeAttribute.get().getValue();
+                        if ( !ArrayUtils.contains( annotation.allowedValues(), value ) ) {
+                            validationResultList.add(new InvalidAttributeValue(this,value,annotation));
                         }
                     }
                     field.set(obj,existingStudyTypeAttribute.get().getValue());
