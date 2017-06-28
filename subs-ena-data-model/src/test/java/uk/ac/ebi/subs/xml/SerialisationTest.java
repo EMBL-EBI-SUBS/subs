@@ -245,6 +245,7 @@ public abstract class SerialisationTest {
         baseSubmittableValue.deSerialiseAttributes();
         final Submittable baseObject = baseSubmittableValue.getBaseObject();
         Collections.sort(baseObject.getAttributes());
+        baseObject.setId(baseSubmittableForCompare.getId());
         assertThat("serialised and deserialised submittable", baseSubmittableForCompare, equalTo(baseObject));
     }
 
