@@ -6,7 +6,6 @@ import org.springframework.data.annotation.*;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.hateoas.Identifiable;
 import uk.ac.ebi.subs.data.status.ProcessingStatusEnum;
@@ -14,14 +13,38 @@ import uk.ac.ebi.subs.data.status.ProcessingStatusEnum;
 import java.util.Date;
 
 @CompoundIndexes({
-        @CompoundIndex(name = "submissionId_submittableId", def = "{ 'submissionId': 1, 'submittableId': 1}")
+        @CompoundIndex(background = true, name = "submissionId_submittableId", def = "{ 'submissionId': 1, 'submittableId': 1}")
 })
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Document
 public class ProcessingStatus extends uk.ac.ebi.subs.data.status.ProcessingStatus implements Identifiable<String> {
 
+    @Id
+    private String id;
+    @Version
+    private Long version;
+    @CreatedDate
+    private Date createdDate;
+    @LastModifiedDate
+    private Date lastModifiedDate;
+    @CreatedBy
+    private String createdBy;
+    @LastModifiedBy
+    private String lastModifiedBy;
+    @Indexed
+    private String submissionId;
+    private String submittableId;
+    private String submittableType;
+    private String accession;
+    private String message;
+    private String archive;
+    private String alias;
+
     public ProcessingStatus() {
+    }
+    public ProcessingStatus(ProcessingStatusEnum statusEnum) {
+        super(statusEnum);
     }
 
     public static ProcessingStatus createForSubmittable(StoredSubmittable storedSubmittable) {
@@ -34,7 +57,7 @@ public class ProcessingStatus extends uk.ac.ebi.subs.data.status.ProcessingStatu
         return processingStatus;
     }
 
-    public void copyDetailsFromSubmittable(StoredSubmittable storedSubmittable){
+    public void copyDetailsFromSubmittable(StoredSubmittable storedSubmittable) {
         if (storedSubmittable.getSubmission() != null)
             this.setSubmissionId(storedSubmittable.getSubmission().getId());
 
@@ -46,37 +69,6 @@ public class ProcessingStatus extends uk.ac.ebi.subs.data.status.ProcessingStatu
         this.setAlias(storedSubmittable.getAlias());
 
     }
-
-    public ProcessingStatus(ProcessingStatusEnum statusEnum) {
-        super(statusEnum);
-    }
-
-    @Id
-    private String id;
-
-    @Version
-    private Long version;
-    @CreatedDate
-    private Date createdDate;
-    @LastModifiedDate
-    private Date lastModifiedDate;
-
-    @CreatedBy
-    private String createdBy;
-    @LastModifiedBy
-    private String lastModifiedBy;
-
-    @Indexed
-    private String submissionId;
-
-
-    private String submittableId;
-    private String submittableType;
-
-    private String accession;
-    private String message;
-    private String archive;
-    private String alias;
 
     @Override
     public String getId() {

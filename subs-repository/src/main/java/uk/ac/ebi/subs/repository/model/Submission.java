@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.Date;
 
 @CompoundIndexes({
-        @CompoundIndex(name = "team_rev_submission_date", def = "{ 'team.name': 1, 'submissionDate': -1 }")
+        @CompoundIndex(background = true, name = "team_rev_submission_date", def = "{ 'team.name': 1, 'submissionDate': -1 }")
 })
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
