@@ -306,6 +306,7 @@ public class ApiDocumentation {
                                         linkWithRel("egaDacPolicies:create").description("This submission can accept new DAC policies"),
                                         linkWithRel("studies:create").description("This submission can accept new studies"),
                                         linkWithRel("processingStatuses").description("All processing statuses for the contents of this submission"),
+                                        linkWithRel("validationResults").description("All validation results for the contents of this submission"),
                                         linkWithRel("processingStatusSummary").description("Summary of processing statuses for this submission"),
                                         linkWithRel("typeProcessingStatusSummary").description("Summary of processing statuses per type, for this submission")
 
