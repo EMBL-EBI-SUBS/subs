@@ -13,7 +13,7 @@ dependencies {
 
     compile("uk.ac.ebi.subs:subs-data-model:1.0.3-SNAPSHOT")
     compile("uk.ac.ebi.subs:subs-messaging:1.0.3-SNAPSHOT")
-    compile("uk.ac.ebi.subs:validator-common:1.1.0-SNAPSHOT")
+    compile("uk.ac.ebi.subs:validator-common:1.2.0-SNAPSHOT")
 
     compile("org.springframework.boot:spring-boot-starter-data-rest")
     compile 'org.springframework.data:spring-data-rest-hal-browser'
@@ -21,7 +21,6 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-actuator")
 
     compile("com.fasterxml.jackson.module:jackson-module-afterburner:2.7.1")
-
 
     testCompile("junit:junit")
     testCompile("org.springframework.boot:spring-boot-starter-test")
@@ -108,15 +107,12 @@ task deployToDev(type: SshTask, dependsOn: 'build') {
                 println "creating symbolic link to $jar.archiveName"
                 def result = execute "ln -s -f $jarDeployDir/$jar.archiveName $jarDeployDir/$jar.baseName" + ".jar", ignoreError: true
                 println result
-
             }
         }
-
     }
     ssh.settings {
         knownHosts = allowAnyHosts
     }
-
 }
 
 task deployToTest(type: SshTask, dependsOn: 'build') {
@@ -131,17 +127,10 @@ task deployToTest(type: SshTask, dependsOn: 'build') {
                 println "creating symbolic link to $jar.archiveName"
                 def result = execute "ln -s -f $jarDeployDir/$jar.archiveName $jarDeployDir/$jar.baseName" + ".jar", ignoreError: true
                 println result
-
             }
         }
-
     }
     ssh.settings {
         knownHosts = allowAnyHosts
     }
-
-
-
 }
-
-
