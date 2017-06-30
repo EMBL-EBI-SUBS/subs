@@ -4,6 +4,7 @@ import org.springframework.data.annotation.*;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.DBRef;
+import uk.ac.ebi.subs.validator.data.ValidationResult;
 
 import java.util.Date;
 
@@ -29,6 +30,16 @@ public class Analysis extends uk.ac.ebi.subs.data.submittable.Analysis implement
     private String lastModifiedBy;
     @DBRef
     private Submission submission;
+    @DBRef
+    private ValidationResult validationResult;
+
+    public ValidationResult getValidationResult() {
+        return validationResult;
+    }
+
+    public void setValidationResult(ValidationResult validationResult) {
+        this.validationResult = validationResult;
+    }
 
     @Override
     public ProcessingStatus getProcessingStatus() {
