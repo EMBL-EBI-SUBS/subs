@@ -13,6 +13,7 @@ import uk.ac.ebi.subs.repository.model.ProcessingStatus;
 import uk.ac.ebi.subs.repository.model.StoredSubmittable;
 import uk.ac.ebi.subs.repository.model.Submission;
 import uk.ac.ebi.subs.repository.repos.status.SubmissionStatusRepository;
+import uk.ac.ebi.subs.validator.data.ValidationResult;
 
 import java.util.HashMap;
 import java.util.List;
@@ -54,6 +55,7 @@ public class SubmissionResourceProcessor implements ResourceProcessor<Resource<S
 
         addTeamRel(resource);
         addContentsRels(resource);
+        addValidationResultLinks(resource);
 
         ifUpdateableAddLinks(resource);
 
@@ -111,23 +113,33 @@ public class SubmissionResourceProcessor implements ResourceProcessor<Resource<S
         }
     }
 
-    private void addContentsRels(Resource<Submission> resource) {
+    private void addContentsRels(Resource<Submission> submissionResource) {
         Map<String, String> expansionParams = new HashMap<>();
-        expansionParams.put("submissionId", resource.getContent().getId());
+        expansionParams.put("submissionId", submissionResource.getContent().getId());
 
         for (Class<? extends StoredSubmittable> submittableClass : submittablesClassList) {
-            Link contentsLink = repositoryEntityLinks.linkToSearchResource(submittableClass, "by-submission");
-            Link collectionLink = repositoryEntityLinks.linkToCollectionResource(submittableClass);
-
-            Assert.notNull(contentsLink);
-            Assert.notNull(collectionLink);
-
-
-            resource.add(
-                    contentsLink.expand(expansionParams).withRel(collectionLink.getRel())
-            );
-
+            addObjectToSubmissionAsLink(submittableClass, submissionResource, expansionParams);
         }
+    }
+
+    private void addValidationResultLinks(Resource<Submission> submissionResource) {
+        Map<String, String> expansionParams = new HashMap<>();
+        expansionParams.put("submissionId", submissionResource.getContent().getId());
+
+        addObjectToSubmissionAsLink(ValidationResult.class, submissionResource, expansionParams);
+    }
+
+    private void addObjectToSubmissionAsLink(Class<?> linkToBeAdded, Resource<Submission> submissionResource, Map<String, String> expansionParams) {
+        Link contentsLink = repositoryEntityLinks.linkToSearchResource(linkToBeAdded, "by-submission");
+        Link collectionLink = repositoryEntityLinks.linkToCollectionResource(linkToBeAdded);
+
+        Assert.notNull(contentsLink);
+        Assert.notNull(collectionLink);
+
+
+        submissionResource.add(
+                contentsLink.expand(expansionParams).withRel(collectionLink.getRel())
+        );
 
     }
 
