@@ -387,12 +387,13 @@ public class ApiDocumentation {
                                 ),
                                 links(
                                         halLinks(),
+                                        validationresultLink(),
+                                        submissionLink(),
+                                        processingStatusLink(),
                                         linkWithRel("self").description("This resource"),
                                         linkWithRel("sample").description("This resource"),
                                         linkWithRel("self:update").description("This resource can be updated"),
                                         linkWithRel("self:delete").description("This resource can be deleted"),
-                                        linkWithRel("submission").description("Submission that this sample is part of"),
-                                        linkWithRel("processingStatus").description("Processing status for this sample"),
                                         linkWithRel("history").description("Collection of resources for samples with the same team and alias as this resource"),
                                         linkWithRel("current-version").description("Current version of this sample, as identified by team and alias")
 
@@ -441,12 +442,13 @@ public class ApiDocumentation {
                                 ),
                                 links(
                                         halLinks(),
+                                        validationresultLink(),
+                                        submissionLink(),
+                                        processingStatusLink(),
                                         linkWithRel("self").description("This resource"),
                                         linkWithRel("sample").description("This resource"),
                                         linkWithRel("self:update").description("This resource can be updated"),
                                         linkWithRel("self:delete").description("This resource can be deleted"),
-                                        linkWithRel("submission").description("Submission that this sample is part of"),
-                                        linkWithRel("processingStatus").description("Processing status for this sample"),
                                         linkWithRel("history").description("Collection of resources for samples with the same team and alias as this resource"),
                                         linkWithRel("current-version").description("Current version of this sample, as identified by team and alias")
 
@@ -484,12 +486,13 @@ public class ApiDocumentation {
                                 ),
                                 links(
                                         halLinks(),
+                                        validationresultLink(),
+                                        submissionLink(),
+                                        processingStatusLink(),
                                         linkWithRel("self").description("This resource"),
                                         linkWithRel("sample").description("This resource"),
                                         linkWithRel("self:update").description("This resource can be updated"),
                                         linkWithRel("self:delete").description("This resource can be deleted"),
-                                        linkWithRel("submission").description("Submission that this sample is part of"),
-                                        linkWithRel("processingStatus").description("Processing status for this sample"),
                                         linkWithRel("history").description("Collection of resources for samples with the same team and alias as this resource"),
                                         linkWithRel("current-version").description("Current version of this sample, as identified by team and alias")
 
@@ -647,6 +650,7 @@ public class ApiDocumentation {
                                         selfRelLink(),
                                         processingStatusLink(),
                                         submissionLink(),
+                                        validationresultLink(),
                                         linkWithRel("sample").description("Link to this sample"),
                                         linkWithRel("self:update").description("This sample can be updated"),
                                         linkWithRel("self:delete").description("This sample can be deleted")
@@ -891,6 +895,10 @@ public class ApiDocumentation {
 
     private LinkDescriptor processingStatusLink() {
         return linkWithRel("processingStatus").description("Current status of this record");
+    }
+
+    private LinkDescriptor validationresultLink() {
+        return linkWithRel("validationResult").description("Result of the validation of this record");
     }
 
     private class MaskElement implements ContentModifier {
