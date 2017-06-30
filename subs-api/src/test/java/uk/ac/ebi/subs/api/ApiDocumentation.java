@@ -10,8 +10,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.rest.webmvc.RestMediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.JUnitRestDocumentation;
@@ -99,6 +101,9 @@ public class ApiDocumentation {
 
     @Autowired
     private WebApplicationContext context;
+
+    @MockBean
+    private RabbitMessagingTemplate rabbitMessagingTemplate;
 
     private MockMvc mockMvc;
     private SubmissionEventService fakeSubmissionEventService = new SubmissionEventService() {
