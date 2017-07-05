@@ -99,6 +99,14 @@ ssh.settings {
     user = 'sub_adm'
 }
 
+if (project.hasProperty('sshKeyFile')) {
+    ssh.settings.identity = new File(sshKeyFile)
+}
+
+if (project.hasProperty('sshPassphrase')) {
+    ssh.settings.passphrase = sshPassphrase
+}
+
 task deployToDev(type: SshTask, dependsOn: 'build') {
     doLast {
         def deployHome = "/homes/sub_adm/tc_subs/submission-dev";
