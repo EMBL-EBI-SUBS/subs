@@ -95,6 +95,10 @@ remotes {
     }
 }
 
+ssh.settings {
+    user = 'sub_adm'
+}
+
 task deployToDev(type: SshTask, dependsOn: 'build') {
     doLast {
         def deployHome = "/homes/sub_adm/tc_subs/submission-dev";
