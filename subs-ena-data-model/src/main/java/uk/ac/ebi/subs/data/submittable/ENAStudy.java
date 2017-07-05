@@ -8,6 +8,7 @@ public class ENAStudy extends AbstractENASubmittable<Study> {
 
     public static final String EXISTING_STUDY_TYPE = "existing_study_type";
     @ENAAttribute(name = EXISTING_STUDY_TYPE,
+            required = true,
             allowedValues = {
                     "Whole Genome Sequencing",
                     "Metagenomics",
@@ -29,6 +30,10 @@ public class ENAStudy extends AbstractENASubmittable<Study> {
     public static final String STUDY_ABSTRACT = "study_abstract";
     @ENAAttribute(name = STUDY_ABSTRACT, required = true)
     String studyAbstract;
+
+    @ENAAttribute(name = "test_field", required = false, allowedValues = "ILLUMINA")
+    String testField;
+
 
     public ENAStudy(Study study) throws IllegalAccessException {
         super(study);

@@ -15,10 +15,7 @@ import uk.ac.ebi.subs.validator.data.SingleValidationResult;
 import uk.ac.ebi.subs.validator.data.ValidationAuthor;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -82,29 +79,31 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
 
     private void serialiseFields(Class<?> aClass, Object obj) throws IllegalAccessException {
         final Field[] fields = aClass.getDeclaredFields();
-        String string;
+
         for (Field field : fields ) {
-            if (field.isAnnotationPresent(ENAAttribute.class)) {
-                final ENAAttribute annotation = field.getAnnotation(ENAAttribute.class);
+            for (ENAAttribute annotation : field.getAnnotationsByType(ENAAttribute.class)) {
+                annotation.annotationType();
                 int attributeCount = getAttributeCount(annotation.name());
                 if (attributeCount == 1) {
-                    final Optional<Attribute> existingStudyTypeAttribute = getExistingAttribute(annotation.name(),false);
+                    final Optional<Attribute> existingAttribute = getExistingAttribute(annotation.name(),false);
                     if (annotation.allowedValues().length > 0) {
-                        final String value = existingStudyTypeAttribute.get().getValue();
-                        if ( !ArrayUtils.contains( annotation.allowedValues(), value ) ) {
+                        final String value = existingAttribute.get().getValue().toUpperCase();
+                        if ( !Arrays.stream(annotation.allowedValues()).anyMatch(value::equalsIgnoreCase) && annotation.required()) {
                             validationResultList.add(new InvalidAttributeValue(this,value,annotation));
                         }
                     }
-                    field.set(obj,existingStudyTypeAttribute.get().getValue());
-                    deleteAttribute(existingStudyTypeAttribute.get());
+                    field.set(obj,existingAttribute.get().getValue());
+                    deleteAttribute(existingAttribute.get());
                 } else if (attributeCount > 1) {
                     validationResultList.add(new SingleAttributeValidationResult(this,annotation.name()));
                 } else if (attributeCount == 0 && annotation.required()) {
                     validationResultList.add(new AttributeRequiredValidationResult(this,annotation.name()));
                 }
-            } else if (field.getType().isMemberClass()) {
+            }
+            if (field.getType().isMemberClass()) {
                 serialiseFields(field.getType(),field.get(obj));
             }
+
         }
     }
 

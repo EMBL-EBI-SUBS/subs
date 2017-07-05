@@ -13,7 +13,7 @@ import java.util.*;
  * Created by neilg on 28/03/2017.
  */
 @ENAValidation
-public class ENAExperiment extends AbstractENASubmittable<Assay> {
+public class    ENAExperiment extends AbstractENASubmittable<Assay> {
     public static final String DESIGN_DESCRIPTION = "design_description";
     public static final String LIBRARY_NAME = "library_name";
     public static final String LIBRARY_STRATEGY = "library_strategy";
@@ -30,6 +30,9 @@ public class ENAExperiment extends AbstractENASubmittable<Assay> {
     public static final String SINGLE = "SINGLE";
     public static final String PAIRED = "PAIRED";
 
+
+    @ENAAttribute(name= "platform_type", allowedValues = "LS454" )
+    @ENAAttribute(name = "instrument_model", allowedValues = {"454 GS 20", "454 GS FLX", "454 GS FLX", "454 GS FLX Titanium", "454 GS Junior", "unspecified"})
     @ENAPlatform(name = "LS454", instrumentModels = {"454 GS 20", "454 GS FLX", "454 GS FLX", "454 GS FLX Titanium", "454 GS Junior", "unspecified"})
     String ls454 ;
 
@@ -117,7 +120,7 @@ public class ENAExperiment extends AbstractENASubmittable<Assay> {
     @Override
     public void serialiseAttributes() throws IllegalAccessException {
         super.serialiseAttributes();
-        serialisePlatformTypeInstrumentModel();
+        //serialisePlatformTypeInstrumentModel();
         serialiseLibraryLayout();
     }
 
