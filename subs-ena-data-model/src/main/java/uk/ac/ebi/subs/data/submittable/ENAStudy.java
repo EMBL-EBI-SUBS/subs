@@ -1,39 +1,33 @@
 package uk.ac.ebi.subs.data.submittable;
 
-import uk.ac.ebi.subs.ena.annotation.ENAAttribute;
-import uk.ac.ebi.subs.ena.annotation.ENAValidation;
+import uk.ac.ebi.subs.ena.annotation.*;
 
-@ENAValidation(requiredAttributes = {"existing_study_type", "study_abstract"})
+@ENAValidation(
+        value = {
+                @ENAFieldAttribute(attributeName = "existing_study_type", required = true),
+                @ENAFieldAttribute(attributeName = "study_abstract", required = true)
+        })
 public class ENAStudy extends AbstractENASubmittable<Study> {
 
-    public static final String EXISTING_STUDY_TYPE = "existing_study_type";
-    @ENAAttribute(name = EXISTING_STUDY_TYPE,
-            required = true,
-            allowedValues = {
-                    "Whole Genome Sequencing",
-                    "Metagenomics",
-                    "Transcriptome Analysis",
-                    "Resequencing",
-                    "Epigenetics",
-                    "Synthetic Genomics",
-                    "Forensic or Paleo-genomics",
-                    "Gene Regulation Study",
-                    "Cancer Genomics",
-                    "Population Genomics",
-                    "RNASeq",
-                    "Exome Sequencing",
-                    "Pooled Clone Sequencing",
-                    "Other"
-            }
-    )
+    @ENAField(fieldName = "existing_study_type", values = {
+            "Whole Genome Sequencing",
+            "Metagenomics",
+            "Transcriptome Analysis",
+            "Resequencing",
+            "Epigenetics",
+            "Synthetic Genomics",
+            "Forensic or Paleo-genomics",
+            "Gene Regulation Study",
+            "Cancer Genomics",
+            "Population Genomics",
+            "RNASeq",
+            "Exome Sequencing",
+            "Pooled Clone Sequencing",
+            "Other"})
     String studyType;
-    public static final String STUDY_ABSTRACT = "study_abstract";
-    @ENAAttribute(name = STUDY_ABSTRACT, required = true)
+
+    @ENAField(fieldName = "study_abstract")
     String studyAbstract;
-
-    @ENAAttribute(name = "test_field", required = false, allowedValues = "ILLUMINA")
-    String testField;
-
 
     public ENAStudy(Study study) throws IllegalAccessException {
         super(study);

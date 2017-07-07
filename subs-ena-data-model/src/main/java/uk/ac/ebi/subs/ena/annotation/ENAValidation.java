@@ -12,5 +12,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface ENAValidation {
-    String [] requiredAttributes() default {};
+    ENAFieldAttribute [] value();
+    ENAControlledValueAttribute [] enaControlledValueAttributes() default {};
 }
