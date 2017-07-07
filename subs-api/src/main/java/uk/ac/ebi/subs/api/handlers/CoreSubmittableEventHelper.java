@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import uk.ac.ebi.subs.repository.model.ProcessingStatus;
 import uk.ac.ebi.subs.repository.model.StoredSubmittable;
 import uk.ac.ebi.subs.repository.repos.status.ProcessingStatusRepository;
+import uk.ac.ebi.subs.repository.services.SubmittableHelperService;
 
 import java.util.UUID;
 
@@ -15,13 +16,13 @@ import java.util.UUID;
 @RepositoryEventHandler
 public class CoreSubmittableEventHelper {
 
-    @Autowired
+
     public CoreSubmittableEventHelper(ProcessingStatusRepository processingStatusRepository) {
         this.processingStatusRepository = processingStatusRepository;
     }
 
     private ProcessingStatusRepository processingStatusRepository;
-
+    private SubmittableHelperService submittableHelperService;
 
     /**
      * Give submittables an ID and draft status on creation
@@ -30,13 +31,7 @@ public class CoreSubmittableEventHelper {
      */
     @HandleBeforeCreate
     public void beforeCreate(StoredSubmittable submittable) {
-        submittable.setId(UUID.randomUUID().toString());
-
-        ProcessingStatus processingStatus = ProcessingStatus.createForSubmittable(submittable);
-        processingStatus.setId(UUID.randomUUID().toString());
-        processingStatusRepository.insert(processingStatus);
-
-        setTeamFromSubmission(submittable);
+        submittableHelperService.setupNewSubmittable(submittable);
     }
 
     private void setTeamFromSubmission(StoredSubmittable submittable) {

@@ -14,6 +14,7 @@ import uk.ac.ebi.subs.repository.repos.SubmissionRepository;
 import uk.ac.ebi.subs.repository.model.Submission;
 import uk.ac.ebi.subs.repository.model.SubmissionStatus;
 import uk.ac.ebi.subs.repository.repos.status.SubmissionStatusRepository;
+import uk.ac.ebi.subs.repository.services.SubmissionHelperService;
 
 import java.util.Date;
 import java.util.UUID;
@@ -30,6 +31,8 @@ public class SubmissionEventHandler {
 
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+
 
     public SubmissionEventHandler(
             SubmissionRepository submissionRepository,
@@ -56,6 +59,7 @@ public class SubmissionEventHandler {
     private SubmissionRepository submissionRepository;
     private SubmissionEventService submissionEventService;
     private SubmissionStatusRepository submissionStatusRepository;
+    private SubmissionHelperService submissionHelperService;
 
     /**
      * Give submission an ID and draft status on creation
@@ -64,15 +68,7 @@ public class SubmissionEventHandler {
      */
     @HandleBeforeCreate
     public void handleBeforeCreate(Submission submission) {
-        submission.setId(UUID.randomUUID().toString());
-        submission.setCreatedDate(new Date());
-
-        SubmissionStatus submissionStatus = new SubmissionStatus(SubmissionStatusEnum.Draft);
-        submissionStatus.setId(UUID.randomUUID().toString());
-        submissionStatusRepository.insert(submissionStatus);
-
-        submission.setSubmissionStatus(submissionStatus);
-
+        submissionHelperService.setupNewSubmission(submission);
         submissionEventService.submissionCreated(submission);
     }
 
