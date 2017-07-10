@@ -3,10 +3,12 @@ package uk.ac.ebi.subs.data.submittable;
 import uk.ac.ebi.subs.data.component.Archive;
 import uk.ac.ebi.subs.data.component.Attribute;
 import uk.ac.ebi.subs.data.component.Team;
+import uk.ac.ebi.subs.ena.annotation.ENAControlledValueAttribute;
 import uk.ac.ebi.subs.ena.annotation.ENAField;
 import uk.ac.ebi.subs.ena.annotation.ENAFieldAttribute;
 import uk.ac.ebi.subs.ena.annotation.ENAValidation;
 import uk.ac.ebi.subs.ena.validation.AttributeRequiredValidationResult;
+import uk.ac.ebi.subs.ena.validation.InvalidAttributeValue;
 import uk.ac.ebi.subs.ena.validation.SingleAttributeValidationResult;
 import uk.ac.ebi.subs.validator.data.SingleValidationResult;
 
@@ -85,15 +87,19 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
                 setId(UUID.randomUUID().toString());
             //serialiseFields(this.getClass(), this);
             parseAttributes(enaValidation);
+            parseControlledAttributes(enaValidation);
             serialiseFields(this.getClass(), this);
+            if (validationResultList.isEmpty()) {
+                for (Attribute attribute : attributeMap.values()) {
+                    deleteAttribute(attribute);
+                }
+            }
         }
     }
 
-    public void parseAttributes(ENAValidation enaValidation) {
-        // first step is to get the fields
+    private void parseAttributes(ENAValidation enaValidation) {
         for (ENAFieldAttribute enaFieldAttribute : enaValidation.value()) {
             String fieldName = null;
-
             if (!enaFieldAttribute.attributeFieldName().equals(ENAFieldAttribute.NO_FIELD)) {
                 fieldName = attributeMap.get(enaFieldAttribute.attributeFieldName().toUpperCase()).getValue();
             } else if (!enaFieldAttribute.fieldName().equals(ENAFieldAttribute.NO_FIELD)) {
@@ -102,7 +108,6 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
              else {
                 fieldName = enaFieldAttribute.attributeName();
             }
-
             String attributeName = enaFieldAttribute.attributeName();
             final int attributeCount = getAttributeCount(attributeName);
             final Optional<Attribute> attribute = getExistingAttribute(attributeName, false);
@@ -117,6 +122,29 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
         }
     }
 
+    private void parseControlledAttributes (ENAValidation enaValidation) {
+        for (ENAControlledValueAttribute enaControlledValueAttribute : enaValidation.enaControlledValueAttributes()) {
+            String attributeName = enaControlledValueAttribute.attributeName();
+            List<String> allowedValueList = Arrays.asList(enaControlledValueAttribute.allowedValues());
+            final Optional<Attribute> optionalAttribute = getExistingAttribute(attributeName, false);
+            parseControlledValue(optionalAttribute.get(), allowedValueList);
+        }
+    }
+
+    private boolean parseControlledValue(Attribute attribute, List<String> allowedValueList) {
+        if (!allowedValueList.contains(attribute.getValue())) {
+            validationResultList.add(
+                    new InvalidAttributeValue(
+                            this,
+                            attribute.getValue(),
+                            attribute.getName(),
+                            allowedValueList.toArray(new String[0])));
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     private void serialiseFields(Class<?> aClass, Object obj) throws IllegalAccessException {
 
         final Field[] fields = aClass.getDeclaredFields();
@@ -126,6 +154,11 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
                 final ENAField enaField = field.getAnnotation(ENAField.class);
                 if (attributeMap.containsKey(enaField.fieldName().toUpperCase())) {
                     final Attribute attribute = attributeMap.get(enaField.fieldName().toUpperCase());
+                    if (enaField.values().length > 0) {
+                        if (!parseControlledValue(attribute,Arrays.asList(enaField.values()))) {
+                            break;
+                        }
+                    }
                     field.set(obj, attribute.getValue());
                     deleteAttribute(attribute);
                 }
