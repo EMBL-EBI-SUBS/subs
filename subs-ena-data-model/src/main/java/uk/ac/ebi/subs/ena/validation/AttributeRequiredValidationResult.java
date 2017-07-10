@@ -16,4 +16,8 @@ public class AttributeRequiredValidationResult extends AbstractENAValidationResu
         this.attributeName = attributeName;
         this.setValidationStatus(ValidationStatus.Error);
     }
+
+    public String getAttributeName() {
+        return attributeName;
+    }
 }
