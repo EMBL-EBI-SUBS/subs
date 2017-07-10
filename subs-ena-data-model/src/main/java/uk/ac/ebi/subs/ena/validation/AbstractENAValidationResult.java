@@ -1,6 +1,5 @@
 package uk.ac.ebi.subs.ena.validation;
 
-import lombok.EqualsAndHashCode;
 import uk.ac.ebi.subs.data.submittable.ENASubmittable;
 import uk.ac.ebi.subs.validator.data.SingleValidationResult;
 import uk.ac.ebi.subs.validator.data.ValidationAuthor;
