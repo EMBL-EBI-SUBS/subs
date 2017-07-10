@@ -85,7 +85,6 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
 
             if (getId() == null )
                 setId(UUID.randomUUID().toString());
-            //serialiseFields(this.getClass(), this);
             parseAttributes(enaValidation);
             parseControlledAttributes(enaValidation);
             serialiseFields(this.getClass(), this);
@@ -117,7 +116,6 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
                 validationResultList.add(new AttributeRequiredValidationResult(this,attributeName));
             } else if (attributeCount > 0 ) {
                 attributeMap.put(fieldName.toUpperCase(),attribute.get());
-                //deleteAttribute(attribute.get());
             }
         }
     }
@@ -286,7 +284,6 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
         else return null;
     }
 
-    //@Override
     public void setTeamName(String teamName) {
         Team team = new Team();
         team.setName(teamName);
