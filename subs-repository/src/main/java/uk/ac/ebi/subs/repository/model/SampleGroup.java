@@ -6,20 +6,42 @@ import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
-
+import uk.ac.ebi.subs.validator.data.ValidationResult;
 
 import java.util.Date;
 
 @CompoundIndexes({
-        @CompoundIndex(name = "team_alias", def = "{ 'team.name': 1, 'alias': 1 }"),
-        @CompoundIndex(name = "accession", def = "{ 'accession': 1}"),
-        @CompoundIndex(name = "submissionId", def = "{ 'submission.id': 1}")
+        @CompoundIndex(background = true, name = "team_alias", def = "{ 'team.name': 1, 'alias': 1 }"),
+        @CompoundIndex(background = true, name = "accession", def = "{ 'accession': 1}"),
+        @CompoundIndex(background = true, name = "submission", def = "{ 'submission': 1}")
 })
 @Document
 public class SampleGroup extends uk.ac.ebi.subs.data.submittable.SampleGroup implements StoredSubmittable {
 
     @DBRef
     private ProcessingStatus processingStatus;
+    @Version
+    private Long version;
+    @CreatedDate
+    private Date createdDate;
+    @LastModifiedDate
+    private Date lastModifiedDate;
+    @CreatedBy
+    private String createdBy;
+    @LastModifiedBy
+    private String lastModifiedBy;
+    @DBRef
+    private Submission submission;
+    @DBRef
+    private ValidationResult validationResult;
+
+    public ValidationResult getValidationResult() {
+        return validationResult;
+    }
+
+    public void setValidationResult(ValidationResult validationResult) {
+        this.validationResult = validationResult;
+    }
 
     @Override
     public ProcessingStatus getProcessingStatus() {
@@ -30,18 +52,6 @@ public class SampleGroup extends uk.ac.ebi.subs.data.submittable.SampleGroup imp
     public void setProcessingStatus(ProcessingStatus processingStatus) {
         this.processingStatus = processingStatus;
     }
-
-    @Version
-    private Long version;
-    @CreatedDate
-    private Date createdDate;
-    @LastModifiedDate
-    private Date lastModifiedDate;
-    @CreatedBy private String createdBy;
-    @LastModifiedBy private String lastModifiedBy;
-
-    @DBRef
-    private Submission submission;
 
     public Submission getSubmission() {
         return submission;

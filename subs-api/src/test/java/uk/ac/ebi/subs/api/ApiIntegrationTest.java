@@ -1,6 +1,5 @@
 package uk.ac.ebi.subs.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
@@ -14,30 +13,32 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.subs.ApiApplication;
 import uk.ac.ebi.subs.data.Submission;
 import uk.ac.ebi.subs.data.client.Sample;
-import uk.ac.ebi.subs.repository.repos.SubmissionRepository;
 import uk.ac.ebi.subs.repository.model.SubmissionStatus;
-import uk.ac.ebi.subs.repository.repos.submittables.SampleRepository;
+import uk.ac.ebi.subs.repository.repos.SubmissionRepository;
 import uk.ac.ebi.subs.repository.repos.status.SubmissionStatusRepository;
+import uk.ac.ebi.subs.repository.repos.submittables.SampleRepository;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
-
-import static uk.ac.ebi.subs.api.ApiIntegrationTestHelper.*;
+import static uk.ac.ebi.subs.api.ApiIntegrationTestHelper.standardGetHeaders;
+import static uk.ac.ebi.subs.api.ApiIntegrationTestHelper.standardPostHeaders;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ApiApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -48,8 +49,6 @@ public class ApiIntegrationTest {
     @LocalServerPort
     private int port;
     private String rootUri;
-
-
 
     private ApiIntegrationTestHelper testHelper;
 
@@ -65,34 +64,15 @@ public class ApiIntegrationTest {
     @Autowired
     private SampleRepository sampleRepository;
 
+    @MockBean
+    private RabbitMessagingTemplate rabbitMessagingTemplate;
 
     @Before
     public void buildUp() throws URISyntaxException {
-
         rootUri = "http://localhost:" + port + "/api";
-        submissionRepository.deleteAll();
-        sampleRepository.deleteAll();
-        submissionStatusRepository.deleteAll();
 
-        Unirest.setObjectMapper(new com.mashape.unirest.http.ObjectMapper() {
-            public <T> T readValue(String value, Class<T> valueType) {
-                try {
-                    return objectMapper.readValue(value, valueType);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            public String writeValue(Object value) {
-                try {
-                    return objectMapper.writeValueAsString(value);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-
-        testHelper = new ApiIntegrationTestHelper(objectMapper,rootUri);
+        testHelper = new ApiIntegrationTestHelper(objectMapper, rootUri,
+                Arrays.asList(submissionRepository, sampleRepository, submissionStatusRepository));
     }
 
     @After
@@ -125,15 +105,11 @@ public class ApiIntegrationTest {
         assertThat(submissionStatus.getStatus(), equalTo("Draft"));
     }
 
-
-
     @Test
     public void submissionWithSamples() throws IOException, UnirestException {
         Map<String, String> rootRels = testHelper.rootRels();
 
         String submissionLocation = testHelper.submissionWithSamples(rootRels);
-
-
     }
 
     @Test
@@ -170,7 +146,7 @@ public class ApiIntegrationTest {
 
         HttpResponse<JsonNode> submissionResponse = testHelper.postSubmission(rootRels, submission);
 
-        String submissionLocation = submissionResponse.getHeaders().get("Location").get(0).toString();
+        String submissionLocation = submissionResponse.getHeaders().getFirst("Location");
         Map<String, String> submissionRels = testHelper.relsFromPayload(submissionResponse.getBody().getObject());
 
         assertThat(submissionRels.get("samples:create"), notNullValue());
@@ -207,7 +183,6 @@ public class ApiIntegrationTest {
         error.keySet().stream().forEach(key -> errorAsMap.put((String)key,error.get((String)key)));
 
         assertThat(errorAsMap,is(equalTo(expectedError)));
-
     }
 
     /**
@@ -224,7 +199,7 @@ public class ApiIntegrationTest {
 
         HttpResponse<JsonNode> submissionResponse = testHelper.postSubmission(rootRels, submission);
 
-        String submissionLocation = submissionResponse.getHeaders().get("Location").get(0).toString();
+        String submissionLocation = submissionResponse.getHeaders().getFirst("Location");
         Map<String, String> submissionRels = testHelper.relsFromPayload(submissionResponse.getBody().getObject());
 
         assertThat(submissionRels.get("samples:create"), notNullValue());
@@ -276,9 +251,7 @@ public class ApiIntegrationTest {
             assertThat(errorAsMap,is(equalTo(expectedError)));
 
         }
-
     }
-
 
     /**
      * Make multiple submissions with the same contents. Use the sample history endpoint to check that you can
@@ -300,7 +273,7 @@ public class ApiIntegrationTest {
         for (int i = 0; i < numberOfSubmissions; i++) {
             HttpResponse<JsonNode> submissionResponse = testHelper.postSubmission(rootRels, submission);
 
-            String submissionLocation = submissionResponse.getHeaders().get("Location").get(0).toString();
+            String submissionLocation = submissionResponse.getHeaders().getFirst("Location");
             Map<String, String> submissionRels = testHelper.relsFromPayload(submissionResponse.getBody().getObject());
 
             assertThat(submissionRels.get("samples:create"), notNullValue());
@@ -362,13 +335,8 @@ public class ApiIntegrationTest {
             assertThat(embedded.has("samples"),is(true));
             JSONArray sampleHistory = embedded.getJSONArray("samples");
             assertThat(sampleHistory.length(),is(equalTo(numberOfSubmissions)));
-
         }
-
     }
-
-
-
 
     @Test
     public void testPut() throws IOException, UnirestException {
@@ -407,15 +375,5 @@ public class ApiIntegrationTest {
 
         logger.info("samplePutResponse: {}", samplePutResponse.getBody());
         assertThat(samplePutResponse.getStatus(), is(equalTo(HttpStatus.OK.value())));
-
-
     }
-
-
-
-
-
-
-
-
 }

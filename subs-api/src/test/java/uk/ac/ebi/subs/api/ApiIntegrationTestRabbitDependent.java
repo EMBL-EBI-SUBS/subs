@@ -28,6 +28,7 @@ import uk.ac.ebi.subs.repository.repos.submittables.SampleRepository;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -47,8 +48,6 @@ public class ApiIntegrationTestRabbitDependent {
     private int port;
     private String rootUri;
 
-
-
     private ApiIntegrationTestHelper testHelper;
 
     @Autowired
@@ -66,31 +65,10 @@ public class ApiIntegrationTestRabbitDependent {
 
     @Before
     public void buildUp() throws URISyntaxException {
-
         rootUri = "http://localhost:" + port + "/api";
-        submissionRepository.deleteAll();
-        sampleRepository.deleteAll();
-        submissionStatusRepository.deleteAll();
 
-        Unirest.setObjectMapper(new com.mashape.unirest.http.ObjectMapper() {
-            public <T> T readValue(String value, Class<T> valueType) {
-                try {
-                    return objectMapper.readValue(value, valueType);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            public String writeValue(Object value) {
-                try {
-                    return objectMapper.writeValueAsString(value);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-
-        testHelper = new ApiIntegrationTestHelper(objectMapper,rootUri);
+        testHelper = new ApiIntegrationTestHelper(objectMapper, rootUri,
+                Arrays.asList(submissionRepository, sampleRepository, submissionStatusRepository));
     }
 
     @After
@@ -116,7 +94,6 @@ public class ApiIntegrationTestRabbitDependent {
 
         List<Submission> submissions = submissionRepository.findAll();
         assertThat(submissions, empty());
-
     }
 
     /**
@@ -158,14 +135,12 @@ public class ApiIntegrationTestRabbitDependent {
         assertThat(rels.get("self"),notNullValue());
         submissionStatusLocation = rels.get("self");
 
-
         //update the submission
         //create a new submission
         HttpResponse<JsonNode> submissionPatchResponse = Unirest.patch(submissionStatusLocation)
                 .headers(testHelper.standardPostHeaders())
                 .body("{\"status\": \"Submitted\"}")
                 .asJson();
-
 
         assertThat(submissionPatchResponse.getStatus(), is(equalTo(HttpStatus.OK.value())));
     }

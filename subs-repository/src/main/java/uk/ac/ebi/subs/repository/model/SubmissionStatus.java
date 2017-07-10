@@ -15,27 +15,24 @@ import java.util.Date;
 @Document
 public class SubmissionStatus extends uk.ac.ebi.subs.data.status.SubmissionStatus implements Identifiable<String> {
 
-    public SubmissionStatus() {
-    }
-
-    public SubmissionStatus(SubmissionStatusEnum submissionStatusEnum) {
-        super(submissionStatusEnum);
-    }
-
     @Id
     private String id;
-
     @Version
     private Long version;
     @CreatedDate
     private Date createdDate;
     @LastModifiedDate
     private Date lastModifiedDate;
-
     @CreatedBy
     private String createdBy;
     @LastModifiedBy
     private String lastModifiedBy;
+
+    public SubmissionStatus() {
+    }
+    public SubmissionStatus(SubmissionStatusEnum submissionStatusEnum) {
+        super(submissionStatusEnum);
+    }
 
     @Override
     public String getId() {
