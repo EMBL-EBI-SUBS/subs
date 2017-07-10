@@ -39,8 +39,8 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ExperimentSerialisationTest extends SerialisationTest {
-    public static final String ILLUMINA = "Illumina";
-    public static final String LS454 = "Ls454";
+    public static final String ILLUMINA = "ILLUMINA";
+    public static final String LS454 = "LS454";
     public static final String HELICOS = "HELICOS";
     public static final String ABI_SOLID = "ABI_SOLID";
     public static final String COMPLETE_GENOMICS = "COMPLETE_GENOMICS";
@@ -223,11 +223,6 @@ public class ExperimentSerialisationTest extends SerialisationTest {
         testPlatform(HELICOS_INSTRUMENT_MODEL_XPATH,HELICOS, HELICOS_HELISCOPE_INSTRUMENT_MODEL);
     }
 
-    //@Test
-    public void testExperimentHelicosInvalidPlatform() throws Exception {
-        testInvalidPlatform(HELICOS_INSTRUMENT_MODEL_XPATH,HELICOS);
-    }
-
     @Test
     public void testExperimentABISolidPlatform() throws Exception {
         testPlatform(ABI_SOLID_INSTRUMENT_MODEL_XPATH,ABI_SOLID, ABI_SOLID_SYSTEM_2_INSTRUMENT_MODEL);
@@ -299,11 +294,20 @@ public class ExperimentSerialisationTest extends SerialisationTest {
         marshaller.marshal(enaExperiment,new DOMResult(document));
     }
 
-    //@Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInvalidInstrument() throws Exception {
         Assay assay = createAssay(ILLUMINA,"N/A");
         ENAExperiment enaExperiment = new ENAExperiment(assay);
+        final List<SingleValidationResult> validationResultList = enaExperiment.getValidationResultList();
         final Document document = documentBuilderFactory.newDocumentBuilder().newDocument();
+        InvalidAttributeValue invalidAttributeValue = null;
+        for (SingleValidationResult singleValidationResult : enaExperiment.getValidationResultList()) {
+            if (singleValidationResult instanceof InvalidAttributeValue) {
+                invalidAttributeValue = (InvalidAttributeValue) singleValidationResult;
+                break;
+            }
+        }
+        assertThat(invalidAttributeValue, is(IsNull.notNullValue()));
         marshaller.marshal(enaExperiment,new DOMResult(document));
     }
 
