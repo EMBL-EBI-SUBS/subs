@@ -1,10 +1,6 @@
 apply plugin: 'java'
 
 dependencies {
-    compile ("com.github.EMBL-EBI-SUBS:validator-common:master-SNAPSHOT") {
-        changing = true
-        exclude group: 'org.springframework.boot', module :'spring-boot-starter-data-mongodb'
-    }
     compile 'uk.ac.ebi.ena.sra:sra-xml:1.5.30'
     compile("uk.ac.ebi.subs:subs-data-model:1.0.1-SNAPSHOT")
     compile ("org.springframework:spring-oxm")
@@ -13,6 +9,10 @@ dependencies {
     testCompile("org.springframework.boot:spring-boot-starter-test")
     testCompile project(':subs-test-categories')
     compile 'uk.ac.ebi.subs:subs-data-model:1.0.1-SNAPSHOT'
+    compile ("uk.ac.ebi.subs.validator.common:validator-common:1.0.1-SNAPSHOT") {
+        changing = true
+        exclude group: 'org.springframework.boot', module :'spring-boot-starter-data-mongodb'
+    }
 }
 
 bootRepackage.enabled = false
