@@ -160,15 +160,6 @@ public class StudySerialisationTest extends SerialisationTest {
         final List<SingleValidationResult> validationResultList = enaStudy.getValidationResultList();
 
         assertThat("Study is invalid",enaStudy.isValid(),equalTo(false));
-        /*
-        assertThat("correct validation result",
-                validationResultList,
-                containsInAnyOrder(
-                         )
-                )
-
-        );
-        */
     }
 
     @Before

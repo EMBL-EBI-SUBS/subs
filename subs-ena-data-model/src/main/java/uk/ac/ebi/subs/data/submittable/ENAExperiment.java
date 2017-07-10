@@ -44,7 +44,7 @@ public class    ENAExperiment extends AbstractENASubmittable<Assay> {
     public static final String SINGLE = "SINGLE";
     public static final String PAIRED = "PAIRED";
 
-    @ENAField(fieldName = "LS454", values = {"454 GS 20", "454 GS FLX", "454 GS FLX", "454 GS FLX Titanium", "454 GS Junior", "unspecified"})
+    @ENAField(fieldName = "LS454", values = {"454 GS 20", "454 GS FLX", "454 GS FLX+", "454 GS FLX Titanium", "454 GS Junior", "unspecified"})
     String ls454 ;
 
     @ENAField(fieldName = "ILLUMINA", values = {"Illumina Genome Analyzer", "Illumina Genome Analyzer II", "Illumina Genome Analyzer IIx",
@@ -132,41 +132,12 @@ public class    ENAExperiment extends AbstractENASubmittable<Assay> {
     @Override
     public void serialiseAttributes() throws IllegalAccessException {
         super.serialiseAttributes();
-        //serialisePlatformTypeInstrumentModel();
         serialiseLibraryLayout();
     }
 
     public void deSerialiseAttributes () throws IllegalAccessException {
         deserialiseLibraryLayout();
-        //deserialisePlatformTypeInstrumentModel();
         super.deSerialiseAttributes();
-    }
-
-    public void deserialisePlatformTypeInstrumentModel () throws IllegalAccessException {
-
-        /*
-        final Field[] declaredFields = this.getClass().getDeclaredFields();
-        Field platformField = null;
-
-        for (Field field : declaredFields) {
-            if (field.isAnnotationPresent(ENAPlatform.class)) {
-                if (field.get(this) != null) {
-                    if (platformField != null) throw new IllegalArgumentException("Multiple platforms found in class");
-                    platformField = field;
-                }
-            }
-        }
-
-        Attribute platformTypeAttribute = new Attribute();
-        platformTypeAttribute.setName(PLATFORM_TYPE);
-        platformTypeAttribute.setValue(platformField.getAnnotation(ENAPlatform.class).name());
-        getAttributes().add(platformTypeAttribute);
-        Attribute instrumentModelAttribute = new Attribute();
-        instrumentModelAttribute.setName(INSTRUMENT_MODEL);
-        String pt = (String) platformField.get(this);
-        instrumentModelAttribute.setValue(pt);
-        getAttributes().add(instrumentModelAttribute);
-        */
     }
 
     public void serialiseLibraryLayout() throws IllegalAccessException {

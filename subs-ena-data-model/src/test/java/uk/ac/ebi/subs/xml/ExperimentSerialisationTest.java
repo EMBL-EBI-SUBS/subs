@@ -267,7 +267,7 @@ public class ExperimentSerialisationTest extends SerialisationTest {
         assertThat("experiment alias serialised to XML", instrumentModel, equalTo(returnedInstrumentModel));
     }
 
-    public void testInvalidPlatform(String platformXpathQuery, String plaformType) throws Exception {
+    private void testInvalidPlatform(String platformXpathQuery, String plaformType) throws Exception {
         String instrumentModel = UUID.randomUUID().toString();
         Assay assay = createAssay(plaformType,instrumentModel);
         ENAExperiment enaExperiment = new ENAExperiment(assay);
