@@ -1,5 +1,6 @@
 package uk.ac.ebi.subs.data.submittable;
 
+import org.springframework.data.repository.PagingAndSortingRepository;
 import uk.ac.ebi.subs.data.component.Archive;
 import uk.ac.ebi.subs.data.component.Attribute;
 import uk.ac.ebi.subs.data.component.Team;
@@ -81,7 +82,7 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
 
     public void serialiseAttributes () throws IllegalAccessException {
         if (this.getClass().isAnnotationPresent(ENAValidation.class)) {
-            ENAValidation enaValidation = this.getClass().getAnnotation(ENAValidation.class);
+            ENAValidation enaValidation = getEnaValidation();
 
             if (getId() == null )
                 setId(UUID.randomUUID().toString());
@@ -94,6 +95,10 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
                 }
             }
         }
+    }
+
+    ENAValidation getEnaValidation() {
+        return this.getClass().getAnnotation(ENAValidation.class);
     }
 
     private void parseAttributes(ENAValidation enaValidation) {
@@ -170,16 +175,47 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
     }
 
     private void deSerialiseFields (Class<?> aClass, Object obj) throws IllegalAccessException {
+        Map<String,String> fieldMap = new HashMap<>();
+        Map<String,String> attributefieldMap = new HashMap<>();
+
+        if (this.getClass().isAnnotationPresent(ENAValidation.class)) {
+            ENAValidation enaValidation = getEnaValidation();
+            for (ENAFieldAttribute enaFieldAttribute : enaValidation.value()) {
+                String fieldName = null;
+                if (enaFieldAttribute.fieldName().equals(ENAFieldAttribute.NO_FIELD)) {
+                    fieldName = enaFieldAttribute.attributeName();
+                } else {
+                    fieldName = enaFieldAttribute.fieldName();
+                }
+                if (!enaFieldAttribute.attributeFieldName().equals(ENAFieldAttribute.NO_FIELD)) {
+                    attributefieldMap.put(fieldName,enaFieldAttribute.attributeFieldName());
+                } else {
+                    fieldMap.put(fieldName,enaFieldAttribute.attributeName());
+                }
+            }
+        }
+
         final Field[] fields = aClass.getDeclaredFields();
         for (Field field : fields ) {
             if (field.isAnnotationPresent(ENAField.class)) {
                 final ENAField enaField = field.getAnnotation(ENAField.class);
                 final Object o = field.get(obj);
                 if ( o != null ) {
-                    Attribute attribute = new Attribute();
-                    attribute.setName(enaField.fieldName());
-                    attribute.setValue(o.toString());
-                    getAttributes().add(attribute);
+                    if (enaField.attributeName() != null && attributefieldMap.get(enaField.attributeName()) != null) {
+                        Attribute attribute1 = new Attribute();
+                        attribute1.setName(attributefieldMap.get(enaField.attributeName()));
+                        attribute1.setValue(enaField.fieldName());
+                        getAttributes().add(attribute1);
+                        Attribute attribute2 = new Attribute();
+                        attribute2.setName(enaField.attributeName());
+                        attribute2.setValue(o.toString());
+                        getAttributes().add(attribute2);
+                    } else {
+                        Attribute attribute = new Attribute();
+                        attribute.setName(enaField.fieldName());
+                        attribute.setValue(o.toString());
+                        getAttributes().add(attribute);
+                    }
                 }
             } else if (field.getType().isMemberClass()) {
                 deSerialiseFields(field.getType(),field.get(obj));

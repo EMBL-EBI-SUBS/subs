@@ -379,7 +379,7 @@ public class ExperimentSerialisationTest extends SerialisationTest {
         return new ENAExperiment();
     }
 
-    //@Test
+    @Test
     public void testMarshalUnmarshallExperiment () throws Exception {
         serialiseDeserialiseTest(ASSAY_RESOURCE,ENAExperiment.class,Assay.class);
     }
