@@ -2,6 +2,7 @@ package uk.ac.ebi.subs.xml;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.eclipse.persistence.jaxb.MarshallerProperties;
+import org.hamcrest.core.IsNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,10 +10,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import uk.ac.ebi.subs.data.component.*;
+import uk.ac.ebi.subs.data.status.ProcessingStatusEnum;
 import uk.ac.ebi.subs.data.submittable.Assay;
 import uk.ac.ebi.subs.data.submittable.ENAExperiment;
 import uk.ac.ebi.subs.data.submittable.ENASubmittable;
 import uk.ac.ebi.subs.data.submittable.Sample;
+import uk.ac.ebi.subs.ena.validation.InvalidAttributeValue;
+import uk.ac.ebi.subs.validator.data.SingleValidationResult;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
@@ -25,16 +29,18 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ExperimentSerialisationTest extends SerialisationTest {
-    public static final String ILLUMINA = "Illumina";
-    public static final String LS454 = "Ls454";
+    public static final String ILLUMINA = "ILLUMINA";
+    public static final String LS454 = "LS454";
     public static final String HELICOS = "HELICOS";
     public static final String ABI_SOLID = "ABI_SOLID";
     public static final String COMPLETE_GENOMICS = "COMPLETE_GENOMICS";
@@ -261,19 +267,47 @@ public class ExperimentSerialisationTest extends SerialisationTest {
         assertThat("experiment alias serialised to XML", instrumentModel, equalTo(returnedInstrumentModel));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    private void testInvalidPlatform(String platformXpathQuery, String plaformType) throws Exception {
+        String instrumentModel = UUID.randomUUID().toString();
+        Assay assay = createAssay(plaformType,instrumentModel);
+        ENAExperiment enaExperiment = new ENAExperiment(assay);
+        final Document document = documentBuilderFactory.newDocumentBuilder().newDocument();
+        marshaller.marshal(enaExperiment,new DOMResult(document));
+        String returnedInstrumentModel = executeXPathQueryNodeValue(document,platformXpathQuery);
+        assertThat("experiment alias serialised to XML", instrumentModel, equalTo(returnedInstrumentModel));
+    }
+
+    @Test
     public void testInvalidInvalidPlatform() throws Exception {
         Assay assay = createAssay("New Platform","N/A");
         ENAExperiment enaExperiment = new ENAExperiment(assay);
+        InvalidAttributeValue invalidAttributeValue = null;
+        for (SingleValidationResult singleValidationResult : enaExperiment.getValidationResultList()) {
+            if (singleValidationResult instanceof InvalidAttributeValue) {
+                invalidAttributeValue = (InvalidAttributeValue) singleValidationResult;
+                break;
+            }
+        }
+        assertThat(invalidAttributeValue, is(IsNull.notNullValue()));
+
         final Document document = documentBuilderFactory.newDocumentBuilder().newDocument();
         marshaller.marshal(enaExperiment,new DOMResult(document));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInvalidInstrument() throws Exception {
         Assay assay = createAssay(ILLUMINA,"N/A");
         ENAExperiment enaExperiment = new ENAExperiment(assay);
+        final List<SingleValidationResult> validationResultList = enaExperiment.getValidationResultList();
         final Document document = documentBuilderFactory.newDocumentBuilder().newDocument();
+        InvalidAttributeValue invalidAttributeValue = null;
+        for (SingleValidationResult singleValidationResult : enaExperiment.getValidationResultList()) {
+            if (singleValidationResult instanceof InvalidAttributeValue) {
+                invalidAttributeValue = (InvalidAttributeValue) singleValidationResult;
+                break;
+            }
+        }
+        assertThat(invalidAttributeValue, is(IsNull.notNullValue()));
         marshaller.marshal(enaExperiment,new DOMResult(document));
     }
 

@@ -11,14 +11,18 @@ import uk.ac.ebi.subs.data.component.Team;
 import uk.ac.ebi.subs.data.submittable.ENAStudy;
 import uk.ac.ebi.subs.data.submittable.ENASubmittable;
 import uk.ac.ebi.subs.data.submittable.Study;
+import uk.ac.ebi.subs.ena.validation.InvalidAttributeValue;
+import uk.ac.ebi.subs.validator.data.SingleValidationResult;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.dom.DOMResult;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -118,7 +122,7 @@ public class StudySerialisationTest extends SerialisationTest {
     public void testMarshalStudyAbstract() throws Exception {
         Study study = new Study();
         Attribute attribute = new Attribute();
-        attribute.setName(ENAStudy.STUDY_ABSTRACT);
+        attribute.setName("study_abstract");
         attribute.setValue(UUID.randomUUID().toString());
         study.getAttributes().add(attribute);
         ENAStudy enaStudy = new ENAStudy(study);
@@ -132,14 +136,30 @@ public class StudySerialisationTest extends SerialisationTest {
     public void testMarshalStudyType() throws Exception {
         Study study = new Study();
         Attribute attribute = new Attribute();
-        attribute.setName(ENAStudy.EXISTING_STUDY_TYPE);
-        attribute.setValue(UUID.randomUUID().toString());
+        attribute.setName("existing_study_type");
+        attribute.setValue("Whole Genome Sequencing");
         study.getAttributes().add(attribute);
         ENAStudy enaStudy = new ENAStudy(study);
         final Document document = documentBuilderFactory.newDocumentBuilder().newDocument();
         marshaller.marshal(enaStudy,new DOMResult(document));
         String str = executeXPathQueryNodeValue(document,STUDY_TYPE_XPATH);
         assertThat("study type attribute serialised to XML", attribute.getValue(), equalTo(str));
+    }
+
+    @Test
+    public void testMarshalInvalidStudyType() throws Exception {
+        Study study = new Study();
+        Attribute attribute = new Attribute();
+        attribute.setName("existing_study_type");
+        String incorrectStudyType = UUID.randomUUID().toString();
+        attribute.setValue(incorrectStudyType);
+        study.getAttributes().add(attribute);
+        ENAStudy enaStudy = new ENAStudy(study);
+        final Document document = documentBuilderFactory.newDocumentBuilder().newDocument();
+        marshaller.marshal(enaStudy,new DOMResult(document));
+        final List<SingleValidationResult> validationResultList = enaStudy.getValidationResultList();
+
+        assertThat("Study is invalid",enaStudy.isValid(),equalTo(false));
     }
 
     @Before

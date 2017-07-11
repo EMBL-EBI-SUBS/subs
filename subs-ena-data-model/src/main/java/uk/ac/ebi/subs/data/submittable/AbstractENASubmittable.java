@@ -1,18 +1,20 @@
 package uk.ac.ebi.subs.data.submittable;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import uk.ac.ebi.subs.data.component.Archive;
 import uk.ac.ebi.subs.data.component.Attribute;
 import uk.ac.ebi.subs.data.component.Team;
-import uk.ac.ebi.subs.ena.annotation.ENAAttribute;
+import uk.ac.ebi.subs.ena.annotation.ENAControlledValueAttribute;
+import uk.ac.ebi.subs.ena.annotation.ENAField;
+import uk.ac.ebi.subs.ena.annotation.ENAFieldAttribute;
 import uk.ac.ebi.subs.ena.annotation.ENAValidation;
-import uk.ac.ebi.subs.ena.exception.AttributeException;
+import uk.ac.ebi.subs.ena.validation.AttributeRequiredValidationResult;
+import uk.ac.ebi.subs.ena.validation.InvalidAttributeValue;
+import uk.ac.ebi.subs.ena.validation.SingleAttributeValidationResult;
+import uk.ac.ebi.subs.validator.data.SingleValidationResult;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -24,6 +26,9 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
     private static final String INVALID_VALUE_ERROR_MESSAGE = "Invalid value for attribute %s value must be one of %s.";
 
     private Submittable baseSubmittable;
+    private List<SingleValidationResult> validationResultList = new ArrayList<>();
+    Map<String, Attribute> attributeMap = new HashMap<String, Attribute>();
+
 
     public AbstractENASubmittable(Submittable baseSubmittable) throws IllegalAccessException {
         setBaseSubmittable(baseSubmittable);
@@ -61,39 +66,107 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
         }
     }
 
+    public List<String> getAttributeValueList (String attributeName) {
+        List<String> attributeValueList = new ArrayList<>();
+        for (Attribute attribute : getAttributes()) {
+            if (attribute.getName().equalsIgnoreCase(attributeName)) {
+                attributeValueList.add(attribute.getValue());
+            }
+        }
+        return attributeValueList;
+    }
+
     void deleteAttribute(Attribute attribute) {
         getAttributes().remove(attribute);
     }
 
     public void serialiseAttributes () throws IllegalAccessException {
-        if (this.getClass().isAnnotationPresent(ENAValidation.class))
+        if (this.getClass().isAnnotationPresent(ENAValidation.class)) {
+            ENAValidation enaValidation = getEnaValidation();
+
+            if (getId() == null )
+                setId(UUID.randomUUID().toString());
+            parseAttributes(enaValidation);
+            parseControlledAttributes(enaValidation);
             serialiseFields(this.getClass(), this);
+            if (validationResultList.isEmpty()) {
+                for (Attribute attribute : attributeMap.values()) {
+                    deleteAttribute(attribute);
+                }
+            }
+        }
+    }
+
+    ENAValidation getEnaValidation() {
+        return this.getClass().getAnnotation(ENAValidation.class);
+    }
+
+    private void parseAttributes(ENAValidation enaValidation) {
+        for (ENAFieldAttribute enaFieldAttribute : enaValidation.value()) {
+            String fieldName = null;
+            if (!enaFieldAttribute.attributeFieldName().equals(ENAFieldAttribute.NO_FIELD)) {
+                fieldName = attributeMap.get(enaFieldAttribute.attributeFieldName().toUpperCase()).getValue();
+            } else if (!enaFieldAttribute.fieldName().equals(ENAFieldAttribute.NO_FIELD)) {
+                fieldName = enaFieldAttribute.fieldName();
+            }
+             else {
+                fieldName = enaFieldAttribute.attributeName();
+            }
+            String attributeName = enaFieldAttribute.attributeName();
+            final int attributeCount = getAttributeCount(attributeName);
+            final Optional<Attribute> attribute = getExistingAttribute(attributeName, false);
+            if (attributeCount > 1) {
+                validationResultList.add(new SingleAttributeValidationResult(this, attributeName));
+            } else if (attributeCount == 0 && enaFieldAttribute.required()) {
+                validationResultList.add(new AttributeRequiredValidationResult(this,attributeName));
+            } else if (attributeCount > 0 ) {
+                attributeMap.put(fieldName.toUpperCase(),attribute.get());
+            }
+        }
+    }
+
+    private void parseControlledAttributes (ENAValidation enaValidation) {
+        for (ENAControlledValueAttribute enaControlledValueAttribute : enaValidation.enaControlledValueAttributes()) {
+            String attributeName = enaControlledValueAttribute.attributeName();
+            List<String> allowedValueList = Arrays.asList(enaControlledValueAttribute.allowedValues());
+            final Optional<Attribute> optionalAttribute = getExistingAttribute(attributeName, false);
+            parseControlledValue(optionalAttribute.get(), allowedValueList);
+        }
+    }
+
+    private boolean parseControlledValue(Attribute attribute, List<String> allowedValueList) {
+        if (!allowedValueList.contains(attribute.getValue())) {
+            validationResultList.add(
+                    new InvalidAttributeValue(
+                            this,
+                            attribute.getValue(),
+                            attribute.getName(),
+                            allowedValueList.toArray(new String[0])));
+            return false;
+        } else {
+            return true;
+        }
     }
 
     private void serialiseFields(Class<?> aClass, Object obj) throws IllegalAccessException {
+
         final Field[] fields = aClass.getDeclaredFields();
-        String string;
+
         for (Field field : fields ) {
-            if (field.isAnnotationPresent(ENAAttribute.class)) {
-                final ENAAttribute annotation = field.getAnnotation(ENAAttribute.class);
-                int attributeCount = getAttributeCount(annotation.name());
-                if (attributeCount == 1) {
-                    final Optional<Attribute> existingStudyTypeAttribute = getExistingAttribute(annotation.name(),false);
-                    if (annotation.allowedValues().length > 0) {
-                        if ( !ArrayUtils.contains( annotation.allowedValues(), existingStudyTypeAttribute.get().getValue() ) ) {
-                            throw new IllegalArgumentException(String.format(INVALID_VALUE_ERROR_MESSAGE,annotation.name(), StringUtils.join(annotation.allowedValues())));
+            if (field.isAnnotationPresent(ENAField.class)) {
+                final ENAField enaField = field.getAnnotation(ENAField.class);
+                if (attributeMap.containsKey(enaField.fieldName().toUpperCase())) {
+                    final Attribute attribute = attributeMap.get(enaField.fieldName().toUpperCase());
+                    if (enaField.values().length > 0) {
+                        if (!parseControlledValue(attribute,Arrays.asList(enaField.values()))) {
+                            break;
                         }
                     }
-                    field.set(obj,existingStudyTypeAttribute.get().getValue());
-                    deleteAttribute(existingStudyTypeAttribute.get());
-                } else if (attributeCount > 1) {
-                    throw new AttributeException("Multiple values found for attribute " + annotation.name());
-                } else if (attributeCount == 0 && annotation.required()) {
-                    throw new AttributeException("Value for attribute " + annotation.name() + " is required");
+                    field.set(obj, attribute.getValue());
+                    deleteAttribute(attribute);
                 }
-            } else if (field.getType().isMemberClass()) {
-                serialiseFields(field.getType(),field.get(obj));
             }
+
         }
     }
 
@@ -102,16 +175,47 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
     }
 
     private void deSerialiseFields (Class<?> aClass, Object obj) throws IllegalAccessException {
+        Map<String,String> fieldMap = new HashMap<>();
+        Map<String,String> attributefieldMap = new HashMap<>();
+
+        if (this.getClass().isAnnotationPresent(ENAValidation.class)) {
+            ENAValidation enaValidation = getEnaValidation();
+            for (ENAFieldAttribute enaFieldAttribute : enaValidation.value()) {
+                String fieldName = null;
+                if (enaFieldAttribute.fieldName().equals(ENAFieldAttribute.NO_FIELD)) {
+                    fieldName = enaFieldAttribute.attributeName();
+                } else {
+                    fieldName = enaFieldAttribute.fieldName();
+                }
+                if (!enaFieldAttribute.attributeFieldName().equals(ENAFieldAttribute.NO_FIELD)) {
+                    attributefieldMap.put(fieldName,enaFieldAttribute.attributeFieldName());
+                } else {
+                    fieldMap.put(fieldName,enaFieldAttribute.attributeName());
+                }
+            }
+        }
+
         final Field[] fields = aClass.getDeclaredFields();
         for (Field field : fields ) {
-            if (field.isAnnotationPresent(ENAAttribute.class)) {
-                final ENAAttribute annotation = field.getAnnotation(ENAAttribute.class);
+            if (field.isAnnotationPresent(ENAField.class)) {
+                final ENAField enaField = field.getAnnotation(ENAField.class);
                 final Object o = field.get(obj);
                 if ( o != null ) {
-                    Attribute attribute = new Attribute();
-                    attribute.setName(annotation.name());
-                    attribute.setValue(o.toString());
-                    getAttributes().add(attribute);
+                    if (enaField.attributeName() != null && attributefieldMap.get(enaField.attributeName()) != null) {
+                        Attribute attribute1 = new Attribute();
+                        attribute1.setName(attributefieldMap.get(enaField.attributeName()));
+                        attribute1.setValue(enaField.fieldName());
+                        getAttributes().add(attribute1);
+                        Attribute attribute2 = new Attribute();
+                        attribute2.setName(enaField.attributeName());
+                        attribute2.setValue(o.toString());
+                        getAttributes().add(attribute2);
+                    } else {
+                        Attribute attribute = new Attribute();
+                        attribute.setName(enaField.fieldName());
+                        attribute.setValue(o.toString());
+                        getAttributes().add(attribute);
+                    }
                 }
             } else if (field.getType().isMemberClass()) {
                 deSerialiseFields(field.getType(),field.get(obj));
@@ -216,7 +320,6 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
         else return null;
     }
 
-    //@Override
     public void setTeamName(String teamName) {
         Team team = new Team();
         team.setName(teamName);
@@ -241,4 +344,14 @@ public abstract class AbstractENASubmittable<T extends BaseSubmittable> implemen
     public void setAttributesXML(List<Attribute> attributeList) {
         baseSubmittable.setAttributes(attributeList);
     }
+
+    public List<SingleValidationResult> getValidationResultList() {
+        return validationResultList;
+    }
+
+    @Override
+    public boolean isValid() {
+        return validationResultList.isEmpty();
+    }
+
 }
