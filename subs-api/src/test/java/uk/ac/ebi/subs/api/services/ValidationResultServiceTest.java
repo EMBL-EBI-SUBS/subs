@@ -6,8 +6,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import uk.ac.ebi.subs.validator.data.SingleValidationResult;
@@ -20,7 +18,6 @@ import java.util.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -31,7 +28,7 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringJUnit4ClassRunner.class)
 @EnableMongoRepositories(basePackageClasses = ValidationResultRepository.class)
 @EnableAutoConfiguration
-@SpringBootTest(classes = ValidationResultServiceImpl.class)
+@SpringBootTest(classes = ValidationResultService.class)
 public class ValidationResultServiceTest {
 
     @Autowired
@@ -43,16 +40,13 @@ public class ValidationResultServiceTest {
     private static int SIZE_OF_ENTITIES_BY_VALID_SUBMISSION_ID = 5;
     private static String[] ENTITY_UUIDS = {"11", "22", "33", "44", "55", "66", "77", "88"};
 
-    private PageRequest pageRequest = new PageRequest(0, 10);
-
-
     @Before
     public void setup() {
         validationResultRepository = mock(ValidationResultRepository.class);
 
         validationResultService = new ValidationResultServiceImpl(validationResultRepository);
 
-        when(validationResultRepository.findBySubmissionId(eq(VALID_SUBMISSION_ID), any()))
+        when(validationResultRepository.findAllBySubmissionId(eq(VALID_SUBMISSION_ID)))
                 .thenReturn(generatePagedValidationResults(SIZE_OF_ENTITIES_BY_VALID_SUBMISSION_ID, VALID_SUBMISSION_ID)
         );
     }
@@ -63,7 +57,7 @@ public class ValidationResultServiceTest {
                 is(equalTo(SIZE_OF_ENTITIES_BY_VALID_SUBMISSION_ID)));
     }
 
-    private Page<ValidationResult> generatePagedValidationResults(int numberOfValidationResults, String submissionId) {
+    private List<ValidationResult> generatePagedValidationResults(int numberOfValidationResults, String submissionId) {
         Map<ValidationAuthor, List<SingleValidationResult>> validationAuthorListMap = new HashMap<>();
         validationAuthorListMap.put(ValidationAuthor.Taxonomy, new ArrayList<>());
         validationAuthorListMap.put(ValidationAuthor.Biosamples, new ArrayList<>());
@@ -80,10 +74,6 @@ public class ValidationResultServiceTest {
             results.add(validationResult);
         }
 
-        return new PageBuilder<ValidationResult>()
-                .elements(results)
-                .pageRequest(pageRequest)
-                .totalElements(results.size())
-                .build();
+        return results;
     }
 }

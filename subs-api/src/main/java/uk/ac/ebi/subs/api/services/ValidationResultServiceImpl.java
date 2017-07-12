@@ -24,9 +24,6 @@ public class ValidationResultServiceImpl implements ValidationResultService {
 
     @Override
     public List<ValidationResult> getValidationResultBySubmissionId(String submissionId) {
-        Page<ValidationResult> results = validationResultRepository.findBySubmissionId(submissionId,
-                new PageRequest(0, Integer.MAX_VALUE));
-
-        return results.getContent();
+        return validationResultRepository.findAllBySubmissionId(submissionId);
     }
 }
