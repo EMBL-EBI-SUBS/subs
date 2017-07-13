@@ -346,7 +346,8 @@ public class ApiDocumentation {
                                         halLinks(),
                                         linkWithRel("self").description("This resource"),
                                         linkWithRel("submissionStatus").description("This resource"),
-                                        linkWithRel("statusDescription").description("Description of this status")
+                                        linkWithRel("statusDescription").description("Description of this status"),
+                                        linkWithRel("availableStatuses").description("Lists the available statuses")
                                 )
                         )
                 );

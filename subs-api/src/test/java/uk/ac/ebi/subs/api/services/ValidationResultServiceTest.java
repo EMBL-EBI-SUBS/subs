@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import uk.ac.ebi.subs.repository.repos.SubmissionRepository;
 import uk.ac.ebi.subs.validator.data.SingleValidationResult;
 import uk.ac.ebi.subs.validator.data.ValidationAuthor;
 import uk.ac.ebi.subs.validator.data.ValidationResult;
@@ -26,13 +27,16 @@ import static org.mockito.Mockito.when;
  * Created by karoly on 11/07/2017.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@EnableMongoRepositories(basePackageClasses = ValidationResultRepository.class)
+@EnableMongoRepositories(basePackageClasses = { ValidationResultRepository.class, SubmissionRepository.class })
 @EnableAutoConfiguration
 @SpringBootTest(classes = ValidationResultService.class)
 public class ValidationResultServiceTest {
 
     @Autowired
     private ValidationResultRepository validationResultRepository;
+
+    @Autowired
+    private SubmissionRepository submissionRepository;
 
     private ValidationResultService validationResultService;
 
@@ -43,8 +47,9 @@ public class ValidationResultServiceTest {
     @Before
     public void setup() {
         validationResultRepository = mock(ValidationResultRepository.class);
+        submissionRepository = mock(SubmissionRepository.class);
 
-        validationResultService = new ValidationResultServiceImpl(validationResultRepository);
+        validationResultService = new ValidationResultServiceImpl(validationResultRepository, submissionRepository);
 
         when(validationResultRepository.findAllBySubmissionId(eq(VALID_SUBMISSION_ID)))
                 .thenReturn(generatePagedValidationResults(SIZE_OF_ENTITIES_BY_VALID_SUBMISSION_ID, VALID_SUBMISSION_ID)
