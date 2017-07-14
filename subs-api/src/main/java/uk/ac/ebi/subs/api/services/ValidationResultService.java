@@ -19,9 +19,9 @@ public interface ValidationResultService {
     List<ValidationResult> getValidationResultBySubmissionId(String submissionId);
 
     /**
-     * Returns true if all the validation finished for the given {@link Submission}, otherwise false.
+     * Returns true if all the validation finished and passed for the given {@link Submission}, otherwise false.
      * @param submissionStatusId identifier of the submission status. It will be used to get the submission by this id.
-     * @return true if all the validation finished for the given {@link Submission}, otherwise false.
+     * @return true if all the validation finished and passed for the given {@link Submission}, otherwise false.
      */
-    boolean isValidationFinished(String submissionStatusId);
+    boolean isValidationFinishedAndPassed(String submissionStatusId);
 }

@@ -53,7 +53,7 @@ public class SubmissionStatusResourceProcessor implements ResourceProcessor<Reso
     private void addStatusUpdateRel(Resource<SubmissionStatus> submissionStatusResource) {
         SubmissionStatus submissionStatus = submissionStatusResource.getContent();
 
-        if (submissionStatus.getStatus().equals(SubmissionStatusEnum.Draft.name()) && validationResultService.isValidationFinished(submissionStatus.getId())) {
+        if (submissionStatus.getStatus().equals(SubmissionStatusEnum.Draft.name()) && validationResultService.isValidationFinishedAndPassed(submissionStatus.getId())) {
             Link submissionStatusResourceLink = repositoryEntityLinks.linkToSingleResource(submissionStatus).expand();
 
             Assert.notNull(submissionStatusResourceLink);
@@ -66,12 +66,14 @@ public class SubmissionStatusResourceProcessor implements ResourceProcessor<Reso
     private void addAvailableStatuses(Resource<SubmissionStatus> submissionStatusResource) {
         SubmissionStatus submissionStatus = submissionStatusResource.getContent();
 
-        submissionStatusResource.add(
-            basePathAwareLinks.underBasePath(
-                linkTo(
-                    methodOn(SubmissionStatusController.class)
-                        .availableSubmissionStatuses(submissionStatus.getId()))
-            ).withRel("availableStatuses")
-        );
+        if (validationResultService.isValidationFinishedAndPassed(submissionStatus.getId())) {
+            submissionStatusResource.add(
+                    basePathAwareLinks.underBasePath(
+                            linkTo(
+                                    methodOn(SubmissionStatusController.class)
+                                            .availableSubmissionStatuses(submissionStatus.getId()))
+                    ).withRel("availableStatuses")
+            );
+        }
     }
 }

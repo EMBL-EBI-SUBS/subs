@@ -65,7 +65,7 @@ public class SubmissionStatusValidator implements Validator {
             return;
         }
 
-        if (validationResultService.isValidationFinished(submissionStatus.getId())) {
+        if (validationResultService.isValidationFinishedAndPassed(submissionStatus.getId())) {
             SubsApiErrors.invalid.addError(errors,"status");
         }
     }
