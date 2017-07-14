@@ -40,7 +40,7 @@ public class ValidationResultServiceImpl implements ValidationResultService {
 
     private boolean isValidationPassed(List<ValidationResult> validationResults) {
         return validationResults.stream().filter(
-                validationResult -> validationResult.getValidationStatus() != ValidationStatus.Pass)
+                validationResult -> validationResult.getValidationStatus() != ValidationStatus.Complete)
                 .findAny()
                 .orElse(null) == null;
     }
