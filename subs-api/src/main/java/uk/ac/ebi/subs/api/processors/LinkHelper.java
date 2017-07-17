@@ -19,10 +19,10 @@ public class LinkHelper {
     private static final Logger logger = LoggerFactory.getLogger(LinkHelper.class);
     private List<Class<? extends StoredSubmittable>> submittablesClassList;
 
-    private static final String CREATE_REL_SUFFIX = ":create";
-    private static final String SEARCH_REL_SUFFIX = ":search";
-    private static final String UPDATE_REL_SUFFIX = ":update";
-    private static final String DELETE_REL_SUFFIX = ":delete";
+    static final String CREATE_REL_SUFFIX = ":create";
+    static final String SEARCH_REL_SUFFIX = ":search";
+    static final String UPDATE_REL_SUFFIX = ":update";
+    static final String DELETE_REL_SUFFIX = ":delete";
 
     private RepositoryEntityLinks repositoryEntityLinks;
 
@@ -35,8 +35,6 @@ public class LinkHelper {
         this.repositoryEntityLinks = repositoryEntityLinks;
 
     }
-
-
 
     public void addSubmittablesSearchLinks(Collection<Link> links){
         for (Class type : submittablesClassList){
