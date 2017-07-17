@@ -16,6 +16,11 @@ import java.util.UUID;
 @Component
 public class SubmissionHelperService {
 
+    public SubmissionHelperService(SubmissionStatusRepository submissionStatusRepository, SubmissionRepository submissionRepository) {
+        this.submissionStatusRepository = submissionStatusRepository;
+        this.submissionRepository = submissionRepository;
+    }
+
     private SubmissionStatusRepository submissionStatusRepository;
     private SubmissionRepository submissionRepository;
 

@@ -1,6 +1,7 @@
 package uk.ac.ebi.subs.processing;
 
 
+import jdk.nashorn.internal.runtime.StoredScript;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import uk.ac.ebi.subs.data.Submission;
@@ -171,4 +172,6 @@ public class SubmissionEnvelope {
     public Stream<Submittable> allSubmissionItemsStream() {
         return allSubmittablesLists().stream().flatMap(l -> l.stream());
     }
+
+
 }

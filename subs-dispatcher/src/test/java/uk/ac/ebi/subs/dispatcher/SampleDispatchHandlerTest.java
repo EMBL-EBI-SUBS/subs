@@ -11,11 +11,13 @@ import org.springframework.util.StopWatch;
 import uk.ac.ebi.subs.DispatcherApplication;
 import uk.ac.ebi.subs.data.component.Archive;
 import uk.ac.ebi.subs.data.status.ProcessingStatusEnum;
-import uk.ac.ebi.subs.data.submittable.BaseSubmittable;
 import uk.ac.ebi.subs.processing.SubmissionEnvelope;
+
 import uk.ac.ebi.subs.repository.model.*;
 import uk.ac.ebi.subs.repository.repos.status.ProcessingStatusRepository;
+import uk.ac.ebi.subs.repository.repos.submittables.SampleRepository;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -42,8 +44,13 @@ public class SampleDispatchHandlerTest {
     @Autowired
     private DispatcherService dispatcherService;
 
+    @Autowired
+    private SampleRepository sampleRepository;
 
     private Submission submission;
+    private Study study;
+    private List<Assay> assays;
+    private List<Sample> samples;
     private static final int SAMPLE_AND_ASSAY_COUNT = 10;
 
 
@@ -54,15 +61,15 @@ public class SampleDispatchHandlerTest {
         dispatchTestSubmissionSetup.createSubmission();
 
         submission = dispatchTestSubmissionSetup.createSubmission();
-        Study study = dispatchTestSubmissionSetup.createStudy("test-study",submission);
+        study = dispatchTestSubmissionSetup.createStudy("test-study",submission);
 
-        List<Sample> samples = IntStream
+        samples = IntStream
                 .rangeClosed(1,SAMPLE_AND_ASSAY_COUNT)
                 .mapToObj(i -> Integer.valueOf(i))
                 .map(i -> dispatchTestSubmissionSetup.createSample(i.toString(),submission))
                 .collect(Collectors.toList());
 
-        List<Assay> assays = IntStream
+        assays = IntStream
                 .rangeClosed(1,SAMPLE_AND_ASSAY_COUNT)
                 .mapToObj(i -> Integer.valueOf(i))
                 .map(i -> dispatchTestSubmissionSetup.createAssay(i.toString(),submission,samples.get(i - 1),study))
@@ -70,12 +77,12 @@ public class SampleDispatchHandlerTest {
 
         ProcessingStatusEnum statusEnum  = ProcessingStatusEnum.Submitted;
 
-        Stream.concat(
-                samples.stream(),
-                assays.stream()
-        ).forEach(
-                s -> changeSubmittableStatus(statusEnum, s)
-        );
+        List<StoredSubmittable> submittables = new LinkedList<>();
+        submittables.add(study);
+        submittables.addAll(samples);
+        submittables.addAll(assays);
+
+        submittables.forEach(s -> changeSubmittableStatus(statusEnum, s));
 
     }
 
@@ -83,6 +90,12 @@ public class SampleDispatchHandlerTest {
         ProcessingStatus ps = s.getProcessingStatus();
         ps.setStatus(statusEnum);
         processingStatusRepository.save(ps);
+    }
+
+    private void complete(Sample s){
+        s.setAccession(s.getAlias());
+        sampleRepository.save(s);
+        changeSubmittableStatus(ProcessingStatusEnum.Completed,s);
     }
 
     @After
@@ -111,7 +124,36 @@ public class SampleDispatchHandlerTest {
         assertThat(
             submissionEnvelope.getSamples(),hasSize(SAMPLE_AND_ASSAY_COUNT)
         );
+    }
+
+    @Test
+    public void testAssayArchiveReadiness(){
+        samples.forEach(s -> complete(s));
+
+        StopWatch stopWatch = new StopWatch();
+
+        stopWatch.start("assay archive dispatch test");
+
+        Map<Archive,SubmissionEnvelope> dispatcherOutput = dispatcherService.assessDispatchReadiness(submission);
+
+        stopWatch.stop();
+        System.out.println(stopWatch.prettyPrint());
 
 
+        assertThat(dispatcherOutput.keySet(),hasSize(1));
+        assertThat(dispatcherOutput,hasKey(Archive.Ena));
+
+
+        SubmissionEnvelope submissionEnvelope = dispatcherOutput.get(Archive.Ena);
+
+        assertThat(
+                submissionEnvelope.getSamples(),hasSize(SAMPLE_AND_ASSAY_COUNT)
+        );
+        assertThat(
+                submissionEnvelope.getAssays(),hasSize(SAMPLE_AND_ASSAY_COUNT)
+        );
+        assertThat(
+                submissionEnvelope.getStudies(),hasSize(1)
+        );
     }
 }

@@ -2,14 +2,11 @@ package uk.ac.ebi.subs.repository.repos.status;
 
 
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.subs.repository.model.ProcessingStatus;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
@@ -77,6 +74,42 @@ public class ProcessingStatusRepositoryImpl implements ProcessingStatusRepositor
         return typeStatusCounts;
     }
 
+    @Override
+    public Map<String, Set<String>> summariseSubmissionTypesWithSubmittableIds(String submissionId, Collection<String> relevantStatuses) {
+        Aggregation agg =  Aggregation.newAggregation(
+                submissionMatchOperation(submissionId),
+                match(where("status").in(relevantStatuses)),
+                group("submittableType").addToSet("submittableId").as("submittableIds"),
+                project("submittableIds").and("_id").as("submittableType")
+        );
+
+
+
+        AggregationResults<TypeSubmittableIds> aggregationResults = mongoTemplate.aggregate(agg,ProcessingStatus.class,TypeSubmittableIds.class);
+
+        Map<String,Set<String>> idsByType = new HashMap<>();
+
+        for (TypeSubmittableIds typeIds : aggregationResults.getMappedResults()){
+            idsByType.put(typeIds.getSubmittableType(),typeIds.getSubmittableIds());
+        }
+
+        return idsByType;
+
+/*
+* db.getCollection('processingStatus').aggregate(
+{"$match": {"submissionId": "e397d8e9-3b8b-4093-b82c-e23ae5333179"}},
+{"$match": {"status": {"$in": ["Draft","Submitted"]}}},
+{"$group": {"_id": "$submittableType", "submittableIds": {"$addToSet": "$submittableId"}}},
+{"$project": {"submittableType": "$_id", "submittableIds": "$submittableIds"}}
+)
+* */
+    }
+
+
+
+
+
+
     private MatchOperation submissionMatchOperation(String submissionId) {
         return match(where("submissionId").is(submissionId));
     }
@@ -129,6 +162,27 @@ public class ProcessingStatusRepositoryImpl implements ProcessingStatusRepositor
 
         public void setType(String type) {
             this.type = type;
+        }
+    }
+
+    public class TypeSubmittableIds {
+        private String submittableType;
+        private Set<String> submittableIds;
+
+        public String getSubmittableType() {
+            return submittableType;
+        }
+
+        public void setSubmittableType(String submittableType) {
+            this.submittableType = submittableType;
+        }
+
+        public Set<String> getSubmittableIds() {
+            return submittableIds;
+        }
+
+        public void setSubmittableIds(Set<String> submittableIds) {
+            this.submittableIds = submittableIds;
         }
     }
 }

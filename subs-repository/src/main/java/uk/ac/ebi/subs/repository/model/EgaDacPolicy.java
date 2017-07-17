@@ -6,8 +6,10 @@ import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import uk.ac.ebi.subs.data.component.AbstractSubsRef;
 
 import java.util.Date;
+import java.util.stream.Stream;
 
 @CompoundIndexes({
         @CompoundIndex(background = true, name = "team_alias", def = "{ 'team.name': 1, 'alias': 1 }"),
@@ -16,6 +18,11 @@ import java.util.Date;
 })
 @Document
 public class EgaDacPolicy extends uk.ac.ebi.subs.data.submittable.EgaDacPolicy implements StoredSubmittable {
+
+    @Override
+    public Stream<AbstractSubsRef> refs() {
+        return Stream.of((AbstractSubsRef) this.getDacRef());
+    }
 
     @DBRef
     private ProcessingStatus processingStatus;
