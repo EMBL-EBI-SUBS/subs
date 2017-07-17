@@ -1,0 +1,19 @@
+= How to submit data programatically
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 4
+:sectlinks:
+
+== Overview
+
+This document will take you through the steps required to submit data to the https://www.ebi.ac.uk[EMBL-EBI] submission
+system.
+
+== Log in
+
+*TODO* we will add a section describing how to get an authorisation token and what to do with it.
+
+== Create a submission
+
