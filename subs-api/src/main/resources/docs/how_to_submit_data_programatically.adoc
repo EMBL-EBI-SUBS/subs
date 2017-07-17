@@ -13,9 +13,8 @@ https://www.ebi.ac.uk[EMBL-EBI] submission system. EMBL-EBI provide a https://en
 https://en.wikipedia.org/wiki/Representational_state_transfer[REST API] to accept descriptive data from submitters using
 standard HTTP requests.
 
-We present examples using https://en.wikipedia.org/wiki/CURL[curl] to interact with the server.
-
-The 
+The examples in this walkthrough use https://en.wikipedia.org/wiki/CURL[curl] to interact with the server, but you can
+use the API with any programming language.
 
 == Log in
 
@@ -23,8 +22,9 @@ The
 
 == Fetch the API root
 
-We recommend that clients start from the root endpoint and follow the `_links` given in the response payload, instead of
-hardcoding each API endpoint.
+We recommend that clients start from the root endpoint and follow the _links_ given in the `_links` section of the
+response, instead of hard-coding each API endpoint. This will future proof against future changes to URL structure
+within the submission system.
 
 include::{snippets}/root-endpoint/curl-request.adoc[]
 
@@ -59,7 +59,7 @@ If successful, this will return a JSON object with links to parts of the submiss
 
 include::{snippets}/create-submission/http-response.adoc[]
 
-The `location` header has the URL for the created submission. You will need this when adding things to the submission.
+The `location` header in the response has the URL for the created submission. You will need this when adding things to the submission.
 
 == Add samples
 
@@ -67,15 +67,32 @@ Using the link from the submission labelled `samples:create`, `POST` a sample ob
 
 include::{snippets}/create-sample/curl-request.adoc[]
 
-This will return a response:
+
+Note that the submission field above contains the URL to the submission, this allows the records to be linked together.
+
+This will return a response to show that the sample record has been created:
 
 include::{snippets}/create-sample/http-response.adoc[]
 
-Note that the sample record needs to include a
 
-== Naming a record
+== Naming samples (and everything else)
 
-All the documents
+Samples, like all the documents that you add to a submission need to have an _alias_. This field is the name used for
+the record within the submission system. Each alias should be unique within the records of that type owned by a team.
+Using an alias for a second time in another submission will cause the record to be overwritten.
+
+== Sample documents
+
+The description of a sample should normally include a taxonomic code to describe the species classification. This should
+be an entry from the taxonomy database curated at https://www.ncbi.nlm.nih.gov/taxonomy/[NCBI]. EMBL-EBI provide a
+http://www.ebi.ac.uk/ena/browse/taxonomy-service[service] to search for and look up taxonomic entries and this is used
+when the submission interface checks sample documents.
+
+We will accept sample records for display in https://www.ebi.ac.uk/biosamples/[BioSamples] without a taxon ID, but
+you will not be able to use the sample record when submitting data the experimental data archives without a taxon ID.
+
+If you use a taxon ID, it must be one marked as 'submittable' in the taxonomy database.
+
 
 == Validation
 
@@ -98,15 +115,27 @@ include::{snippets}/update-sample/curl-request.adoc[]
 
 include::{snippets}/patch-sample/http-response.adoc[]
 
-Updating a document will cause it to be re-validated, using the procesesses described above.
+Updating a document will cause it to be re-validated, as described above.
 
 == Adding a study
 
+Experimental data are grouped into _studies_. Studies should describe the motivation and summarise the design for the
+study. Like samples, studies are identified by an alias, and have a number of attributes.
+
+As with samples, study records are created using `POST` requests:
+
+TODO add a study
+
 == Adding assays
+
+Assays
+
+If you are familiar with the ENA SRA submission system, an assay is equivalent to an Experiment.
+
 
 == Adding assay data
 
-
+If you are familiar with the ENA SRA submission system, assay data is equivalent to a Run.
 
 == When things go wrong
 
