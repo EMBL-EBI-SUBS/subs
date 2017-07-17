@@ -232,6 +232,7 @@ subprojects {
                     println "creating symbolic link to $jar.archiveName"
                     def result = execute "ln -s -f $jarDeployDir/$jar.archiveName $jarDeployDir/$jar.baseName" + ".jar", ignoreError: true
                     println result
+                    execute "chmod u+x $jarDeployDir/*", ignoreError: false
 
                 }
             }
