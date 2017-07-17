@@ -12,7 +12,6 @@ import uk.ac.ebi.subs.api.services.OperationControlService;
 import uk.ac.ebi.subs.repository.model.ProcessingStatus;
 import uk.ac.ebi.subs.repository.model.StoredSubmittable;
 import uk.ac.ebi.subs.repository.model.Submission;
-import uk.ac.ebi.subs.repository.repos.status.SubmissionStatusRepository;
 import uk.ac.ebi.subs.validator.data.ValidationResult;
 
 import java.util.HashMap;
@@ -28,14 +27,12 @@ public class SubmissionResourceProcessor implements ResourceProcessor<Resource<S
 
 
     public SubmissionResourceProcessor(
-            SubmissionStatusRepository submissionStatusRepository,
             RepositoryEntityLinks repositoryEntityLinks,
             List<Class<? extends StoredSubmittable>> submittablesClassList,
             OperationControlService operationControlService,
             LinkHelper linkHelper,
             BasePathAwareLinks basePathAwareLinks
     ) {
-        this.submissionStatusRepository = submissionStatusRepository;
         this.repositoryEntityLinks = repositoryEntityLinks;
         this.submittablesClassList = submittablesClassList;
         this.operationControlService = operationControlService;
@@ -44,7 +41,6 @@ public class SubmissionResourceProcessor implements ResourceProcessor<Resource<S
     }
 
     private BasePathAwareLinks basePathAwareLinks;
-    private SubmissionStatusRepository submissionStatusRepository;
     private RepositoryEntityLinks repositoryEntityLinks;
     private List<Class<? extends StoredSubmittable>> submittablesClassList;
     private OperationControlService operationControlService;
@@ -155,6 +151,4 @@ public class SubmissionResourceProcessor implements ResourceProcessor<Resource<S
             );
         }
     }
-
-
 }

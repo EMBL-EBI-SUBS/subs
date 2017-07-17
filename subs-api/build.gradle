@@ -13,7 +13,7 @@ dependencies {
 
     compile("uk.ac.ebi.subs:subs-data-model:1.0.3-SNAPSHOT")
     compile("uk.ac.ebi.subs:subs-messaging:1.0.3-SNAPSHOT")
-    compile("uk.ac.ebi.subs:validator-common:1.2.0-SNAPSHOT")
+    compile("uk.ac.ebi.subs:validator-common:1.13.0-SNAPSHOT")
 
     compile("org.springframework.boot:spring-boot-starter-data-rest")
     compile 'org.springframework.data:spring-data-rest-hal-browser'
@@ -81,10 +81,6 @@ springBoot {
 }
 
 remotes {
-    staging {
-        role('staging')
-        host = 'mac-subs-001'
-    }
     dev {
         role('dev')
         host = 'wp-np2-d0'
@@ -119,6 +115,8 @@ task deployToDev(type: SshTask, dependsOn: 'build') {
                 println "creating symbolic link to $jar.archiveName"
                 def result = execute "ln -s -f $jarDeployDir/$jar.archiveName $jarDeployDir/$jar.baseName" + ".jar", ignoreError: true
                 println result
+                println "updating permissions of $jarDeployDir/$jar.archiveName"
+                execute "chmod u+x $jarDeployDir/*", ignoreError: false
             }
         }
     }
@@ -139,6 +137,7 @@ task deployToTest(type: SshTask, dependsOn: 'build') {
                 println "creating symbolic link to $jar.archiveName"
                 def result = execute "ln -s -f $jarDeployDir/$jar.archiveName $jarDeployDir/$jar.baseName" + ".jar", ignoreError: true
                 println result
+                execute "chmod u+x $jarDeployDir/*", ignoreError: false
             }
         }
     }
