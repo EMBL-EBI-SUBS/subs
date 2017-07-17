@@ -8,12 +8,110 @@
 
 == Overview
 
-This document will take you through the steps required to submit data to the https://www.ebi.ac.uk[EMBL-EBI] submission
-system.
+This document will take you through the steps required to submit descriptive data (often called "metadata") using the
+https://www.ebi.ac.uk[EMBL-EBI] submission system. EMBL-EBI provide a https://en.wikipedia.org/wiki/HATEOAS[hypermedia]
+https://en.wikipedia.org/wiki/Representational_state_transfer[REST API] to accept descriptive data from submitters using
+standard HTTP requests.
+
+We present examples using https://en.wikipedia.org/wiki/CURL[curl] to interact with the server.
+
+The 
 
 == Log in
 
 *TODO* we will add a section describing how to get an authorisation token and what to do with it.
 
+== Fetch the API root
+
+We recommend that clients start from the root endpoint and follow the `_links` given in the response payload, instead of
+hardcoding each API endpoint.
+
+include::{snippets}/root-endpoint/curl-request.adoc[]
+
+This will return a long list of links, in http://stateless.co/hal_specification.html[HAL JSON] format:
+
+include::{snippets}/root-endpoint/http-response.adoc[]
+
+You don't need to worry about most of those links for now, we'll learn about them as we go.
+
+== Pick a team
+
+Every submission is owned by a _team_. At this stage of development, the API doesn't restrict what team you use.
+A future update will add support for team membership and administration. Until then, you can use any team name you like.
+
+A team object is structured like this:
+
+`{"name" : "my-team"}`
+
+At present, you also need to provide a submitter object when creating a submission. In future versions this will be
+taken from your log in information, but for now you need to provide a submitter object:
+
+`{"email": "alice@example.com"}`
+
 == Create a submission
 
+Using the link labelled `submissions:create`, `POST` a document containing a team and a submitter to create
+a submission:
+
+include::{snippets}/create-submission/curl-request.adoc[]
+
+If successful, this will return a JSON object with links to parts of the submission:
+
+include::{snippets}/create-submission/http-response.adoc[]
+
+The `location` header has the URL for the created submission. You will need this when adding things to the submission.
+
+== Add samples
+
+Using the link from the submission labelled `samples:create`, `POST` a sample object:
+
+include::{snippets}/create-sample/curl-request.adoc[]
+
+This will return a response:
+
+include::{snippets}/create-sample/http-response.adoc[]
+
+Note that the sample record needs to include a
+
+== Naming a record
+
+All the documents
+
+== Validation
+
+Descriptive data is checked at two points during submission:
+
+ 1. When sent to the API server, through `POST`, `PUT` and `PATCH` requests. At this point the sent must be match the expected syntax, and be identified with an alias.
+ 2. Once accepted by the API server, it is sent to a suite of validators to ensure it meets the requirements of the relevant archives or project.
+
+The second stage of validation is more in depth, and takes longer. Clients can poll for `ValidationResults` for each
+submitted document, and for a submission. You will not be able to complete a submission until validation
+have completed and no errors have been found.
+
+TODO add example of getting validation results
+
+== Updating a sample
+
+If you want to change a sample record after you've created it, you should use a `PUT` request to replace the record:
+
+include::{snippets}/update-sample/curl-request.adoc[]
+
+include::{snippets}/patch-sample/http-response.adoc[]
+
+Updating a document will cause it to be re-validated, using the procesesses described above.
+
+== Adding a study
+
+== Adding assays
+
+== Adding assay data
+
+
+
+== When things go wrong
+
+Successful requests will return a HTTP status code in `20X` range
+(see the <<submission_api.adoc#_http_status_codes,reference docs>>). When something goes wrong, there will be an
+error message to explain the problem. There's an explanation of each error type in the <<submission_api.adoc#_errors,reference docs>>.
+
+Errors can normally be resolved by correcting the content or format of your request. Please get in touch if the
