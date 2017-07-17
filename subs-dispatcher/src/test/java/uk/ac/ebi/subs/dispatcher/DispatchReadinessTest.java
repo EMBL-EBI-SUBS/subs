@@ -32,7 +32,7 @@ import static org.junit.Assert.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = DispatcherApplication.class)
-public class SampleDispatchHandlerTest {
+public class DispatchReadinessTest {
 
 
     @Autowired

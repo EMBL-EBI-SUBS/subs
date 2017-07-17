@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import uk.ac.ebi.subs.data.component.AbstractSubsRef;
+import uk.ac.ebi.subs.validator.data.ValidationResult;
 
 import java.util.Collections;
 import java.util.Date;
@@ -41,6 +42,16 @@ public class SampleGroup extends uk.ac.ebi.subs.data.submittable.SampleGroup imp
     private String lastModifiedBy;
     @DBRef
     private Submission submission;
+    @DBRef
+    private ValidationResult validationResult;
+
+    public ValidationResult getValidationResult() {
+        return validationResult;
+    }
+
+    public void setValidationResult(ValidationResult validationResult) {
+        this.validationResult = validationResult;
+    }
 
     @Override
     public ProcessingStatus getProcessingStatus() {

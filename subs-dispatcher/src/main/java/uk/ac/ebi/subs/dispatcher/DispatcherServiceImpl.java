@@ -225,29 +225,29 @@ public class DispatcherServiceImpl implements DispatcherService {
     private ProcessingStatusRepository processingStatusRepository;
     private SubmissionEnvelopeStuffer submissionEnvelopeStuffer;
 
-    public DispatcherServiceImpl(
-
-            RefLookupService refLookupService,
-            ProcessingStatusRepository processingStatusRepository,
-            ProcessingStatusBulkOperations processingStatusBulkOperations,
-            Map<Class<? extends StoredSubmittable>, SubmittableRepository<? extends StoredSubmittable>> submittableRepositoryMap,
-            SubmissionEnvelopeStuffer submissionEnvelopeStuffer
-    ) {
-
-        this.submissionEnvelopeService = submissionEnvelopeService;
+    public DispatcherServiceImpl(Map<Class<? extends StoredSubmittable>, SubmittableRepository<? extends StoredSubmittable>> submittableRepositoryMap, RefLookupService refLookupService, SubmissionEnvelopeService submissionEnvelopeService, ProcessingStatusBulkOperations processingStatusBulkOperations, ProcessingStatusRepository processingStatusRepository, SubmissionEnvelopeStuffer submissionEnvelopeStuffer) {
         this.refLookupService = refLookupService;
-        this.processingStatusRepository = processingStatusRepository;
+        this.submissionEnvelopeService = submissionEnvelopeService;
         this.processingStatusBulkOperations = processingStatusBulkOperations;
+        this.processingStatusRepository = processingStatusRepository;
         this.submissionEnvelopeStuffer = submissionEnvelopeStuffer;
 
-        processingStatusesToAllow = new HashSet<>();
-        processingStatusesToAllow.add(ProcessingStatusEnum.Draft.name());
-        processingStatusesToAllow.add(ProcessingStatusEnum.Submitted.name());
+        setupStatusesToProcess();
+        buildSubmittableRepositoryMap(submittableRepositoryMap);
+    }
 
+
+    private void buildSubmittableRepositoryMap(Map<Class<? extends StoredSubmittable>, SubmittableRepository<? extends StoredSubmittable>> submittableRepositoryMap) {
         this.submittableRepositoryMap = new HashMap<>();
         submittableRepositoryMap.entrySet().forEach(es ->
                 this.submittableRepositoryMap.put(es.getKey().getSimpleName(), es.getValue())
         );
+    }
+
+    private void setupStatusesToProcess() {
+        processingStatusesToAllow = new HashSet<>();
+        processingStatusesToAllow.add(ProcessingStatusEnum.Draft.name());
+        processingStatusesToAllow.add(ProcessingStatusEnum.Submitted.name());
     }
 
 }

@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import uk.ac.ebi.subs.data.component.AbstractSubsRef;
 import uk.ac.ebi.subs.data.component.SampleRef;
 import uk.ac.ebi.subs.data.component.SampleRelationship;
+import uk.ac.ebi.subs.validator.data.ValidationResult;
 
 import java.util.Date;
 import java.util.stream.Stream;
@@ -45,6 +46,16 @@ public class Sample extends uk.ac.ebi.subs.data.submittable.Sample implements St
     private String lastModifiedBy;
     @DBRef
     private Submission submission;
+    @DBRef
+    private ValidationResult validationResult;
+
+    public ValidationResult getValidationResult() {
+        return validationResult;
+    }
+
+    public void setValidationResult(ValidationResult validationResult) {
+        this.validationResult = validationResult;
+    }
 
     @Override
     public ProcessingStatus getProcessingStatus() {

@@ -37,12 +37,17 @@ public class SubmissionEventHandler {
     public SubmissionEventHandler(
             SubmissionRepository submissionRepository,
             SubmissionEventService submissionEventService,
-            SubmissionStatusRepository submissionStatusRepository
+            SubmissionHelperService submissionHelperService
     ) {
         this.submissionEventService = submissionEventService;
-        this.submissionStatusRepository = submissionStatusRepository;
         this.submissionRepository = submissionRepository;
+        this.submissionHelperService = submissionHelperService;
     }
+
+
+    private SubmissionRepository submissionRepository;
+    private SubmissionEventService submissionEventService;
+    private SubmissionHelperService submissionHelperService;
 
     public void setSubmissionRepository(SubmissionRepository submissionRepository) {
         this.submissionRepository = submissionRepository;
@@ -52,14 +57,9 @@ public class SubmissionEventHandler {
         this.submissionEventService = submissionEventService;
     }
 
-    public void setSubmissionStatusRepository(SubmissionStatusRepository submissionStatusRepository) {
-        this.submissionStatusRepository = submissionStatusRepository;
+    public void setSubmissionHelperService(SubmissionHelperService submissionHelperService) {
+        this.submissionHelperService = submissionHelperService;
     }
-
-    private SubmissionRepository submissionRepository;
-    private SubmissionEventService submissionEventService;
-    private SubmissionStatusRepository submissionStatusRepository;
-    private SubmissionHelperService submissionHelperService;
 
     /**
      * Give submission an ID and draft status on creation
