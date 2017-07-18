@@ -43,6 +43,8 @@ import uk.ac.ebi.subs.repository.repos.SubmissionRepository;
 import uk.ac.ebi.subs.repository.repos.status.ProcessingStatusRepository;
 import uk.ac.ebi.subs.repository.repos.status.SubmissionStatusRepository;
 import uk.ac.ebi.subs.repository.repos.submittables.SampleRepository;
+import uk.ac.ebi.subs.validator.data.ValidationResult;
+import uk.ac.ebi.subs.validator.repository.ValidationResultRepository;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -98,6 +100,9 @@ public class ApiDocumentation {
 
     @Autowired
     private SubmissionStatusEventHandler submissionStatusEventHandler;
+
+    @Autowired
+    private ValidationResultRepository validationResultRepository;
 
     private ObjectMapper objectMapper;
 
@@ -604,6 +609,66 @@ public class ApiDocumentation {
                 );
     }
 
+    @Test
+    public void createAssayData() throws Exception {
+        Submission sub = storeSubmission();
+        uk.ac.ebi.subs.data.client.AssayData assayData = Helpers.generateTestClientAssayData(1).get(0);
+
+        setSubmissionInSubmittable(sub, assayData);
+
+        String jsonRepresentation = objectMapper.writeValueAsString(assayData);
+
+        this.mockMvc.perform(
+                post("/api/assayData").content(jsonRepresentation)
+                        .contentType(RestMediaTypes.HAL_JSON)
+                        .accept(RestMediaTypes.HAL_JSON)
+
+        ).andExpect(status().isCreated())
+                .andDo(
+                        document("create-assay-data",
+                                preprocessRequest(prettyPrint()),
+                                preprocessResponse(prettyPrint()),
+                                responseFields(
+                                        fieldWithPath("_links").description("Links"),
+                                        fieldWithPath("alias").description("Unique name for the study within the team"),
+                                        fieldWithPath("title").description("Title for the study"),
+                                        fieldWithPath("description").description("Description for the study"),
+                                        fieldWithPath("attributes").description("A list of attributes for the study"),
+
+
+                                        fieldWithPath("archive").description("Destination archive for this assay"),
+                                        fieldWithPath("assayRef").description("Reference to the assay that this assay data is generated from"),
+
+                                        fieldWithPath("sampleRef").description("Reference to the sample that this assay data is generated from"),
+                                        fieldWithPath("files").description("Files used in this submission"),
+                                        fieldWithPath("files[0].name").description("File name"),
+                                        fieldWithPath("files[0].checksum").description("File checksum using md5"),
+                                        fieldWithPath("files[0].type").description("File type"),
+
+                                        fieldWithPath("_embedded.submission").description("Submission that this study is part of"),
+                                        fieldWithPath("_embedded.processingStatus").description("Processing status for this study."),
+                                        fieldWithPath("team").description("Team this sample belongs to"),
+                                        fieldWithPath("createdDate").description("Date this resource was created"),
+                                        fieldWithPath("lastModifiedDate").description("Date this resource was modified"),
+                                        fieldWithPath("createdBy").description("User who created this resource"),
+                                        fieldWithPath("lastModifiedBy").description("User who last modified this resource")
+                                ),
+                                links(
+                                        halLinks(),
+                                        validationresultLink(),
+                                        submissionLink(),
+                                        processingStatusLink(),
+                                        linkWithRel("self").description("This resource"),
+                                        linkWithRel("assayData").description("This resource"),
+                                        linkWithRel("self:update").description("This resource can be updated"),
+                                        linkWithRel("self:delete").description("This resource can be deleted"),
+                                        linkWithRel("history").description("Collection of resources for samples with the same team and alias as this resource"),
+                                        linkWithRel("current-version").description("Current version of this sample, as identified by team and alias")
+                                )
+                        )
+                );
+    }
+
     private void setSubmissionInSubmittable(Submission sub, PartOfSubmission submittable) {
         submittable.setSubmission(SCHEME + "://" + HOST + "/api/submissions/" + sub.getId());
     }
@@ -765,6 +830,33 @@ public class ApiDocumentation {
                         )
                 );
 
+        ValidationResult validationResult = validationResultRepository.findAll().get(0);
+
+        this.mockMvc.perform(
+                get("/api/validationResults/{validationResultId}",validationResult.getUuid())
+                        .accept(RestMediaTypes.HAL_JSON)
+
+        ).andExpect(status().isOk())
+                .andDo(
+                        document("get-validation-result",
+                                preprocessRequest(prettyPrint()),
+                                preprocessResponse(prettyPrint()),
+                                responseFields(
+                                        fieldWithPath("_links").description("Links"),
+
+                                        fieldWithPath("validationStatus").description("Is validation pending or complete?"),
+                                        fieldWithPath("entityUuid").description("Identifer for the resource being validated"),
+                                        fieldWithPath("version").description("Version of this resource"),
+                                        fieldWithPath("submissionId").description("Identifier for the submission this result relates to")
+                                ),
+                                links(
+                                        halLinks(),
+                                        linkWithRel("self").description("This resource"),
+                                        linkWithRel("validationResult").description("This resource")
+
+                                )
+                        )
+                );
     }
 
 
