@@ -286,8 +286,6 @@ include::{snippets}/get-team/links.adoc[]
 
 === Submissions
 
-`DELETE`-ing a submission will delete the submission and all resources within it e.g. studies, samples.
-
 ==== Create a submission
 
 ===== Request
@@ -301,6 +299,12 @@ include::{snippets}/create-submission/http-response.adoc[]
 ===== Links
 
 include::{snippets}/create-submission/links.adoc[]
+
+==== Delete a submission
+
+`DELETE`-ing a submission will delete the submission and all resources within it e.g. studies, samples.
+
+TODO add delete example
 
 === Submission status
 
