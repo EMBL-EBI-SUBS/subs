@@ -16,15 +16,27 @@ standard HTTP requests.
 The examples in this walkthrough use https://en.wikipedia.org/wiki/CURL[curl] to interact with the server, but you can
 use the API with any programming language.
 
+The submission process follows these steps:
+
+ 1. Create a submission
+ 2. Add documents describing your data to the submission (samples, studies, etc...)
+ 3. Get feedback and amend documents if necessary
+ 4. Tell us the submission is ready to go
+
+At this point we will send the data to the appropriate archive or archives. They will send reports on their progress
+with your data and accessions back to us.
+
+This guide assumes some familiarity with REST APIs and the HTTP protocol.
+
 == Log in
 
 *TODO* we will add a section describing how to get an authorisation token and what to do with it.
 
 == Fetch the API root
 
-We recommend that clients start from the root endpoint and follow the _links_ given in the `_links` section of the
-response, instead of hard-coding each API endpoint. This will future proof against future changes to URL structure
-within the submission system.
+We recommend that you start from the root endpoint and follow the _links_ given in the `_links` section of the
+response, instead of hard-coding each API endpoint. This will insulate you from future changes to the submission system
+architecture or URL structure.
 
 include::{snippets}/root-endpoint/curl-request.adoc[]
 
@@ -34,22 +46,29 @@ include::{snippets}/root-endpoint/http-response.adoc[]
 
 You don't need to worry about most of those links for now, we'll learn about them as we go.
 
-== Pick a team
+== Create a submission
+
+The submission system allows you to build up your submission over time and send it to the archives when you are ready.
+The first step is to create a submission.
+
+=== Pick a team
 
 Every submission is owned by a _team_. A team is a group of people, working together on the same data. How you use this
-is up to you. You could create a team for just yourself, everyone in a lab, or one for all collaborators on At this stage of development, the API doesn't restrict what team you use.
-A future update will add support for team membership and administration. Until then, you can use any team name you like.
+is up to you. You could create a team for just yourself, everyone in a lab, or one for all collaborators on a project.
 
-A team object is structured like this:
+At this stage of development the API doesn't restrict what team you use. A future update will add support for team
+membership and administration. Until then, you can use any team name you like.
+
+A team document is structured like this:
 
 `{"name" : "my-team"}`
 
 At present, you also need to provide a submitter object when creating a submission. In future versions this will be
-taken from your log in information, but for now you need to provide a submitter object:
+taken from your log in information, but for now you need to provide a submitter document:
 
 `{"email": "alice@example.com"}`
 
-== Create a submission
+=== POSTing a submission
 
 Using the link labelled `submissions:create`, `POST` a document containing a team and a submitter to create
 a submission:
@@ -60,21 +79,13 @@ If successful, this will return a JSON object with links to parts of the submiss
 
 include::{snippets}/create-submission/http-response.adoc[]
 
-The `location` header in the response has the URL for the created submission. You will need this when adding things to the submission.
+The `location` header in the response has the URL for the created submission. You will need this when adding things to
+the submission.
 
-== Add samples
+== Adding samples
 
-Using the link from the submission labelled `samples:create`, `POST` a sample object:
-
-include::{snippets}/create-sample/curl-request.adoc[]
-
-
-Note that the submission field above contains the URL to the submission, this allows the records to be linked together.
-
-This will return a response to show that the sample record has been created:
-
-include::{snippets}/create-sample/http-response.adoc[]
-
+We'll start by adding samples. It's a good template for adding anything to a submission - while the details in the
+documents change, the process is the same across all types of document.
 
 === Naming samples (and everything else)
 
@@ -82,31 +93,49 @@ Samples, like all the documents that you add to a submission need to have an _al
 the record within the submission system. Each alias should be unique within the records of that type owned by a team.
 Using an alias for a second time in another submission will cause the record to be overwritten.
 
-=== Sample documents
+=== Requirements for sample documents
 
-The description of a sample should normally include a taxonomic code to describe the species classification. This should
+The description of a sample should normally include a taxonomic code to describe the species classification. This must
 be an entry from the taxonomy database curated at https://www.ncbi.nlm.nih.gov/taxonomy/[NCBI]. EMBL-EBI provide a
 http://www.ebi.ac.uk/ena/browse/taxonomy-service[service] to search for and look up taxonomic entries and this is used
-when the submission interface checks sample documents.
+when the submission system checks sample documents.
 
 We will accept sample records for display in https://www.ebi.ac.uk/biosamples/[BioSamples] without a taxon ID, but
 you will not be able to use the sample record when submitting data the experimental data archives without a taxon ID.
+In addition, if you use a taxon ID, it must be one marked as 'submittable' in the taxonomy database.
 
-If you use a taxon ID, it must be one marked as 'submittable' in the taxonomy database.
+=== POSTing a sample
 
+Using the link from the submission labelled `samples:create` and `POST` a sample object:
+
+include::{snippets}/create-sample/curl-request.adoc[]
+
+Note that the submission field above contains the URL to the submission, this allows the records to be linked together.
+
+This will return a response to show that the sample record has been created:
+
+include::{snippets}/create-sample/http-response.adoc[]
 
 === Validation
 
 Descriptive data is checked at two points during submission:
 
- 1. When sent to the API server, through `POST`, `PUT` and `PATCH` requests. At this point the sent must be match the expected syntax, and be identified with an alias.
- 2. Once accepted by the API server, it is sent to a suite of validators to ensure it meets the requirements of the relevant archives or project.
+ 1. When sent to the API server, through `POST`, `PUT` and `PATCH` requests. At this point the sent must be match the
+ expected syntax, and be identified with an alias.
+ 2. Once accepted by the API server, it is sent to a suite of validators to ensure it meets the requirements of the
+ relevant archives or project.
 
 The second stage of validation is more in depth, and takes longer. Clients can poll for `ValidationResults` for each
 submitted document, and for a submission. You will not be able to complete a submission until validation
-have completed and no errors have been found.
+has completed and errors have been found.
 
-TODO add example of getting validation results
+Use the `validationResult` link from sample (or any other submitted document) to see its validation results. This may be
+ pending, in which case you can poll for completion.
+
+include::{snippets}/get-validation-result/curl-request.adoc[]
+
+include::{snippets}/get-validation-result/http-response.adoc[]
+
 
 === Updating a sample
 
@@ -206,11 +235,15 @@ Once all documents in a submission have been completely archived, the submission
 If you need to update the information of any of the records submitted, create an new submission and add a document,
 following the same process as before. Using the same team and alias will ensure that the archive records are updated.
 
-
 == When things go wrong
 
 Successful requests will return a HTTP status code in `20X` range
 (see the <<submission_api.adoc#_http_status_codes,reference docs>>). When something goes wrong, there will be an
 error message to explain the problem. There's an explanation of each error type in the <<submission_api.adoc#_errors,reference docs>>.
 
-Errors can normally be resolved by correcting the content or format of your request. Please get in touch if the
+Errors can normally be resolved by correcting the content or format of your request. Please get in touch if the cause
+of the problem isn't clear. *TODO* add helpdesk link
+
+== Where to go next?
+
+You can find more in-depth documentation on the API in the <<submission_api.adoc#,reference documentation>>.
