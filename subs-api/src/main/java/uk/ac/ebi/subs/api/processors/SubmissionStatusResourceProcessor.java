@@ -10,7 +10,9 @@ import uk.ac.ebi.subs.api.controllers.StatusDescriptionController;
 import uk.ac.ebi.subs.api.controllers.SubmissionStatusController;
 import uk.ac.ebi.subs.api.services.ValidationResultService;
 import uk.ac.ebi.subs.data.status.SubmissionStatusEnum;
+import uk.ac.ebi.subs.repository.model.Submission;
 import uk.ac.ebi.subs.repository.model.SubmissionStatus;
+import uk.ac.ebi.subs.repository.repos.SubmissionRepository;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -21,11 +23,14 @@ public class SubmissionStatusResourceProcessor implements ResourceProcessor<Reso
     private BasePathAwareLinks basePathAwareLinks;
     private ValidationResultService validationResultService;
     private RepositoryEntityLinks repositoryEntityLinks;
+    private SubmissionRepository submissionRepository;
 
-    public SubmissionStatusResourceProcessor(BasePathAwareLinks basePathAwareLinks, ValidationResultService validationResultService, RepositoryEntityLinks repositoryEntityLinks) {
+    public SubmissionStatusResourceProcessor(BasePathAwareLinks basePathAwareLinks, ValidationResultService validationResultService,
+                                             RepositoryEntityLinks repositoryEntityLinks, SubmissionRepository submissionRepository) {
         this.basePathAwareLinks = basePathAwareLinks;
         this.validationResultService = validationResultService;
         this.repositoryEntityLinks = repositoryEntityLinks;
+        this.submissionRepository = submissionRepository;
     }
 
     @Override
@@ -65,13 +70,14 @@ public class SubmissionStatusResourceProcessor implements ResourceProcessor<Reso
 
     private void addAvailableStatuses(Resource<SubmissionStatus> submissionStatusResource) {
         SubmissionStatus submissionStatus = submissionStatusResource.getContent();
+        Submission submission = submissionRepository.findBySubmissionStatusId(submissionStatus.getId());
 
         if (validationResultService.isValidationFinishedAndPassed(submissionStatus.getId())) {
             submissionStatusResource.add(
                     basePathAwareLinks.underBasePath(
                             linkTo(
                                     methodOn(SubmissionStatusController.class)
-                                            .availableSubmissionStatuses(submissionStatus.getId()))
+                                            .availableSubmissionStatuses(submission.getId()))
                     ).withRel("availableStatuses")
             );
         }
