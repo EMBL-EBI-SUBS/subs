@@ -546,6 +546,64 @@ public class ApiDocumentation {
                 );
     }
 
+    @Test
+    public void createAssay() throws Exception {
+        Submission sub = storeSubmission();
+        uk.ac.ebi.subs.data.client.Assay assay= Helpers.generateTestClientAssays(1).get(0);
+
+        setSubmissionInSubmittable(sub, assay);
+
+        String jsonRepresentation = objectMapper.writeValueAsString(assay);
+
+        this.mockMvc.perform(
+                post("/api/assays").content(jsonRepresentation)
+                        .contentType(RestMediaTypes.HAL_JSON)
+                        .accept(RestMediaTypes.HAL_JSON)
+
+        ).andExpect(status().isCreated())
+                .andDo(
+                        document("create-assay",
+                                preprocessRequest(prettyPrint()),
+                                preprocessResponse(prettyPrint()),
+                                responseFields(
+                                        fieldWithPath("_links").description("Links"),
+                                        fieldWithPath("alias").description("Unique name for the study within the team"),
+                                        fieldWithPath("title").description("Title for the study"),
+                                        fieldWithPath("description").description("Description for the study"),
+                                        fieldWithPath("attributes").description("A list of attributes for the study"),
+
+
+                                        fieldWithPath("archive").description("Destination archive for this assay"),
+                                        fieldWithPath("studyRef").description("Reference to the study that this assay is part of"),
+
+                                        fieldWithPath("sampleUses").description("Samples used in this assay"),
+                                        fieldWithPath("sampleUses[0].sampleRef").description("Reference to the sample used in this assay"),
+                                        fieldWithPath("protocolUses").description("Protocols used in this study"),
+
+                                        fieldWithPath("_embedded.submission").description("Submission that this study is part of"),
+                                        fieldWithPath("_embedded.processingStatus").description("Processing status for this study."),
+                                        fieldWithPath("team").description("Team this sample belongs to"),
+                                        fieldWithPath("createdDate").description("Date this resource was created"),
+                                        fieldWithPath("lastModifiedDate").description("Date this resource was modified"),
+                                        fieldWithPath("createdBy").description("User who created this resource"),
+                                        fieldWithPath("lastModifiedBy").description("User who last modified this resource")
+                                ),
+                                links(
+                                        halLinks(),
+                                        validationresultLink(),
+                                        submissionLink(),
+                                        processingStatusLink(),
+                                        linkWithRel("self").description("This resource"),
+                                        linkWithRel("assay").description("This resource"),
+                                        linkWithRel("self:update").description("This resource can be updated"),
+                                        linkWithRel("self:delete").description("This resource can be deleted"),
+                                        linkWithRel("history").description("Collection of resources for samples with the same team and alias as this resource"),
+                                        linkWithRel("current-version").description("Current version of this sample, as identified by team and alias")
+                                )
+                        )
+                );
+    }
+
     private void setSubmissionInSubmittable(Submission sub, PartOfSubmission submittable) {
         submittable.setSubmission(SCHEME + "://" + HOST + "/api/submissions/" + sub.getId());
     }

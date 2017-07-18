@@ -136,7 +136,11 @@ include::{snippets}/create-study/http-response.adoc[]
 Assay documents describes the processes performed on the sample to produce data. For example, this could be library
 preparation and sequencing for an NGS study. If you are familiar with the ENA SRA submission system, an assay is equivalent to an Experiment.
 
-TODO add an assay
+include::{snippets}/create-assay/curl-request.adoc[]
+
+This will return a response to show that the study record has been created:
+
+include::{snippets}/create-assay/http-response.adoc[]
 
 == Adding assay data
 
@@ -150,9 +154,10 @@ Once you have added all your documents to the submission and they have been vali
 to the archives. You do this by changing the submission status. To get to the submission status, follow the
 `submissionStatus` link from the submission, then the `self` link.
 
-TODO document endpoints that show valid statuses for a submission
+Follow the `availableStatuses` link from submission or submissionStatus to see the statuses that are currently available.
+Available statuses are affected by whever or not validation has finished and the current status of the submission.
 
-You can then change the submission status to 'Submitted', using either a `PUT` or `PATCH` request:
+Once validation is complete, you can change the submission status to 'Submitted', using either a `PUT` or `PATCH` request:
 
 include::{snippets}/patch-submission-status/curl-request.adoc[]
 
