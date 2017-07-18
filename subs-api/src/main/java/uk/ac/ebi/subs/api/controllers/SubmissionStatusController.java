@@ -33,7 +33,7 @@ public class SubmissionStatusController {
 
     @RequestMapping("/availableSubmissionStatuses")
     public Set<String> availableSubmissionStatuses(@PathVariable String submissionId) {
-        Submission currentSubmission = submissionRepository.findBySubmissionStatusId(submissionId);
+        Submission currentSubmission = submissionRepository.findOne(submissionId);
 
         if (validationResultService.isValidationFinishedAndPassed(currentSubmission.getSubmissionStatus().getId())) {
             StatusDescription statusDescription = submissionStatusDescriptionMap.get(currentSubmission.getSubmissionStatus().getStatus());
