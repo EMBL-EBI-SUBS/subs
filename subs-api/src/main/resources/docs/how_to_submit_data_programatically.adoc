@@ -36,7 +36,8 @@ You don't need to worry about most of those links for now, we'll learn about the
 
 == Pick a team
 
-Every submission is owned by a _team_. A team is a group At this stage of development, the API doesn't restrict what team you use.
+Every submission is owned by a _team_. A team is a group of people, working together on the same data. How you use this
+is up to you. You could create a team for just yourself, everyone in a lab, or one for all collaborators on At this stage of development, the API doesn't restrict what team you use.
 A future update will add support for team membership and administration. Until then, you can use any team name you like.
 
 A team object is structured like this:
