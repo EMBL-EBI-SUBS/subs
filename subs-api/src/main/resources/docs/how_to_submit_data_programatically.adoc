@@ -149,6 +149,8 @@ Once you have added all your documents to the submission and they have been vali
 to the archives. You do this by changing the submission status. To get to the submission status, follow the
 `submissionStatus` link from the submission, then the `self` link.
 
+TODO document endpoints that show valid statuses for a submission
+
 You can then change the submission status to 'Submitted', using either a `PUT` or `PATCH` request:
 
 include::{snippets}/patch-submission-status/curl-request.adoc[]
@@ -161,9 +163,39 @@ This will also lock the submission, so you cannot make further changes while we 
 
 == Tracking progress
 
-Access the status report to see how the submission
+Once you've finalised your submission, we will send it off to the relevant data archives. You can see how
+that's progressing - e.g. has a study been received an accession yet?. There are several ways to do this.
 
-TODO get submission status reports
+Firstly, you can see the all details by following the `processingStatuses` link from the submission:
+
+include::{snippets}/page-progress-reports/curl-request.adoc[]
+
+include::{snippets}/page-progress-reports/http-response.adoc[]
+
+You can also see summaries of the same information.
+
+Summarised by status (follow the `processingStatusSummary` link from the submission):
+
+include::{snippets}/summary-progress-reports/curl-request.adoc[]
+
+include::{snippets}/summary-progress-reports/http-response.adoc[]
+
+Summarised by status and type (follow the `typeProcessingStatusSummary` link from the submission)
+
+include::{snippets}/type-summary-progress-reports/curl-request.adoc[]
+
+include::{snippets}/type-summary-progress-reports/http-response.adoc[]
+
+You can also follow the `processingStatus` link from sample (or any other part of the submission) to see the current
+progress for an individual document.
+
+== The end?
+
+Once all documents in a submission have been completely archived, the submission is considered complete.
+
+If you need to update the information of any of the records submitted, create an new submission and add a document,
+following the same process as before. Using the same team and alias will ensure that the archive records are updated.
+
 
 == When things go wrong
 

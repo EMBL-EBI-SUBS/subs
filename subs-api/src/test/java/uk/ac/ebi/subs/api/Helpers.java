@@ -78,8 +78,8 @@ public class Helpers {
             s.setArchive(Archive.Ena);
 
             Attribute studyAbstract = new Attribute();
-            studyType.setName("study_abstract");
-            studyType.setValue(s.getDescription());
+            studyAbstract.setName("study_abstract");
+            studyAbstract.setValue(s.getDescription());
 
             s.getAttributes().add(studyType);
             s.getAttributes().add(studyAbstract);
