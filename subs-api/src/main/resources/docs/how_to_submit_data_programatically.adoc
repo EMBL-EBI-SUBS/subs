@@ -124,7 +124,11 @@ study. Like samples, studies are identified by an alias, and have a number of at
 
 As with samples, study records are created using `POST` requests:
 
-TODO add a study
+include::{snippets}/create-study/curl-request.adoc[]
+
+This will return a response to show that the study record has been created:
+
+include::{snippets}/create-study/http-response.adoc[]
 
 == Adding assays
 
@@ -143,10 +147,13 @@ TODO add assay data
 
 Update the submission status to 'Submitted'.
 
+TODO modify submission status
+
 == Tracking progress
 
 Access the status report to see how the submission
 
+TODO get submission status reports
 
 == When things go wrong
 

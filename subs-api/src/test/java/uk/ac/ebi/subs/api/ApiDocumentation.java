@@ -32,9 +32,10 @@ import uk.ac.ebi.subs.DocumentationProducer;
 import uk.ac.ebi.subs.api.handlers.SubmissionEventHandler;
 import uk.ac.ebi.subs.api.handlers.SubmissionStatusEventHandler;
 import uk.ac.ebi.subs.api.services.SubmissionEventService;
-import uk.ac.ebi.subs.data.component.Team;
+import uk.ac.ebi.subs.data.client.PartOfSubmission;
 import uk.ac.ebi.subs.data.component.SampleRelationship;
 import uk.ac.ebi.subs.data.component.Submitter;
+import uk.ac.ebi.subs.data.component.Team;
 import uk.ac.ebi.subs.repository.model.Sample;
 import uk.ac.ebi.subs.repository.model.Submission;
 import uk.ac.ebi.subs.repository.model.SubmissionStatus;
@@ -324,7 +325,7 @@ public class ApiDocumentation {
         Assert.notNull(status);
 
         this.mockMvc.perform(
-                patch("/api/submissionStatuses/{id}",status.getId()).content("{\"status\": \"Submitted\"}")
+                patch("/api/submissionStatuses/{id}", status.getId()).content("{\"status\": \"Submitted\"}")
                         .contentType(RestMediaTypes.HAL_JSON)
                         .accept(RestMediaTypes.HAL_JSON)
 
@@ -354,11 +355,76 @@ public class ApiDocumentation {
     }
 
     @Test
+    public void createStudy() throws Exception {
+        Submission sub = storeSubmission();
+        uk.ac.ebi.subs.data.client.Study study = Helpers.generateTestClientStudies(1).get(0);
+
+        setSubmissionInSubmittable(sub, study);
+
+        String jsonRepresentation = objectMapper.writeValueAsString(study);
+
+        this.mockMvc.perform(
+                post("/api/studies").content(jsonRepresentation)
+                        .contentType(RestMediaTypes.HAL_JSON)
+                        .accept(RestMediaTypes.HAL_JSON)
+
+        ).andExpect(status().isCreated())
+                .andDo(
+                        document("create-study",
+                                preprocessRequest(prettyPrint()),
+                                preprocessResponse(prettyPrint()),
+                                responseFields(
+                                        fieldWithPath("_links").description("Links"),
+                                        fieldWithPath("alias").description("Unique name for the study within the team"),
+                                        fieldWithPath("title").description("Title for the study"),
+                                        fieldWithPath("description").description("Description for the study"),
+                                        fieldWithPath("attributes").description("A list of attributes for the study"),
+
+
+                                        fieldWithPath("archive").description("Destination archive for this study"),
+                                        fieldWithPath("publications").description("Publications for this study"),
+                                        fieldWithPath("contacts").description("Contact details for people involved in this study"),
+                                        fieldWithPath("protocolRefs").description("References to protocols used in this study"),
+                                        fieldWithPath("projectRef").description("References to the overall project that this study is part of"),
+                                        fieldWithPath("releaseDate").description("Date at which this project will be released"),
+
+
+                                        fieldWithPath("_embedded.submission").description("Submission that this study is part of"),
+                                        fieldWithPath("_embedded.processingStatus").description("Processing status for this study."),
+                                        fieldWithPath("team").description("Team this sample belongs to"),
+                                        fieldWithPath("createdDate").description("Date this resource was created"),
+                                        fieldWithPath("lastModifiedDate").description("Date this resource was modified"),
+                                        fieldWithPath("createdBy").description("User who created this resource"),
+                                        fieldWithPath("lastModifiedBy").description("User who last modified this resource")
+                                ),
+                                links(
+                                        halLinks(),
+                                        validationresultLink(),
+                                        submissionLink(),
+                                        processingStatusLink(),
+                                        linkWithRel("self").description("This resource"),
+                                        linkWithRel("study").description("This resource"),
+                                        linkWithRel("self:update").description("This resource can be updated"),
+                                        linkWithRel("self:delete").description("This resource can be deleted"),
+                                        linkWithRel("history").description("Collection of resources for samples with the same team and alias as this resource"),
+                                        linkWithRel("current-version").description("Current version of this sample, as identified by team and alias")
+                                )
+                        )
+                );
+    }
+
+    private void setSubmissionInSubmittable(Submission sub, PartOfSubmission submittable) {
+        submittable.setSubmission(SCHEME + "://" + HOST + "/api/submissions/" + sub.getId());
+    }
+
+
+    @Test
     public void createSample() throws Exception {
         Submission sub = storeSubmission();
         uk.ac.ebi.subs.data.client.Sample sample = Helpers.generateTestClientSamples(1).get(0);
 
-        sample.setSubmission(SCHEME+"://"+HOST+"/api/submissions/"+sub.getId());
+
+        setSubmissionInSubmittable(sub, sample);
 
         String jsonRepresentation = objectMapper.writeValueAsString(sample);
 
@@ -379,6 +445,7 @@ public class ApiDocumentation {
                                         fieldWithPath("title").description("Title for the sample"),
                                         fieldWithPath("description").description("Description for the sample"),
                                         fieldWithPath("attributes").description("A list of attributes for the sample"),
+                                        fieldWithPath("archive").description("The destination archive for this record"),
                                         fieldWithPath("sampleRelationships").description("Relationships to other samples"),
                                         fieldWithPath("taxonId").description("NCBI Taxon ID for this sample"),
                                         fieldWithPath("taxon").description("Scientific name for this taxon"),
@@ -419,7 +486,7 @@ public class ApiDocumentation {
         jsonRepresentation = objectMapper.writeValueAsString(sample);
 
         this.mockMvc.perform(
-                put("/api/samples/{id}",sampleId).content(jsonRepresentation)
+                put("/api/samples/{id}", sampleId).content(jsonRepresentation)
                         .contentType(RestMediaTypes.HAL_JSON)
                         .accept(RestMediaTypes.HAL_JSON)
 
@@ -433,6 +500,7 @@ public class ApiDocumentation {
                                         fieldWithPath("alias").description("Unique name for the sample within the team"),
                                         fieldWithPath("title").description("Title for the sample"),
                                         fieldWithPath("description").description("Description for the sample"),
+                                        fieldWithPath("archive").description("The destination archive for this record"),
                                         fieldWithPath("attributes").description("A list of attributes for the sample"),
                                         fieldWithPath("sampleRelationships").description("Relationships to other samples"),
                                         fieldWithPath("taxonId").description("NCBI Taxon ID for this sample"),
@@ -463,7 +531,7 @@ public class ApiDocumentation {
                 );
 
         this.mockMvc.perform(
-                patch("/api/samples/{id}",sampleId).content("{\"archive\":\"BioSamples\"}")
+                patch("/api/samples/{id}", sampleId).content("{\"archive\":\"BioSamples\"}")
                         .contentType(RestMediaTypes.HAL_JSON)
                         .accept(RestMediaTypes.HAL_JSON)
 
@@ -507,7 +575,6 @@ public class ApiDocumentation {
                 );
 
     }
-
 
 
     private uk.ac.ebi.subs.data.Submission badClientSubmission() {
