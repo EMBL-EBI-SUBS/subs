@@ -84,7 +84,9 @@ public class Helpers {
             s.getAttributes().add(studyType);
             s.getAttributes().add(studyAbstract);
 
-            s.setReleaseDate(new Date(LocalDate.parse("2020-12-25").toEpochDay()));
+            LocalDate releaseDate = LocalDate.parse("2020-12-25");
+
+            s.setReleaseDate(java.sql.Date.valueOf(releaseDate));
         }
 
         return studies;
