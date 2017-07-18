@@ -113,8 +113,6 @@ public class Helpers {
             uk.ac.ebi.subs.data.client.Assay a = new uk.ac.ebi.subs.data.client.Assay();
             assays.add(a);
 
-            a.setId(createId());
-
             a.setAlias("A" + i);
             a.setTitle("Assay " + i);
             a.setDescription("Human sequencing experiment");
@@ -139,6 +137,39 @@ public class Helpers {
         }
 
         return assays;
+    }
+
+    public static List<uk.ac.ebi.subs.data.client.AssayData> generateTestClientAssayData(int numberOfAssaysRequired) {
+        List<uk.ac.ebi.subs.data.client.AssayData> assayData = new ArrayList<>(numberOfAssaysRequired);
+
+
+        List<uk.ac.ebi.subs.data.client.Assay> assays = generateTestClientAssays(numberOfAssaysRequired);
+
+
+        for (int i = 1; i <= numberOfAssaysRequired; i++) {
+            uk.ac.ebi.subs.data.client.AssayData ad = new uk.ac.ebi.subs.data.client.AssayData();
+            assayData.add(ad);
+
+
+            ad.setAlias("AD" + i);
+            ad.setTitle("AssayData" + i);
+            ad.setDescription("Human sequencing experiment run");
+
+            ad.setArchive(Archive.Ena);
+
+            AssayRef assayRef = new AssayRef();
+            assayRef.setAlias(assays.get(i-1).getAlias());
+            ad.setAssayRef(assayRef);
+
+            File file = new File();
+            file.setName("sequencingData.cram");
+            file.setType("CRAM");
+            file.setChecksum("4bb1c4561d99d88c8b38a40d694267dc");
+            ad.getFiles().add(file);
+
+        }
+
+        return assayData;
     }
 
 

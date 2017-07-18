@@ -138,7 +138,7 @@ preparation and sequencing for an NGS study. If you are familiar with the ENA SR
 
 include::{snippets}/create-assay/curl-request.adoc[]
 
-This will return a response to show that the study record has been created:
+This will return a response to show that the assay record has been created:
 
 include::{snippets}/create-assay/http-response.adoc[]
 
@@ -146,7 +146,11 @@ include::{snippets}/create-assay/http-response.adoc[]
 
 If you are familiar with the ENA SRA submission system, assay data is equivalent to a Run.
 
-TODO add assay data
+include::{snippets}/create-assay-data/curl-request.adoc[]
+
+This will return a response to show that the assay record has been created:
+
+include::{snippets}/create-assay-data/http-response.adoc[]
 
 == Finalising your submission
 
