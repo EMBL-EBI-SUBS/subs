@@ -36,7 +36,7 @@ You don't need to worry about most of those links for now, we'll learn about the
 
 == Pick a team
 
-Every submission is owned by a _team_. At this stage of development, the API doesn't restrict what team you use.
+Every submission is owned by a _team_. A team is a group At this stage of development, the API doesn't restrict what team you use.
 A future update will add support for team membership and administration. Until then, you can use any team name you like.
 
 A team object is structured like this:
@@ -75,13 +75,13 @@ This will return a response to show that the sample record has been created:
 include::{snippets}/create-sample/http-response.adoc[]
 
 
-== Naming samples (and everything else)
+=== Naming samples (and everything else)
 
 Samples, like all the documents that you add to a submission need to have an _alias_. This field is the name used for
 the record within the submission system. Each alias should be unique within the records of that type owned by a team.
 Using an alias for a second time in another submission will cause the record to be overwritten.
 
-== Sample documents
+=== Sample documents
 
 The description of a sample should normally include a taxonomic code to describe the species classification. This should
 be an entry from the taxonomy database curated at https://www.ncbi.nlm.nih.gov/taxonomy/[NCBI]. EMBL-EBI provide a
@@ -94,7 +94,7 @@ you will not be able to use the sample record when submitting data the experimen
 If you use a taxon ID, it must be one marked as 'submittable' in the taxonomy database.
 
 
-== Validation
+=== Validation
 
 Descriptive data is checked at two points during submission:
 
@@ -107,13 +107,13 @@ have completed and no errors have been found.
 
 TODO add example of getting validation results
 
-== Updating a sample
+=== Updating a sample
 
 If you want to change a sample record after you've created it, you should use a `PUT` request to replace the record:
 
 include::{snippets}/update-sample/curl-request.adoc[]
 
-include::{snippets}/patch-sample/http-response.adoc[]
+include::{snippets}/update-sample/http-response.adoc[]
 
 Updating a document will cause it to be re-validated, as described above.
 
@@ -128,14 +128,25 @@ TODO add a study
 
 == Adding assays
 
-Assays
+Assay documents describes the processes performed on the sample to produce data. For example, this could be library
+preparation and sequencing for an NGS study. If you are familiar with the ENA SRA submission system, an assay is equivalent to an Experiment.
 
-If you are familiar with the ENA SRA submission system, an assay is equivalent to an Experiment.
-
+TODO add an assay
 
 == Adding assay data
 
 If you are familiar with the ENA SRA submission system, assay data is equivalent to a Run.
+
+TODO add assay data
+
+== Finalising your submission
+
+Update the submission status to 'Submitted'.
+
+== Tracking progress
+
+Access the status report to see how the submission
+
 
 == When things go wrong
 
