@@ -7,23 +7,31 @@ import org.springframework.data.rest.core.annotation.HandleBeforeSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.subs.api.services.SubmittableValidationDispatcher;
+import uk.ac.ebi.subs.api.services.ValidationResultService;
 import uk.ac.ebi.subs.repository.model.*;
 import uk.ac.ebi.subs.repository.repos.status.ProcessingStatusRepository;
+import uk.ac.ebi.subs.validator.data.ValidationResult;
+import uk.ac.ebi.subs.validator.repository.ValidationResultRepository;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 @Component
 @RepositoryEventHandler
 public class CoreSubmittableEventHelper {
 
-    @Autowired
-    public CoreSubmittableEventHelper(ProcessingStatusRepository processingStatusRepository, SubmittableValidationDispatcher submittableValidationDispatcher) {
+    public CoreSubmittableEventHelper(
+            ProcessingStatusRepository processingStatusRepository,
+            SubmittableValidationDispatcher submittableValidationDispatcher,
+            ValidationResultRepository validationResultRepository) {
         this.processingStatusRepository = processingStatusRepository;
         this.submittableValidationDispatcher = submittableValidationDispatcher;
+        this.validationResultRepository = validationResultRepository;
     }
 
     private ProcessingStatusRepository processingStatusRepository;
     private SubmittableValidationDispatcher submittableValidationDispatcher;
+    private ValidationResultRepository validationResultRepository;
 
 
     /**
@@ -32,8 +40,18 @@ public class CoreSubmittableEventHelper {
      * @param submittable
      */
     @HandleBeforeCreate
-    public void setProcessingStatus(StoredSubmittable submittable) {
+    public void addDependentObjectsToSubmittable(StoredSubmittable submittable) {
         submittable.setId(UUID.randomUUID().toString());
+
+        ValidationResult validationResult = new ValidationResult();
+        validationResult.setEntityUuid(submittable.getId());
+        validationResult.setUuid(UUID.randomUUID().toString());
+
+        if (submittable.getSubmission() != null)
+            validationResult.setSubmissionId(submittable.getSubmission().getId());
+        validationResultRepository.save(validationResult);
+
+        submittable.setValidationResult(validationResult);
 
         ProcessingStatus processingStatus = ProcessingStatus.createForSubmittable(submittable);
         processingStatus.setId(UUID.randomUUID().toString());
