@@ -145,9 +145,19 @@ TODO add assay data
 
 == Finalising your submission
 
-Update the submission status to 'Submitted'.
+Once you have added all your documents to the submission and they have been validated, you can finalise it and send them
+to the archives. You do this by changing the submission status. To get to the submission status, follow the
+`submissionStatus` link from the submission, then the `self` link.
 
-TODO modify submission status
+You can then change the submission status to 'Submitted', using either a `PUT` or `PATCH` request:
+
+include::{snippets}/patch-submission-status/curl-request.adoc[]
+
+This will return a response to show that the status has been changed:
+
+include::{snippets}/patch-submission-status/http-response.adoc[]
+
+This will also lock the submission, so you cannot make further changes while we broker the data into the archives.
 
 == Tracking progress
 
