@@ -2,8 +2,7 @@ package uk.ac.ebi.subs.api;
 
 
 import uk.ac.ebi.subs.data.client.Study;
-import uk.ac.ebi.subs.data.component.Submitter;
-import uk.ac.ebi.subs.data.component.Team;
+import uk.ac.ebi.subs.data.component.*;
 import uk.ac.ebi.subs.data.status.ProcessingStatusEnum;
 import uk.ac.ebi.subs.data.status.SubmissionStatusEnum;
 import uk.ac.ebi.subs.repository.model.ProcessingStatus;
@@ -50,9 +49,47 @@ public class Helpers {
             s.setDescription("Human sample donor");
             s.setTaxon("Homo sapiens");
             s.setTaxonId(9606L);
+            s.setArchive(Archive.BioSamples);
         }
 
         return samples;
+    }
+
+    public static List<uk.ac.ebi.subs.data.client.Study> generateTestClientStudies(int numberOfStudiesRequired) {
+        List<uk.ac.ebi.subs.data.client.Study> studies= new ArrayList<>(numberOfStudiesRequired);
+
+        for (int i = 1; i <= numberOfStudiesRequired; i++) {
+            uk.ac.ebi.subs.data.client.Study s = new uk.ac.ebi.subs.data.client.Study();
+            studies.add(s);
+
+            Attribute studyType = new Attribute();
+            studyType.setName("study_type");
+            studyType.setValue("Whole Genome Sequencing");
+
+            Term studyFactorTerm = new Term();
+            studyFactorTerm.setUrl("http://www.ebi.ac.uk/efo/EFO_0003744");
+
+            studyType.getTerms().add(studyFactorTerm);
+
+            s.setAlias("Study" + i);
+            s.setTitle("My Sequencing Study " + i);
+            s.setDescription("We sequenced some humans to discover variants linked with a disease");
+
+            s.setArchive(Archive.Ena);
+
+            Attribute studyAbstract = new Attribute();
+            studyType.setName("study_abstract");
+            studyType.setValue(s.getDescription());
+
+            s.getAttributes().add(studyType);
+            s.getAttributes().add(studyAbstract);
+
+            LocalDate releaseDate = LocalDate.parse("2020-12-25");
+
+            s.setReleaseDate(java.sql.Date.valueOf(releaseDate));
+        }
+
+        return studies;
     }
 
 
@@ -77,22 +114,6 @@ public class Helpers {
         return samples;
     }
 
-    public static List<Study> generateTestClientStudies(int numberOfStudiesRequired) {
-        List<Study> studies = new ArrayList<>(numberOfStudiesRequired);
-
-        for (int i = 1; i <= numberOfStudiesRequired; i++) {
-            Study s = new Study();
-            s.setId(createId());
-            s.setAlias("D" + i);
-            s.setTitle("Study " + i);
-            s.setDescription("Human study");
-            s.setReleaseDate(new Date(LocalDate.parse("2020-12-25").toEpochDay()));
-
-            studies.add(s);
-        }
-
-        return studies;
-    }
 
     public static Team generateTestTeam() {
         Team d = new Team();
