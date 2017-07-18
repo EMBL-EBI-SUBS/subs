@@ -33,12 +33,12 @@ import uk.ac.ebi.subs.api.handlers.SubmissionEventHandler;
 import uk.ac.ebi.subs.api.handlers.SubmissionStatusEventHandler;
 import uk.ac.ebi.subs.api.services.SubmissionEventService;
 import uk.ac.ebi.subs.data.client.PartOfSubmission;
+import uk.ac.ebi.subs.data.component.Archive;
 import uk.ac.ebi.subs.data.component.SampleRelationship;
 import uk.ac.ebi.subs.data.component.Submitter;
 import uk.ac.ebi.subs.data.component.Team;
-import uk.ac.ebi.subs.repository.model.Sample;
-import uk.ac.ebi.subs.repository.model.Submission;
-import uk.ac.ebi.subs.repository.model.SubmissionStatus;
+import uk.ac.ebi.subs.data.status.ProcessingStatusEnum;
+import uk.ac.ebi.subs.repository.model.*;
 import uk.ac.ebi.subs.repository.repos.SubmissionRepository;
 import uk.ac.ebi.subs.repository.repos.status.ProcessingStatusRepository;
 import uk.ac.ebi.subs.repository.repos.status.SubmissionStatusRepository;
@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -355,6 +356,138 @@ public class ApiDocumentation {
     }
 
     @Test
+    public void progressReports() throws Exception {
+        Submission sub = storeSubmission();
+
+        fakeValidationResults(sub);
+
+        this.mockMvc.perform(get("/api/processingStatuses/search/findBySubmissionId?submissionId={submissionId}", sub.getId()))
+                .andExpect(status().isOk())
+                .andDo(document(
+                        "page-progress-reports",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        links(halLinks(),
+                                linkWithRel("self").description("This resource list"),
+                                linkWithRel("first").description("The first page in the resource list"),
+                                linkWithRel("next").description("The next page in the resource list"),
+                                linkWithRel("last").description("The last page in the resource list")
+                        ),
+                        responseFields(
+                                fieldWithPath("_links").description("<<resources-page-links,Links>> to other resources"),
+                                fieldWithPath("_embedded").description("The list of resources"),
+                                fieldWithPath("page.size").description("The number of resources in this page"),
+                                fieldWithPath("page.totalElements").description("The total number of resources"),
+                                fieldWithPath("page.totalPages").description("The total number of pages"),
+                                fieldWithPath("page.number").description("The page number")
+                        )
+                ));
+
+        this.mockMvc.perform(get("/api/submissions/{submissionId}/processingStatusSummaryCounts", sub.getId()))
+                .andExpect(status().isOk())
+                .andDo(document(
+                        "summary-progress-reports",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        links(halLinks()
+                        ),
+                        responseFields(
+                                fieldWithPath("Dispatched").description("The number of documents dispatched to an archive"),
+                                fieldWithPath("Completed").description("The number of documents that are completely archived")
+                        )
+                ));
+
+        this.mockMvc.perform(get("/api/submissions/{submissionId}/processingStatusSummaryTypeCounts", sub.getId()))
+                .andExpect(status().isOk())
+                .andDo(document(
+                        "type-summary-progress-reports",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        links(halLinks()
+                        ),
+                        responseFields(
+                                fieldWithPath("Assay").description("Counts of statuses for this document type"),
+                                fieldWithPath("AssayData").description("Counts of statuses for this document type"),
+                                fieldWithPath("Study").description("Counts of statuses for this document type"),
+                                fieldWithPath("Sample").description("Counts of statuses for this document type")
+                        )
+                ));
+    }
+
+
+
+    private void fakeValidationResults(Submission sub) {
+        IntStream
+                .rangeClosed(1,10)
+                .mapToObj(Integer::valueOf)
+                .forEach(index ->
+                     storeProcessingStatus(
+                             sub,
+                             Sample.class,
+                             "sample"+index,
+                             "SAMEAFAKE0000"+index,
+                             Archive.BioSamples,
+                             ProcessingStatusEnum.Completed
+                     )
+                );
+
+        storeProcessingStatus(
+                sub,
+                Study.class,
+                "study",
+                null,
+                Archive.Ena,
+                ProcessingStatusEnum.Dispatched
+        );
+
+        IntStream
+                .rangeClosed(1,10)
+                .mapToObj(Integer::valueOf)
+                .forEach(index ->
+                        storeProcessingStatus(
+                                sub,
+                                Assay.class,
+                                "assay"+index,
+                                null,
+                                Archive.Ena,
+                                ProcessingStatusEnum.Dispatched
+                        )
+                );
+
+        IntStream
+                .rangeClosed(1,10)
+                .mapToObj(Integer::valueOf)
+                .forEach(index ->
+                        storeProcessingStatus(
+                                sub,
+                                AssayData.class,
+                                "assayData"+index,
+                                null,
+                                Archive.Ena,
+                                ProcessingStatusEnum.Dispatched
+                        )
+                );
+    }
+
+    private void storeProcessingStatus(
+            Submission sub,
+            Class<? extends StoredSubmittable> type,
+            String alias,
+            String accession,
+            Archive archive,
+            ProcessingStatusEnum processingStatusEnum
+    ){
+        ProcessingStatus status = new ProcessingStatus();
+        status.setSubmissionId(sub.getId());
+        status.setAccession(accession);
+        status.setArchive(archive.name());
+        status.setSubmittableType(type.getSimpleName());
+
+        status.setStatus(processingStatusEnum);
+        processingStatusRepository.insert(status);
+    }
+
+    @Test
     public void createStudy() throws Exception {
         Submission sub = storeSubmission();
         uk.ac.ebi.subs.data.client.Study study = Helpers.generateTestClientStudies(1).get(0);
@@ -404,6 +537,64 @@ public class ApiDocumentation {
                                         processingStatusLink(),
                                         linkWithRel("self").description("This resource"),
                                         linkWithRel("study").description("This resource"),
+                                        linkWithRel("self:update").description("This resource can be updated"),
+                                        linkWithRel("self:delete").description("This resource can be deleted"),
+                                        linkWithRel("history").description("Collection of resources for samples with the same team and alias as this resource"),
+                                        linkWithRel("current-version").description("Current version of this sample, as identified by team and alias")
+                                )
+                        )
+                );
+    }
+
+    @Test
+    public void createAssay() throws Exception {
+        Submission sub = storeSubmission();
+        uk.ac.ebi.subs.data.client.Assay assay= Helpers.generateTestClientAssays(1).get(0);
+
+        setSubmissionInSubmittable(sub, assay);
+
+        String jsonRepresentation = objectMapper.writeValueAsString(assay);
+
+        this.mockMvc.perform(
+                post("/api/assays").content(jsonRepresentation)
+                        .contentType(RestMediaTypes.HAL_JSON)
+                        .accept(RestMediaTypes.HAL_JSON)
+
+        ).andExpect(status().isCreated())
+                .andDo(
+                        document("create-assay",
+                                preprocessRequest(prettyPrint()),
+                                preprocessResponse(prettyPrint()),
+                                responseFields(
+                                        fieldWithPath("_links").description("Links"),
+                                        fieldWithPath("alias").description("Unique name for the study within the team"),
+                                        fieldWithPath("title").description("Title for the study"),
+                                        fieldWithPath("description").description("Description for the study"),
+                                        fieldWithPath("attributes").description("A list of attributes for the study"),
+
+
+                                        fieldWithPath("archive").description("Destination archive for this assay"),
+                                        fieldWithPath("studyRef").description("Reference to the study that this assay is part of"),
+
+                                        fieldWithPath("sampleUses").description("Samples used in this assay"),
+                                        fieldWithPath("sampleUses[0].sampleRef").description("Reference to the sample used in this assay"),
+                                        fieldWithPath("protocolUses").description("Protocols used in this study"),
+
+                                        fieldWithPath("_embedded.submission").description("Submission that this study is part of"),
+                                        fieldWithPath("_embedded.processingStatus").description("Processing status for this study."),
+                                        fieldWithPath("team").description("Team this sample belongs to"),
+                                        fieldWithPath("createdDate").description("Date this resource was created"),
+                                        fieldWithPath("lastModifiedDate").description("Date this resource was modified"),
+                                        fieldWithPath("createdBy").description("User who created this resource"),
+                                        fieldWithPath("lastModifiedBy").description("User who last modified this resource")
+                                ),
+                                links(
+                                        halLinks(),
+                                        validationresultLink(),
+                                        submissionLink(),
+                                        processingStatusLink(),
+                                        linkWithRel("self").description("This resource"),
+                                        linkWithRel("assay").description("This resource"),
                                         linkWithRel("self:update").description("This resource can be updated"),
                                         linkWithRel("self:delete").description("This resource can be deleted"),
                                         linkWithRel("history").description("Collection of resources for samples with the same team and alias as this resource"),

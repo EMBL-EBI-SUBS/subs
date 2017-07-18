@@ -1,14 +1,14 @@
 package uk.ac.ebi.subs.api;
 
 
+import uk.ac.ebi.subs.data.client.*;
 import uk.ac.ebi.subs.data.client.Study;
 import uk.ac.ebi.subs.data.component.*;
 import uk.ac.ebi.subs.data.status.ProcessingStatusEnum;
 import uk.ac.ebi.subs.data.status.SubmissionStatusEnum;
-import uk.ac.ebi.subs.repository.model.ProcessingStatus;
+import uk.ac.ebi.subs.repository.model.*;
+import uk.ac.ebi.subs.repository.model.Assay;
 import uk.ac.ebi.subs.repository.model.Sample;
-import uk.ac.ebi.subs.repository.model.Submission;
-import uk.ac.ebi.subs.repository.model.SubmissionStatus;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -78,8 +78,8 @@ public class Helpers {
             s.setArchive(Archive.Ena);
 
             Attribute studyAbstract = new Attribute();
-            studyType.setName("study_abstract");
-            studyType.setValue(s.getDescription());
+            studyAbstract.setName("study_abstract");
+            studyAbstract.setValue(s.getDescription());
 
             s.getAttributes().add(studyType);
             s.getAttributes().add(studyAbstract);
@@ -90,6 +90,55 @@ public class Helpers {
         }
 
         return studies;
+    }
+
+    private static Attribute attribute(String name, String value){
+        Attribute attribute = new Attribute();
+        attribute.setName(name);
+        attribute.setValue(value);
+        return attribute;
+    }
+
+    public static List<uk.ac.ebi.subs.data.client.Assay> generateTestClientAssays(int numberOfAssaysRequired) {
+        List<uk.ac.ebi.subs.data.client.Assay> assays = new ArrayList<>(numberOfAssaysRequired);
+
+        Study study = generateTestClientStudies(1).get(0);
+        StudyRef studyRef = new StudyRef();
+        studyRef.setAlias(study.getAlias());
+
+        List<uk.ac.ebi.subs.data.client.Sample> samples = generateTestClientSamples(numberOfAssaysRequired);
+
+
+        for (int i = 1; i <= numberOfAssaysRequired; i++) {
+            uk.ac.ebi.subs.data.client.Assay a = new uk.ac.ebi.subs.data.client.Assay();
+            assays.add(a);
+
+            a.setId(createId());
+
+            a.setAlias("A" + i);
+            a.setTitle("Assay " + i);
+            a.setDescription("Human sequencing experiment");
+
+            a.setStudyRef(studyRef);
+
+            a.setArchive(Archive.Ena);
+
+            SampleRef sampleRef = new SampleRef();
+            sampleRef.setAlias(samples.get(i-1).getAlias());
+            SampleUse sampleUse = new SampleUse();
+            sampleUse.setSampleRef( sampleRef);
+            a.getSampleUses().add(sampleUse);
+
+            a.getAttributes().add(attribute("library_strategy","WGS"));
+            a.getAttributes().add(attribute("library_source","GENOMIC"));
+            a.getAttributes().add(attribute("library_selection","RANDOM"));
+            a.getAttributes().add(attribute("library_layout","SINGLE"));
+
+            a.getAttributes().add(attribute("platform_type","ILLUMINA"));
+            a.getAttributes().add(attribute("instrument_model","Illumina HiSeq 2000"));
+        }
+
+        return assays;
     }
 
 
