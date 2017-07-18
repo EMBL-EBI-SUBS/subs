@@ -43,6 +43,8 @@ import uk.ac.ebi.subs.repository.repos.SubmissionRepository;
 import uk.ac.ebi.subs.repository.repos.status.ProcessingStatusRepository;
 import uk.ac.ebi.subs.repository.repos.status.SubmissionStatusRepository;
 import uk.ac.ebi.subs.repository.repos.submittables.SampleRepository;
+import uk.ac.ebi.subs.validator.data.ValidationResult;
+import uk.ac.ebi.subs.validator.repository.ValidationResultRepository;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -98,6 +100,9 @@ public class ApiDocumentation {
 
     @Autowired
     private SubmissionStatusEventHandler submissionStatusEventHandler;
+
+    @Autowired
+    private ValidationResultRepository validationResultRepository;
 
     private ObjectMapper objectMapper;
 
@@ -825,6 +830,33 @@ public class ApiDocumentation {
                         )
                 );
 
+        ValidationResult validationResult = validationResultRepository.findAll().get(0);
+
+        this.mockMvc.perform(
+                get("/api/validationResults/{validationResultId}",validationResult.getUuid())
+                        .accept(RestMediaTypes.HAL_JSON)
+
+        ).andExpect(status().isOk())
+                .andDo(
+                        document("get-validation-result",
+                                preprocessRequest(prettyPrint()),
+                                preprocessResponse(prettyPrint()),
+                                responseFields(
+                                        fieldWithPath("_links").description("Links"),
+
+                                        fieldWithPath("validationStatus").description("Is validation pending or complete?"),
+                                        fieldWithPath("entityUuid").description("Identifer for the resource being validated"),
+                                        fieldWithPath("version").description("Version of this resource"),
+                                        fieldWithPath("submissionId").description("Identifier for the submission this result relates to")
+                                ),
+                                links(
+                                        halLinks(),
+                                        linkWithRel("self").description("This resource"),
+                                        linkWithRel("validationResult").description("This resource")
+
+                                )
+                        )
+                );
     }
 
 
