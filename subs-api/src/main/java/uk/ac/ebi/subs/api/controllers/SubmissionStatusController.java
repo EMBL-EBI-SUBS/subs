@@ -4,12 +4,12 @@ import org.springframework.data.rest.webmvc.BasePathAwareController;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.ac.ebi.subs.api.services.ValidationResultService;
 import uk.ac.ebi.subs.data.status.StatusDescription;
 import uk.ac.ebi.subs.repository.model.Submission;
-import uk.ac.ebi.subs.repository.model.SubmissionStatus;
 import uk.ac.ebi.subs.repository.repos.SubmissionRepository;
-import uk.ac.ebi.subs.repository.repos.status.SubmissionStatusRepository;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,18 +23,24 @@ public class SubmissionStatusController {
 
     private Map<String, StatusDescription> submissionStatusDescriptionMap;
     private SubmissionRepository submissionRepository;
+    private ValidationResultService validationResultService;
 
-    public SubmissionStatusController(Map<String, StatusDescription> submissionStatusDescriptionMap, SubmissionRepository submissionRepository) {
+    public SubmissionStatusController(Map<String, StatusDescription> submissionStatusDescriptionMap, SubmissionRepository submissionRepository, ValidationResultService validationResultService) {
         this.submissionStatusDescriptionMap = submissionStatusDescriptionMap;
         this.submissionRepository = submissionRepository;
+        this.validationResultService = validationResultService;
     }
 
     @RequestMapping("/availableSubmissionStatuses")
     public Set<String> availableSubmissionStatuses(@PathVariable String submissionId) {
-        Submission currentSubmission = submissionRepository.findOne(submissionId);
+        Submission currentSubmission = submissionRepository.findBySubmissionStatusId(submissionId);
 
-        StatusDescription statusDescription = submissionStatusDescriptionMap.get(currentSubmission.getSubmissionStatus().getStatus());
+        if (validationResultService.isValidationFinishedAndPassed(currentSubmission.getSubmissionStatus().getId())) {
+            StatusDescription statusDescription = submissionStatusDescriptionMap.get(currentSubmission.getSubmissionStatus().getStatus());
 
-        return statusDescription.getUserTransitions();
+            return statusDescription.getUserTransitions();
+        }
+
+        return Collections.emptySet();
     }
 }
