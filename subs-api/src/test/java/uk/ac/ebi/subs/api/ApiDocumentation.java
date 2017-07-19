@@ -44,6 +44,7 @@ import uk.ac.ebi.subs.repository.repos.status.ProcessingStatusRepository;
 import uk.ac.ebi.subs.repository.repos.status.SubmissionStatusRepository;
 import uk.ac.ebi.subs.repository.repos.submittables.SampleRepository;
 import uk.ac.ebi.subs.validator.data.ValidationResult;
+import uk.ac.ebi.subs.validator.data.ValidationStatus;
 import uk.ac.ebi.subs.validator.repository.ValidationResultRepository;
 
 import java.io.IOException;
@@ -112,6 +113,7 @@ public class ApiDocumentation {
     @MockBean
     private RabbitMessagingTemplate rabbitMessagingTemplate;
 
+
     private MockMvc mockMvc;
     private SubmissionEventService fakeSubmissionEventService = new SubmissionEventService() {
         @Override
@@ -161,6 +163,8 @@ public class ApiDocumentation {
         this.submissionRepository.deleteAll();
         this.sampleRepository.deleteAll();
         this.submissionStatusRepository.deleteAll();
+        this.validationResultRepository.deleteAll();
+        this.processingStatusRepository.deleteAll();
     }
 
     @After
@@ -327,6 +331,13 @@ public class ApiDocumentation {
                         )
                 );
 
+        Submission sub = submissionRepository.findAll().get(0);
+        ValidationResult vr = new ValidationResult();
+        vr.setSubmissionId(sub.getId());
+        vr.setUuid("test");
+        vr.setValidationStatus(ValidationStatus.Complete);
+       validationResultRepository.insert(vr);
+
         SubmissionStatus status = submissionStatusRepository.findAll().get(0);
         Assert.notNull(status);
 
@@ -353,7 +364,8 @@ public class ApiDocumentation {
                                         halLinks(),
                                         linkWithRel("self").description("This resource"),
                                         linkWithRel("submissionStatus").description("This resource"),
-                                        linkWithRel("statusDescription").description("Description of this status")
+                                        linkWithRel("statusDescription").description("Description of this status"),
+                                        linkWithRel("availableStatuses").description("List of status values that you can currently use in this resource")
                                 )
                         )
                 );
@@ -364,7 +376,7 @@ public class ApiDocumentation {
     public void progressReports() throws Exception {
         Submission sub = storeSubmission();
 
-        fakeValidationResults(sub);
+        fakeProcessingStatus(sub);
 
         this.mockMvc.perform(get("/api/processingStatuses/search/findBySubmissionId?submissionId={submissionId}", sub.getId()))
                 .andExpect(status().isOk())
@@ -421,7 +433,7 @@ public class ApiDocumentation {
 
 
 
-    private void fakeValidationResults(Submission sub) {
+    private void fakeProcessingStatus(Submission sub) {
         IntStream
                 .rangeClosed(1,10)
                 .mapToObj(Integer::valueOf)
