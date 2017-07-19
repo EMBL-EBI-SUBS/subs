@@ -10,6 +10,7 @@ import uk.ac.ebi.subs.agent.services.FetchService;
 import uk.ac.ebi.subs.agent.services.SubmissionService;
 import uk.ac.ebi.subs.agent.services.UpdateService;
 import uk.ac.ebi.subs.data.Submission;
+import uk.ac.ebi.subs.data.component.Attribute;
 import uk.ac.ebi.subs.data.submittable.Sample;
 import uk.ac.ebi.subs.messaging.Exchanges;
 import uk.ac.ebi.subs.messaging.Topics;
@@ -17,6 +18,8 @@ import uk.ac.ebi.subs.processing.ProcessingCertificate;
 import uk.ac.ebi.subs.processing.SubmissionEnvelope;
 import uk.ac.ebi.subs.processing.UpdatedSamplesEnvelope;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,6 +52,14 @@ public class SamplesProcessor {
         logger.debug("Processing {} samples from {} submission", envelope.getSamples().size(), submission.getId());
 
         List<ProcessingCertificate> certificates = new ArrayList<>();
+
+        // Set updateDate
+        for (Sample sample : envelope.getSamples()) {
+            Attribute attribute = new Attribute();
+            attribute.setName("update");
+            attribute.setValue(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+            sample.getAttributes().add(attribute);
+        }
 
         // Update
         List<Sample> samplesToUpdate = envelope.getSamples().stream()

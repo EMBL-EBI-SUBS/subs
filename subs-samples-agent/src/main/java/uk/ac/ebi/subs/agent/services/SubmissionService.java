@@ -30,8 +30,10 @@ public class SubmissionService {
 
     public List<Sample> submit(List<Sample> sampleList) {
         ArrayList<Sample> submittedSamples = new ArrayList<>();
+
         sampleList.forEach(usiSample -> {
-            Sample submitted = submit(toBsdSample.convert(usiSample));
+            uk.ac.ebi.biosamples.model.Sample bsdSample = toBsdSample.convert(usiSample);
+            Sample submitted = submit(bsdSample);
             submittedSamples.add(submitted);
         });
         return submittedSamples;
