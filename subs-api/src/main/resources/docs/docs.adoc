@@ -1,0 +1,20 @@
+= Documentation
+:doctype: article
+:icons: font
+
+== What are you looking for?
+ * <<Developer documentation>>
+ * <<Website documentation>>
+ * <<Frequently asked questions>>
+
+== Developer documentation
+ * <<how_to_submit_data_programatically.adoc#,How to submit data programatically>>
+ * <<submission_api.adoc#,API reference documentation>>
+
+== Website documentation
+ * _TODO_
+
+== Frequently asked questions
+ * _TODO_
+
+
