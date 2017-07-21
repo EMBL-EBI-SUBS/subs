@@ -18,6 +18,7 @@ import java.util.UUID;
 
 public class Helpers {
 
+
     public static Submission generateSubmission() {
         Submission s = new Submission();
 
@@ -45,11 +46,24 @@ public class Helpers {
             samples.add(s);
 
             s.setAlias("D" + i);
-            s.setTitle("Donor " + i);
-            s.setDescription("Human sample donor");
+            s.setTitle("NA12878_D" + i);
+            s.setDescription("Material derived from cell line NA12878");
             s.setTaxon("Homo sapiens");
             s.setTaxonId(9606L);
             s.setArchive(Archive.BioSamples);
+
+            Attribute cellLineType = attribute("Cell line type", "EBV-LCL cell line");
+            Term ebvLclCellLine = new Term();
+            ebvLclCellLine.setUrl("http://purl.obolibrary.org/obo/BTO_0003335");
+            cellLineType.getTerms().add(ebvLclCellLine);
+
+            s.getAttributes().add(cellLineType);
+
+            SampleRelationship derivedFrom = new SampleRelationship();
+            derivedFrom.setAccession("SAME123392");
+            derivedFrom.setRelationshipNature("Derived from");
+
+            s.getSampleRelationships().add(derivedFrom);
         }
 
         return samples;
@@ -65,11 +79,6 @@ public class Helpers {
             Attribute studyType = new Attribute();
             studyType.setName("study_type");
             studyType.setValue("Whole Genome Sequencing");
-
-            Term studyFactorTerm = new Term();
-            studyFactorTerm.setUrl("http://www.ebi.ac.uk/efo/EFO_0003744");
-
-            studyType.getTerms().add(studyFactorTerm);
 
             s.setAlias("Study" + i);
             s.setTitle("My Sequencing Study " + i);
@@ -105,6 +114,7 @@ public class Helpers {
         Study study = generateTestClientStudies(1).get(0);
         StudyRef studyRef = new StudyRef();
         studyRef.setAlias(study.getAlias());
+        studyRef.setTeam(TEAM_NAME);
 
         List<uk.ac.ebi.subs.data.client.Sample> samples = generateTestClientSamples(numberOfAssaysRequired);
 
@@ -123,6 +133,8 @@ public class Helpers {
 
             SampleRef sampleRef = new SampleRef();
             sampleRef.setAlias(samples.get(i-1).getAlias());
+            sampleRef.setTeam(TEAM_NAME);
+
             SampleUse sampleUse = new SampleUse();
             sampleUse.setSampleRef( sampleRef);
             a.getSampleUses().add(sampleUse);
@@ -159,6 +171,7 @@ public class Helpers {
 
             AssayRef assayRef = new AssayRef();
             assayRef.setAlias(assays.get(i-1).getAlias());
+            assayRef.setTeam(TEAM_NAME);
             ad.setAssayRef(assayRef);
 
             File file = new File();
@@ -197,10 +210,12 @@ public class Helpers {
 
     public static Team generateTestTeam() {
         Team d = new Team();
-        d.setName("my-team");
+        d.setName(TEAM_NAME);
         return d;
     }
 
+
+    private static String TEAM_NAME = "my-team";
 
     public static Submission generateTestSubmission() {
         Submission sub = new Submission();

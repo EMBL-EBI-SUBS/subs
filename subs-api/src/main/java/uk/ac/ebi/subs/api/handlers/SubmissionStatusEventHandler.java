@@ -1,6 +1,7 @@
 package uk.ac.ebi.subs.api.handlers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.core.annotation.HandleAfterSave;
 import org.springframework.data.rest.core.annotation.HandleBeforeSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.stereotype.Component;
@@ -35,7 +36,7 @@ public class SubmissionStatusEventHandler {
         this.submissionEventService = submissionEventService;
     }
 
-    @HandleBeforeSave
+    @HandleAfterSave
     public void handleUpdate(SubmissionStatus submissionStatus) {
         if (SubmissionStatusEnum.Submitted.name().equals(submissionStatus.getStatus())) {
             Submission submission = submissionRepository.findBySubmissionStatusId(submissionStatus.getId());

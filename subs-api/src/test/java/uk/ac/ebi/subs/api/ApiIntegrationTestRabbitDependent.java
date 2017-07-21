@@ -139,6 +139,6 @@ public class ApiIntegrationTestRabbitDependent {
                 .body("{\"status\": \"Submitted\"}")
                 .asJson();
 
-        assertThat(submissionPatchResponse.getStatus(), is(equalTo(HttpStatus.OK.value())));
+        assertThat(submissionPatchResponse.getStatus(), is(equalTo(HttpStatus.BAD_REQUEST.value()))); //validation results required
     }
 }

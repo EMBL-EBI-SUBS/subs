@@ -2,17 +2,16 @@ package uk.ac.ebi.subs.api.handlers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.core.annotation.HandleAfterDelete;
 import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
-import org.springframework.data.rest.core.annotation.HandleBeforeDelete;
 import org.springframework.data.rest.core.annotation.HandleBeforeSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.subs.api.services.SubmissionEventService;
 import uk.ac.ebi.subs.data.status.SubmissionStatusEnum;
-import uk.ac.ebi.subs.repository.repos.SubmissionRepository;
 import uk.ac.ebi.subs.repository.model.Submission;
 import uk.ac.ebi.subs.repository.model.SubmissionStatus;
+import uk.ac.ebi.subs.repository.repos.SubmissionRepository;
 import uk.ac.ebi.subs.repository.repos.status.SubmissionStatusRepository;
 import uk.ac.ebi.subs.repository.services.SubmissionHelperService;
 
@@ -88,7 +87,7 @@ public class SubmissionEventHandler {
         submissionEventService.submissionUpdated(submission);
     }
 
-    @HandleBeforeDelete
+    @HandleAfterDelete
     public void handleBeforeDelete(Submission submission) {
         submissionEventService.submissionDeleted(submission);
     }
