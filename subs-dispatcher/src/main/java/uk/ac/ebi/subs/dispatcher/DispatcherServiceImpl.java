@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import uk.ac.ebi.subs.data.Submission;
+import uk.ac.ebi.subs.data.component.AbstractSubsRef;
 import uk.ac.ebi.subs.data.component.Archive;
 import uk.ac.ebi.subs.data.component.SampleRef;
 import uk.ac.ebi.subs.data.component.SampleUse;
@@ -41,6 +42,16 @@ public class DispatcherServiceImpl implements DispatcherService {
     }
 
     @Override
+    /**
+     * When is a submittable ready for dispatch?
+     *
+     * If all the things it references are either
+     *  - destined for the same archive as it, and in the same submission (archive agent can resolve accessioning + linking)
+     *  - been accessioned already
+     *
+     * If any of the submittables for an archive are not ready for dispatch, don't send anything to that archive
+     *
+     */
     public Map<Archive, SubmissionEnvelope> assessDispatchReadiness(final Submission submission) {
         Map<String, Set<String>> typesAndIdsToConsider = processingStatusRepository
                 .summariseSubmissionTypesWithSubmittableIds(submission.getId(), processingStatusesToAllow);
@@ -54,6 +65,10 @@ public class DispatcherServiceImpl implements DispatcherService {
         }
 
         Set<Archive> archivesToBlock = new HashSet<>();
+
+        //expect many refs to the same thing, e.g. all assays pointing to the same study
+        Map<AbstractSubsRef,StoredSubmittable> refLookupCache = new HashMap<>();
+
 
         for (Map.Entry<String, Set<String>> typeAndIds : typesAndIdsToConsider.entrySet()) {
             String type = typeAndIds.getKey();
@@ -70,7 +85,7 @@ public class DispatcherServiceImpl implements DispatcherService {
                             .refs()
                             .filter(ref -> ref != null)
                             .filter(ref -> ref.getAlias() != null || ref.getAccession() != null) //TODO this is because of empty refs as defaults
-                            .map(ref -> refLookupService.lookupRef(ref))
+                            .map(ref -> lookupRefInCacheThenRepository(refLookupCache, ref) )
                             .filter(referencedSubmittable -> !isForSameArchiveAndInSameSubmission(submission, archive, referencedSubmittable))
                             .collect(Collectors.toList());
 
@@ -104,6 +119,12 @@ public class DispatcherServiceImpl implements DispatcherService {
         }
 
         return readyForDispatch;
+    }
+
+    private StoredSubmittable lookupRefInCacheThenRepository(Map<AbstractSubsRef, StoredSubmittable> refLookupCache, AbstractSubsRef ref) {
+        if (!refLookupCache.containsKey(ref))
+            refLookupCache.put(ref,refLookupService.lookupRef(ref));
+        return refLookupCache.get(ref);
     }
 
     private boolean isBlockerForThisSubmittable(Submission submission, Archive archive, StoredSubmittable sub) {
