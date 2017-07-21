@@ -18,6 +18,8 @@ import uk.ac.ebi.subs.processing.SubmissionEnvelope;
 import uk.ac.ebi.subs.repository.RefLookupService;
 import uk.ac.ebi.subs.repository.SubmissionEnvelopeService;
 import uk.ac.ebi.subs.repository.model.StoredSubmittable;
+import uk.ac.ebi.subs.repository.processing.SupportingSample;
+import uk.ac.ebi.subs.repository.processing.SupportingSampleRepository;
 import uk.ac.ebi.subs.repository.repos.status.ProcessingStatusBulkOperations;
 import uk.ac.ebi.subs.repository.repos.status.ProcessingStatusRepository;
 import uk.ac.ebi.subs.repository.repos.submittables.SubmittableRepository;
@@ -31,15 +33,6 @@ public class DispatcherServiceImpl implements DispatcherService {
 
 
     private static final Logger logger = LoggerFactory.getLogger(DispatcherServiceImpl.class);
-
-
-    private boolean containsAnyAllowedStatus(Map.Entry<String, Map<String, Integer>> typeStatusSummary) {
-        for (String status : processingStatusesToAllow) {
-            if (typeStatusSummary.getValue().containsKey(status) && typeStatusSummary.getValue().get(status) > 0)
-                return true;
-        }
-        return false;
-    }
 
     @Override
     /**
@@ -68,7 +61,6 @@ public class DispatcherServiceImpl implements DispatcherService {
 
         //expect many refs to the same thing, e.g. all assays pointing to the same study
         Map<AbstractSubsRef,StoredSubmittable> refLookupCache = new HashMap<>();
-
 
         for (Map.Entry<String, Set<String>> typeAndIds : typesAndIdsToConsider.entrySet()) {
             String type = typeAndIds.getKey();
