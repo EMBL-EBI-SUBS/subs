@@ -1,4 +1,4 @@
-package uk.ac.ebi.subs.repository;
+package uk.ac.ebi.subs;
 
 
 import org.springframework.boot.SpringApplication;
