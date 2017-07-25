@@ -5,9 +5,13 @@ import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import uk.ac.ebi.subs.data.component.AbstractSubsRef;
+import uk.ac.ebi.subs.data.component.SampleRef;
+import uk.ac.ebi.subs.data.component.SampleRelationship;
 import uk.ac.ebi.subs.validator.data.ValidationResult;
 
 import java.util.Date;
+import java.util.stream.Stream;
 
 @CompoundIndexes({
         @CompoundIndex(background = true, name = "team_alias", def = "{ 'team.name': 1, 'alias': 1 }"),
@@ -16,6 +20,17 @@ import java.util.Date;
 })
 @Document
 public class Sample extends uk.ac.ebi.subs.data.submittable.Sample implements StoredSubmittable {
+
+    public Stream<AbstractSubsRef> refs(){
+        return this.getSampleRelationships().stream().map(sr -> asRef(sr));
+    }
+    private static AbstractSubsRef asRef(SampleRelationship sr){
+        AbstractSubsRef ref = new SampleRef();
+        ref.setAccession(sr.getAccession());
+        ref.setAlias(sr.getAlias());
+        ref.setTeam(sr.getTeam());
+        return ref;
+    }
 
     @DBRef
     private ProcessingStatus processingStatus;

@@ -26,8 +26,8 @@ import java.util.List;
  */
 public class StressTesterConfig {
 
-    private static final int TOTAL = 200;
-    private static final int PER_ROUTE = 200;
+    private static final int TOTAL = 1000;
+    private static final int PER_ROUTE = 1000;
 
     @Bean
     public RestTemplate restTemplate() {

@@ -19,7 +19,7 @@ public class RefLookupServiceImpl implements RefLookupService {
     Map<Class<? extends AbstractSubsRef>, SubmittableRepository<? extends StoredSubmittable>> referenceRepositoryMap;
 
     @Override
-    public <T extends AbstractSubsRef> Submittable lookupRef(T ref) {
+    public <T extends AbstractSubsRef> StoredSubmittable lookupRef(T ref) {
         SubmittableRepository repo = referenceRepositoryMap.get(ref.getClass());
 
         if(ref.isAccessioned()) {
@@ -30,7 +30,7 @@ public class RefLookupServiceImpl implements RefLookupService {
     }
 
     @Override
-    public <T extends AbstractSubsRef> Set<? extends Submittable> lookupRefs(Collection<T> refs) {
+    public <T extends AbstractSubsRef> Set<? extends StoredSubmittable> lookupRefs(Collection<T> refs) {
         return refs.stream().map(this::lookupRef).collect(Collectors.toSet());
     }
 

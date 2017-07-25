@@ -32,9 +32,12 @@ public class SubmissionEnvelope {
     private List<Study> studies = new ArrayList<>();
     private List<Protocol> protocols = new ArrayList<>();
 
-    public SubmissionEnvelope() {};
+    public SubmissionEnvelope() {
+    }
 
-    public  SubmissionEnvelope(Submission submission){
+    ;
+
+    public SubmissionEnvelope(Submission submission) {
         this.submission = submission;
     }
 
@@ -171,4 +174,6 @@ public class SubmissionEnvelope {
     public Stream<Submittable> allSubmissionItemsStream() {
         return allSubmittablesLists().stream().flatMap(l -> l.stream());
     }
+
+
 }

@@ -1,34 +1,25 @@
 package uk.ac.ebi.subs.api.handlers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.annotation.*;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.subs.api.services.SubmittableValidationDispatcher;
-import uk.ac.ebi.subs.api.services.ValidationResultService;
-import uk.ac.ebi.subs.repository.model.*;
-import uk.ac.ebi.subs.repository.repos.status.ProcessingStatusRepository;
-import uk.ac.ebi.subs.validator.data.ValidationResult;
-import uk.ac.ebi.subs.validator.repository.ValidationResultRepository;
-
-import java.util.HashMap;
-import java.util.UUID;
+import uk.ac.ebi.subs.repository.model.Assay;
+import uk.ac.ebi.subs.repository.model.Sample;
+import uk.ac.ebi.subs.repository.model.StoredSubmittable;
+import uk.ac.ebi.subs.repository.model.Study;
+import uk.ac.ebi.subs.repository.services.SubmittableHelperService;
 
 @Component
 @RepositoryEventHandler
 public class CoreSubmittableEventHelper {
 
-    public CoreSubmittableEventHelper(
-            ProcessingStatusRepository processingStatusRepository,
-            SubmittableValidationDispatcher submittableValidationDispatcher,
-            ValidationResultRepository validationResultRepository) {
-        this.processingStatusRepository = processingStatusRepository;
+    public CoreSubmittableEventHelper(SubmittableHelperService submittableHelperService, SubmittableValidationDispatcher submittableValidationDispatcher) {
+        this.submittableHelperService = submittableHelperService;
         this.submittableValidationDispatcher = submittableValidationDispatcher;
-        this.validationResultRepository = validationResultRepository;
     }
 
-    private ProcessingStatusRepository processingStatusRepository;
+    private SubmittableHelperService submittableHelperService;
     private SubmittableValidationDispatcher submittableValidationDispatcher;
-    private ValidationResultRepository validationResultRepository;
 
 
     /**
@@ -38,31 +29,19 @@ public class CoreSubmittableEventHelper {
      */
     @HandleBeforeCreate
     public void addDependentObjectsToSubmittable(StoredSubmittable submittable) {
-        submittable.setId(UUID.randomUUID().toString());
-
-        ValidationResult validationResult = new ValidationResult();
-        validationResult.setEntityUuid(submittable.getId());
-        validationResult.setUuid(UUID.randomUUID().toString());
-
-        if (submittable.getSubmission() != null)
-            validationResult.setSubmissionId(submittable.getSubmission().getId());
-        validationResultRepository.save(validationResult);
-
-        submittable.setValidationResult(validationResult);
-
-        ProcessingStatus processingStatus = ProcessingStatus.createForSubmittable(submittable);
-        processingStatus.setId(UUID.randomUUID().toString());
-        processingStatusRepository.insert(processingStatus);
-
-        setTeamFromSubmission(submittable);
+        submittableHelperService.setupNewSubmittable(submittable);
     }
 
     // Validation of created submittables
     @HandleAfterCreate
-    public void validateOnCreate(Sample sample) { submittableValidationDispatcher.validateCreate(sample); }
+    public void validateOnCreate(Sample sample) {
+        submittableValidationDispatcher.validateCreate(sample);
+    }
 
     @HandleAfterCreate
-    public void validateOnCreate(Study study) { submittableValidationDispatcher.validateCreate(study); }
+    public void validateOnCreate(Study study) {
+        submittableValidationDispatcher.validateCreate(study);
+    }
 
     @HandleAfterCreate
     public void validateOnCreate(Assay assay) {
@@ -72,10 +51,14 @@ public class CoreSubmittableEventHelper {
     // Validation of updated submittables
 
     @HandleAfterSave
-    public void validateOnSave(Sample sample) { submittableValidationDispatcher.validateUpdate(sample); }
+    public void validateOnSave(Sample sample) {
+        submittableValidationDispatcher.validateUpdate(sample);
+    }
 
     @HandleAfterSave
-    public void validateOnSave(Study study) { submittableValidationDispatcher.validateUpdate(study); }
+    public void validateOnSave(Study study) {
+        submittableValidationDispatcher.validateUpdate(study);
+    }
 
     @HandleAfterSave
     public void validateOnSave(Assay assay) {
@@ -89,8 +72,8 @@ public class CoreSubmittableEventHelper {
         }
     }
 
-    @HandleAfterSave
+    @HandleBeforeSave
     public void beforeSave(StoredSubmittable storedSubmittable) {
-        setTeamFromSubmission(storedSubmittable);
+        submittableHelperService.setTeamFromSubmission(storedSubmittable);
     }
 }

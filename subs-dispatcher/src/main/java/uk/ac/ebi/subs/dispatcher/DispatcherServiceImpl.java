@@ -4,24 +4,24 @@ package uk.ac.ebi.subs.dispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import uk.ac.ebi.subs.data.Submission;
+import uk.ac.ebi.subs.data.component.AbstractSubsRef;
 import uk.ac.ebi.subs.data.component.Archive;
 import uk.ac.ebi.subs.data.component.SampleRef;
 import uk.ac.ebi.subs.data.component.SampleUse;
 import uk.ac.ebi.subs.data.status.ProcessingStatusEnum;
-import uk.ac.ebi.subs.data.status.SubmissionStatusEnum;
 import uk.ac.ebi.subs.data.submittable.Assay;
 import uk.ac.ebi.subs.data.submittable.Sample;
 import uk.ac.ebi.subs.data.submittable.Submittable;
 import uk.ac.ebi.subs.processing.SubmissionEnvelope;
 import uk.ac.ebi.subs.repository.RefLookupService;
 import uk.ac.ebi.subs.repository.SubmissionEnvelopeService;
-import uk.ac.ebi.subs.repository.model.ProcessingStatus;
 import uk.ac.ebi.subs.repository.model.StoredSubmittable;
-import uk.ac.ebi.subs.repository.repos.SubmissionRepository;
+import uk.ac.ebi.subs.repository.processing.SupportingSample;
+import uk.ac.ebi.subs.repository.processing.SupportingSampleRepository;
 import uk.ac.ebi.subs.repository.repos.status.ProcessingStatusBulkOperations;
 import uk.ac.ebi.subs.repository.repos.status.ProcessingStatusRepository;
-import uk.ac.ebi.subs.repository.repos.status.SubmissionStatusRepository;
 import uk.ac.ebi.subs.repository.repos.submittables.SubmittableRepository;
 
 import java.util.*;
@@ -35,59 +35,104 @@ public class DispatcherServiceImpl implements DispatcherService {
     private static final Logger logger = LoggerFactory.getLogger(DispatcherServiceImpl.class);
 
     @Override
-    public Map<Archive, SubmissionEnvelope> assessDispatchReadiness(Submission submission) {
-
-        SubmissionEnvelope submissionEnvelope = submissionEnvelopeService.fetchOne(submission.getId());
-
-        /*
-         * TODO this does not use the referenced sample information in supportingSamples
-         */
-
-        /*
-        * this is a deliberately simple implementation for prototyping
-        * we will need to redo this as we flesh out the system
-        * */
-
-
-        /*
-         * for now, dispatch envelopes to one archive at a time
-         */
-
-        Map<Archive, Boolean> archiveProcessingRequired = new HashMap<>();
-        Arrays.asList(Archive.values()).forEach(a -> archiveProcessingRequired.put(a, false));
+    /**
+     * When is a submittable ready for dispatch?
+     *
+     * If all the things it references are either
+     *  - destined for the same archive as it, and in the same submission (archive agent can resolve accessioning + linking)
+     *  - been accessioned already
+     *
+     * If any of the submittables for an archive are not ready for dispatch, don't send anything to that archive
+     *
+     */
+    public Map<Archive, SubmissionEnvelope> assessDispatchReadiness(final Submission submission) {
+        Map<String, Set<String>> typesAndIdsToConsider = processingStatusRepository
+                .summariseSubmissionTypesWithSubmittableIds(submission.getId(), processingStatusesToAllow);
 
 
-        submissionContentsRepositories
-                .stream()
-                .flatMap(repo -> repo.streamBySubmissionId(submission.getId()))
-                .filter(item ->
-                        processingStatusesToAllow.contains(item.getProcessingStatus().getStatus()))
-                .forEach(item -> {
-                    archiveProcessingRequired.put(item.getArchive(), true);
-                });
+        Map<Archive, SubmissionEnvelope> readyForDispatch = new HashMap<>();
 
-
-        Archive targetArchive = null;
-
-        if (archiveProcessingRequired.get(Archive.BioSamples)) {
-            targetArchive = Archive.BioSamples;
-        } else if (archiveProcessingRequired.get(Archive.Ena)) {
-            targetArchive = Archive.Ena;
-        } else if (archiveProcessingRequired.get(Archive.ArrayExpress)) {
-            targetArchive = Archive.ArrayExpress;
+        logger.info("Submission {} has data to process {}", submission.getId(), typesAndIdsToConsider.keySet());
+        for (Map.Entry<String, Set<String>> typeAndIds : typesAndIdsToConsider.entrySet()) {
+            logger.info("Submission {} has data to process for {}: {}", submission.getId(), typeAndIds.getKey(), typeAndIds.getValue().size());
         }
 
-        Map<Archive, SubmissionEnvelope> readyToDispatch = new HashMap<>();
+        Set<Archive> archivesToBlock = new HashSet<>();
+
+        //expect many refs to the same thing, e.g. all assays pointing to the same study
+        Map<AbstractSubsRef,StoredSubmittable> refLookupCache = new HashMap<>();
+
+        for (Map.Entry<String, Set<String>> typeAndIds : typesAndIdsToConsider.entrySet()) {
+            String type = typeAndIds.getKey();
+
+            if (submittableRepositoryMap.containsKey(type)) {
+                SubmittableRepository submittableRepository = submittableRepositoryMap.get(type);
+
+                for (String submittableId : typeAndIds.getValue()) {
+                    StoredSubmittable submittable = submittableRepository.findOne(submittableId);
+                    Archive archive = submittable.getArchive();
 
 
-        if (targetArchive == null) {
-            logger.info("no work to do on submission {}", submission.getId());
-        } else {
-            readyToDispatch.put(targetArchive, submissionEnvelope);
+                    List<StoredSubmittable> referencedSubmittables = submittable
+                            .refs()
+                            .filter(ref -> ref != null)
+                            .filter(ref -> ref.getAlias() != null || ref.getAccession() != null) //TODO this is because of empty refs as defaults
+                            .map(ref -> lookupRefInCacheThenRepository(refLookupCache, ref) )
+                            .filter(referencedSubmittable -> !isForSameArchiveAndInSameSubmission(submission, archive, referencedSubmittable))
+                            .collect(Collectors.toList());
+
+                    Optional<StoredSubmittable> optionalBlockingSubmittable = referencedSubmittables.stream()
+                            .filter(sub -> !sub.isAccessioned())
+                            .findAny();
+
+                    if (!optionalBlockingSubmittable.isPresent()) {
+                        SubmissionEnvelope submissionEnvelope = upsertSubmissionEnvelope(
+                                archive,
+                                submission,
+                                readyForDispatch
+                        );
+
+
+                        submissionEnvelopeStuffer.add(submissionEnvelope, submittable);
+                        submissionEnvelopeStuffer.addAll(submissionEnvelope, referencedSubmittables);
+                    }
+
+                    if (optionalBlockingSubmittable.isPresent()) {
+                        archivesToBlock.add(archive);
+                    }
+                }
+
+
+            }
         }
 
-        return readyToDispatch;
+        for (Archive archiveToBlock : archivesToBlock) {
+            readyForDispatch.remove(archiveToBlock);
+        }
+
+        return readyForDispatch;
     }
+
+    private StoredSubmittable lookupRefInCacheThenRepository(Map<AbstractSubsRef, StoredSubmittable> refLookupCache, AbstractSubsRef ref) {
+        if (!refLookupCache.containsKey(ref))
+            refLookupCache.put(ref,refLookupService.lookupRef(ref));
+        return refLookupCache.get(ref);
+    }
+
+    private boolean isBlockerForThisSubmittable(Submission submission, Archive archive, StoredSubmittable sub) {
+        return !(sub.isAccessioned() ||
+                isForSameArchiveAndInSameSubmission(submission, archive, sub));
+    }
+
+    private boolean isForSameArchiveAndInSameSubmission(Submission submission, Archive archive, StoredSubmittable sub) {
+        Assert.notNull(sub.getSubmission().getId());
+        Assert.notNull(submission.getId());
+        Assert.notNull(sub.getArchive());
+        Assert.notNull(archive);
+        return sub.getSubmission().getId().equals(submission.getId())
+                && sub.getArchive().equals(archive);
+    }
+
 
     @Override
     public Map<Archive, SubmissionEnvelope> determineSupportingInformationRequired(Submission submission) {
@@ -131,7 +176,7 @@ public class DispatcherServiceImpl implements DispatcherService {
                 .map(SampleUse::getSampleRef)
                 .collect(Collectors.toSet());
 
-        submissionEnvelope.getSupportingSamples().addAll((Set<Sample>) refLookupService.lookupRefs(assaySampleRefs));
+        submissionEnvelope.getSupportingSamples().addAll((Set<? extends Sample>) refLookupService.lookupRefs(assaySampleRefs));
     }
 
     public void determineSupportingInformationRequired(SubmissionEnvelope submissionEnvelope) {
@@ -172,37 +217,47 @@ public class DispatcherServiceImpl implements DispatcherService {
 
     }
 
-    private List<Class<? extends StoredSubmittable>> submittablesClassList;
-    private SubmissionEnvelopeService submissionEnvelopeService;
-    private RefLookupService refLookupService;
-    private SubmissionRepository submissionRepository;
-    private SubmissionStatusRepository submissionStatusRepository;
-    private ProcessingStatusRepository processingStatusRepository;
-    private ProcessingStatusBulkOperations processingStatusBulkOperations;
-    private List<SubmittableRepository<?>> submissionContentsRepositories;
+    public static SubmissionEnvelope upsertSubmissionEnvelope(
+            Archive archive,
+            Submission submission,
+            Map<Archive, SubmissionEnvelope> receiver) {
+
+        if (!receiver.containsKey(archive)) {
+            receiver.put(archive, new SubmissionEnvelope(submission));
+        }
+        return receiver.get(archive);
+
+    }
+
+
     private Set<String> processingStatusesToAllow;
+    private Map<String, SubmittableRepository> submittableRepositoryMap;
+    private RefLookupService refLookupService;
+    private SubmissionEnvelopeService submissionEnvelopeService;
+    private ProcessingStatusBulkOperations processingStatusBulkOperations;
+    private ProcessingStatusRepository processingStatusRepository;
+    private SubmissionEnvelopeStuffer submissionEnvelopeStuffer;
 
-    public DispatcherServiceImpl(
-            SubmissionEnvelopeService submissionEnvelopeService,
-            RefLookupService refLookupService,
-            SubmissionRepository submissionRepository,
-            SubmissionStatusRepository submissionStatusRepository,
-            ProcessingStatusRepository processingStatusRepository,
-            List<Class<? extends StoredSubmittable>> submittablesClassList,
-            List<SubmittableRepository<?>> submissionContentsRepositories,
-            ProcessingStatusBulkOperations processingStatusBulkOperations
-
-    ) {
-        this.submissionEnvelopeService = submissionEnvelopeService;
+    public DispatcherServiceImpl(Map<Class<? extends StoredSubmittable>, SubmittableRepository<? extends StoredSubmittable>> submittableRepositoryMap, RefLookupService refLookupService, SubmissionEnvelopeService submissionEnvelopeService, ProcessingStatusBulkOperations processingStatusBulkOperations, ProcessingStatusRepository processingStatusRepository, SubmissionEnvelopeStuffer submissionEnvelopeStuffer) {
         this.refLookupService = refLookupService;
-        this.submissionRepository = submissionRepository;
-        this.submissionStatusRepository = submissionStatusRepository;
-
-        this.submittablesClassList = submittablesClassList;
-        this.processingStatusRepository = processingStatusRepository;
-        this.submissionContentsRepositories = submissionContentsRepositories;
+        this.submissionEnvelopeService = submissionEnvelopeService;
         this.processingStatusBulkOperations = processingStatusBulkOperations;
+        this.processingStatusRepository = processingStatusRepository;
+        this.submissionEnvelopeStuffer = submissionEnvelopeStuffer;
 
+        setupStatusesToProcess();
+        buildSubmittableRepositoryMap(submittableRepositoryMap);
+    }
+
+
+    private void buildSubmittableRepositoryMap(Map<Class<? extends StoredSubmittable>, SubmittableRepository<? extends StoredSubmittable>> submittableRepositoryMap) {
+        this.submittableRepositoryMap = new HashMap<>();
+        submittableRepositoryMap.entrySet().forEach(es ->
+                this.submittableRepositoryMap.put(es.getKey().getSimpleName(), es.getValue())
+        );
+    }
+
+    private void setupStatusesToProcess() {
         processingStatusesToAllow = new HashSet<>();
         processingStatusesToAllow.add(ProcessingStatusEnum.Draft.name());
         processingStatusesToAllow.add(ProcessingStatusEnum.Submitted.name());
