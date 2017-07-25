@@ -1,7 +1,6 @@
 package uk.ac.ebi.subs.processing;
 
 
-import jdk.nashorn.internal.runtime.StoredScript;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import uk.ac.ebi.subs.data.Submission;
@@ -33,9 +32,12 @@ public class SubmissionEnvelope {
     private List<Study> studies = new ArrayList<>();
     private List<Protocol> protocols = new ArrayList<>();
 
-    public SubmissionEnvelope() {};
+    public SubmissionEnvelope() {
+    }
 
-    public  SubmissionEnvelope(Submission submission){
+    ;
+
+    public SubmissionEnvelope(Submission submission) {
         this.submission = submission;
     }
 

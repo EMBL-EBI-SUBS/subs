@@ -23,6 +23,13 @@ public class SubmittableHelperService {
     public void setupNewSubmittable(StoredSubmittable submittable){
         submittable.setId(UUID.randomUUID().toString());
 
+        /*
+        Spring Data Rest does not validate until after the 'Before' events have been handled, so we can't rely on having
+        a submission. If there's no submission, the submittable won't be valid
+         */
+        if (submittable.getSubmission() == null)
+            return;
+
         createProcessingStatus(submittable);
         createValidationResult(submittable);
 
@@ -34,7 +41,7 @@ public class SubmittableHelperService {
         validationResult.setEntityUuid(submittable.getId());
         validationResult.setUuid(UUID.randomUUID().toString());
 
-        if (submittable.getSubmission() != null)
+
             validationResult.setSubmissionId(submittable.getSubmission().getId());
         validationResultRepository.save(validationResult);
 

@@ -94,15 +94,6 @@ public class ProcessingStatusRepositoryImpl implements ProcessingStatusRepositor
         }
 
         return idsByType;
-
-/*
-* db.getCollection('processingStatus').aggregate(
-{"$match": {"submissionId": "e397d8e9-3b8b-4093-b82c-e23ae5333179"}},
-{"$match": {"status": {"$in": ["Draft","Submitted"]}}},
-{"$group": {"_id": "$submittableType", "submittableIds": {"$addToSet": "$submittableId"}}},
-{"$project": {"submittableType": "$_id", "submittableIds": "$submittableIds"}}
-)
-* */
     }
 
 
