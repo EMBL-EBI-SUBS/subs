@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -38,51 +39,38 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
-import static uk.ac.ebi.subs.api.ApiIntegrationTestHelper.standardGetHeaders;
-import static uk.ac.ebi.subs.api.ApiIntegrationTestHelper.standardPostHeaders;
-import static uk.ac.ebi.subs.api.ApiIntegrationTestHelper.createStandardGetHeaders;
-import static uk.ac.ebi.subs.api.ApiIntegrationTestHelper.createStandardPostHeaders;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = ApiApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-public class ApiIntegrationTest {
+public abstract class ApiIntegrationTest {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @LocalServerPort
     private int port;
-    private String rootUri;
+    protected String rootUri;
 
-    private ApiIntegrationTestHelper testHelper;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    protected ApiIntegrationTestHelper testHelper;
 
     @Autowired
-    private SubmissionRepository submissionRepository;
+    protected ObjectMapper objectMapper;
 
     @Autowired
-    SubmissionStatusRepository submissionStatusRepository;
+    protected SubmissionRepository submissionRepository;
 
     @Autowired
-    private SampleRepository sampleRepository;
+    protected SubmissionStatusRepository submissionStatusRepository;
+
+    @Autowired
+    protected SampleRepository sampleRepository;
 
     @MockBean
     private RabbitMessagingTemplate rabbitMessagingTemplate;
 
     @Before
-    public void buildUp() throws URISyntaxException {
+    public void buildUp() throws URISyntaxException, UnirestException {
         rootUri = "http://localhost:" + port + "/api";
-
         testHelper = new ApiIntegrationTestHelper(objectMapper, rootUri,
                 Arrays.asList(submissionRepository, sampleRepository, submissionStatusRepository));
     }
-
-    ApiIntegrationTestHelper createApiIntegrationTestHelper(ObjectMapper objectMapper, String rootUri) throws UnirestException {
-        return new ApiIntegrationTestHelper(objectMapper, rootUri);
-    }
-
 
     @After
     public void tearDown() throws IOException {
@@ -115,11 +103,9 @@ public class ApiIntegrationTest {
     }
 
     @Test
-
-
-    //@Test
     public void submissionWithSamples() throws IOException, UnirestException {
         Map<String, String> rootRels = testHelper.rootRels();
+
         String submissionLocation = testHelper.submissionWithSamples(rootRels);
     }
 
@@ -136,7 +122,7 @@ public class ApiIntegrationTest {
         assertThat(rootRels.get("samples:create"), notNullValue());
 
         HttpResponse<JsonNode> sampleResponse = Unirest.post(rootRels.get("samples:create"))
-                .headers(standardPostHeaders())
+                .headers(testHelper.getPostHeaders())
                 .body(sample)
                 .asJson();
 
@@ -304,8 +290,7 @@ public class ApiIntegrationTest {
         }
 
         String teamName = submission.getTeam().getName();
-        String teamUrl = rootRels.get("team").replace("{teamName}",teamName);
-
+        String teamUrl = this.rootUri + "/teams/" + teamName;
         HttpResponse<JsonNode> teamQueryResponse = Unirest.get(teamUrl).headers(testHelper.getGetHeaders()).asJson();
 
         assertThat(teamQueryResponse.getStatus(), is(equalTo(HttpStatus.OK.value())));
