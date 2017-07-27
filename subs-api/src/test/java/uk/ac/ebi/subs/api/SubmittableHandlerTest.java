@@ -31,7 +31,7 @@ import static org.mockito.Mockito.*;
  * Created by rolando on 12/06/2017.
  */
 @RunWith(SpringRunner.class)
-@ActiveProfiles("SubmittableValidationDispatcherTest")
+@ActiveProfiles({"SubmittableValidationDispatcherTest","basic_auth"})
 @SpringBootTest(classes = ApiApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class SubmittableHandlerTest {
     @LocalServerPort
