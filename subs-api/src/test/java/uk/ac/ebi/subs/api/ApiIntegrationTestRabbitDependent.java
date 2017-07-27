@@ -38,7 +38,7 @@ import static org.junit.Assert.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ApiApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Category(RabbitMQDependentTest.class)
-@ActiveProfiles("test")
+@ActiveProfiles("basic_auth")
 public class ApiIntegrationTestRabbitDependent {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
