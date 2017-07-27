@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Profile;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -31,17 +33,14 @@ import uk.ac.ebi.subs.repository.repos.submittables.SampleRepository;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ApiApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("production")
+@ActiveProfiles("aap")
 public class AAPIntegrationTest extends ApiIntegrationTest {
 
     @Value("${aap.url}")
@@ -53,11 +52,15 @@ public class AAPIntegrationTest extends ApiIntegrationTest {
     @Value("${aap.password}")
     private String appPassword;
 
-    @Override
-    ApiIntegrationTestHelper createApiIntegrationTestHelper(ObjectMapper objectMapper, String rootUri) throws UnirestException {
-        final ApiIntegrationTestHelper apiIntegrationTestHelper = new ApiIntegrationTestHelper(objectMapper, rootUri,
-                ApiIntegrationTestHelper.createJWTGetHeaders(aapURL, aapUsername, appPassword),
-                ApiIntegrationTestHelper.createJWTPostHeaders(aapURL, aapUsername, appPassword));
-        return apiIntegrationTestHelper;
+
+    @Before
+    public void buildUp() throws URISyntaxException, UnirestException {
+        super.buildUp();
+        final Map<String, String> jwtGetHeaders = ApiIntegrationTestHelper.createJWTGetHeaders(aapURL, aapUsername, appPassword);
+        final Map<String, String> jwtPostHeaders = ApiIntegrationTestHelper.createJWTPostHeaders(aapURL, aapUsername, appPassword);
+        testHelper = new ApiIntegrationTestHelper(objectMapper, rootUri,
+                Arrays.asList(submissionRepository, sampleRepository, submissionStatusRepository),jwtGetHeaders,jwtPostHeaders);
     }
+
+
 }
