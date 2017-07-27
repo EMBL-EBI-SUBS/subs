@@ -8,7 +8,11 @@ apply plugin: 'application'
 mainClassName = "uk.ac.ebi.subs.ApiApplication"
 
 dependencies {
-    compile project(':subs-repository')
+    compile(project(':subs-repository')) {
+//        exclude module: 'org.springframework.boot:spring-boot-starter-security:1.5.1.RELEASE'
+//        exclude module: 'org.springframework.security:spring-security-config'
+    }
+
     compile project(':subs-processing-model')
 
     compile("uk.ac.ebi.subs:subs-data-model:1.0.3-SNAPSHOT")
@@ -22,8 +26,6 @@ dependencies {
 
     compile("com.fasterxml.jackson.module:jackson-module-afterburner:2.7.1")
 
-    compile 'uk.ac.ebi.tsc.aap.client:aap-client-java:0.1-SNAPSHOT'
-
     testCompile("junit:junit")
     testCompile("org.springframework.boot:spring-boot-starter-test")
     testCompile("com.google.code.gson:gson:2.7") //bug in spring boot, see https://github.com/spring-projects/spring-boot/issues/6502
@@ -34,6 +36,7 @@ dependencies {
 
     testCompile project(':subs-test-categories')
     compile 'de.codecentric:spring-boot-admin-starter-client:1.4.6'
+    compile 'uk.ac.ebi.tsc.aap.client:security:0.2.2-SNAPSHOT'
 }
 
 ext {
