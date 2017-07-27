@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.access.expression.SecurityExpressionOperations;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,12 +24,12 @@ import org.springframework.security.web.access.expression.WebSecurityExpressionR
 
 @SuppressWarnings("SpringJavaAutowiringInspection")
 @Configuration
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableWebSecurity(debug = true)
-@Profile("test")
-//ComponentScan annotation to scan aap-client-java external artifact
+@Profile("basic_auth")
+@Order(1)
 public class TestWebSecurityConfig extends WebSecurityConfigurerAdapter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(uk.ac.ebi.subs.api.config.WebSecurityConfig.class);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestWebSecurityConfig.class);
 
     @Autowired
     UserDetailsService userDetailsService;
@@ -42,7 +42,6 @@ public class TestWebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                // we don't need CSRF because our token is invulnerable
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests().anyRequest().authenticated();
@@ -54,8 +53,8 @@ public class TestWebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public UserDetailsService userDetailsService() {
         InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-        manager.createUser(User.withUsername("usi_user").password("password").roles("my-team").build());
-        manager.createUser(User.withUsername("usi_admin").password("password").roles("my-team","USI_ADMIN").build());
+        manager.createUser(User.withUsername("usi_user").password("password").roles("user").build());
+        manager.createUser(User.withUsername("usi_admin").password("password").roles("admin","user").build());
         return manager;
     }
 
@@ -65,7 +64,7 @@ public class TestWebSecurityConfig extends WebSecurityConfigurerAdapter {
             @Override
             protected SecurityExpressionOperations createSecurityExpressionRoot(Authentication authentication, FilterInvocation fi) {
                 WebSecurityExpressionRoot root = (WebSecurityExpressionRoot) super.createSecurityExpressionRoot(authentication, fi);
-                root.setDefaultRolePrefix(""); //remove the prefix ROLE_
+                //root.setDefaultRolePrefix(""); //remove the prefix ROLE_
                 return root;
             }
         });
