@@ -19,8 +19,6 @@ import uk.ac.ebi.subs.repository.repos.status.SubmissionStatusRepository;
 import uk.ac.ebi.subs.repository.repos.submittables.SampleRepository;
 import uk.ac.ebi.subs.repository.repos.submittables.SubmittableRepository;
 import uk.ac.ebi.subs.repository.security.TeamNameExtractor;
-import uk.ac.ebi.tsc.aap.client.model.Domain;
-import uk.ac.ebi.tsc.aap.client.model.User;
 
 import java.util.List;
 import java.util.UUID;
@@ -124,19 +122,6 @@ public class TeamNameExtractorTest {
         submission.setSubmissionStatus(new SubmissionStatus(SubmissionStatusEnum.Draft));
 
         return submission;
-    }
-
-
-
-
-    private void addDomainToUser(User user, String domainName) {
-        user.getDomains().add(createDomain(domainName));
-    }
-
-    private Domain createDomain(String domainName) {
-        Domain domain = new Domain();
-        domain.setDomainName(domainName);
-        return domain;
     }
 
     @Before
