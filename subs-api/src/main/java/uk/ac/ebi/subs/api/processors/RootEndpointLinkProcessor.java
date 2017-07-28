@@ -24,15 +24,13 @@ public class RootEndpointLinkProcessor implements ResourceProcessor<RepositoryLi
 
     private static final Logger logger = LoggerFactory.getLogger(RootEndpointLinkProcessor.class);
 
-    public RootEndpointLinkProcessor(RepositoryEntityLinks repositoryEntityLinks, LinkHelper linkHelper, BasePathAwareLinks basePathAwareLinks) {
+    public RootEndpointLinkProcessor(RepositoryEntityLinks repositoryEntityLinks, LinkHelper linkHelper) {
         this.repositoryEntityLinks = repositoryEntityLinks;
         this.linkHelper = linkHelper;
-        this.basePathAwareLinks = basePathAwareLinks;
     }
 
     private RepositoryEntityLinks repositoryEntityLinks;
     private LinkHelper linkHelper;
-    private BasePathAwareLinks basePathAwareLinks;
 
     private void addLinks(List<Link> links) {
 
@@ -77,8 +75,7 @@ public class RootEndpointLinkProcessor implements ResourceProcessor<RepositoryLi
 
     private void addTeams(List<Link> links) {
         links.add(
-                basePathAwareLinks.underBasePath(
-                        linkTo(methodOn(TeamController.class).getTeams(null))
+                linkTo(methodOn(TeamController.class).getTeams(null)
                 ).withRel("teams")
         );
     }

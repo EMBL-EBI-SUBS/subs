@@ -13,21 +13,14 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @Configuration
 public class StatusResourceAssemblerConfig {
 
-    private BasePathAwareLinks basePathAwareLinks;
-
-    public StatusResourceAssemblerConfig(BasePathAwareLinks basePathAwareLinks) {
-        this.basePathAwareLinks = basePathAwareLinks;
-    }
-
     @Bean
     public ResourceAssembler<StatusDescription, Resource<StatusDescription>> submissionStatusResourceAssembler() {
         return entity -> {
             Resource<StatusDescription> res = new Resource<StatusDescription>(entity);
 
             res.add(
-                    basePathAwareLinks.underBasePath(
-                            linkTo(
-                                    methodOn(StatusDescriptionController.class).submissionStatus(entity.getStatusName())
+                    linkTo(
+                            methodOn(StatusDescriptionController.class).submissionStatus(entity.getStatusName()
                             )
                     ).withSelfRel()
             );
