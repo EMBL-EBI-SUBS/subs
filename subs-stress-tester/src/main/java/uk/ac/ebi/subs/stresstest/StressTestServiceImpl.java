@@ -42,10 +42,10 @@ public class StressTestServiceImpl implements StressTestService {
 
     private ApiLinkDiscovery apiLinkDiscovery = new ApiLinkDiscovery();
 
-    @Value("${host:submission-dev.ebi.ac.uk}")
+    @Value("${host:.}")
     String host;
 
-    @Value("${port:80}")
+    @Value("${port:8080}")
     Integer port;
 
     @Value("${basePath:api/}")
