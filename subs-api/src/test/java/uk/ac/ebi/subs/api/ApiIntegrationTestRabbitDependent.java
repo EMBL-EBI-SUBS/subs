@@ -65,9 +65,12 @@ public class ApiIntegrationTestRabbitDependent {
     @Before
     public void buildUp() throws URISyntaxException {
         rootUri = "http://localhost:" + port + "/api";
-
+        final Map<String, String> standardGetContentHeader = ApiIntegrationTestHelper.createStandardGetHeader();
+        standardGetContentHeader.putAll(ApiIntegrationTestHelper.createBasicAuthheaders());
+        final Map<String, String> standardPostContentHeader = ApiIntegrationTestHelper.createStandardGetHeader();
+        standardPostContentHeader.putAll(ApiIntegrationTestHelper.createBasicAuthheaders());
         testHelper = new ApiIntegrationTestHelper(objectMapper, rootUri,
-                Arrays.asList(submissionRepository, sampleRepository, submissionStatusRepository));
+                Arrays.asList(submissionRepository, sampleRepository, submissionStatusRepository),standardGetContentHeader,standardPostContentHeader);
     }
 
     @After
