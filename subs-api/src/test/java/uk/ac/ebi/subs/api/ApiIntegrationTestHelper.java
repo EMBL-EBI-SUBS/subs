@@ -193,9 +193,9 @@ public class ApiIntegrationTestHelper {
     }
 
 
-    public static Map<String, String> createBasicAuthheaders () {
+    public static Map<String, String> createBasicAuthheaders (String userName, String password) {
         Map<String, String> h = new HashMap<>();
-        h.put("Authorization", "Basic " + Base64Coder.encodeString(DEFAULT_USER + ":" + DEFAULT_PASSWORD));
+        h.put("Authorization", "Basic " + Base64Coder.encodeString(userName + ":" + password));
         return h;
     }
 
