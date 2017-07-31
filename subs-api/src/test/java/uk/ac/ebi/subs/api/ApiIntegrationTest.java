@@ -8,21 +8,16 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.subs.ApiApplication;
 import uk.ac.ebi.subs.data.Submission;
 import uk.ac.ebi.subs.data.client.Sample;
 import uk.ac.ebi.subs.repository.model.SubmissionStatus;
@@ -69,15 +64,19 @@ public abstract class ApiIntegrationTest {
     public void buildUp() throws URISyntaxException, UnirestException {
         rootUri = "http://localhost:" + port + "/api";
         testHelper = new ApiIntegrationTestHelper(objectMapper, rootUri,
-                Arrays.asList(submissionRepository, sampleRepository, submissionStatusRepository));
+                Arrays.asList(submissionRepository, sampleRepository, submissionStatusRepository),createGetHeaders(),createPostHeaders());
     }
 
     @After
     public void tearDown() throws IOException {
-        Unirest.shutdown();
         submissionRepository.deleteAll();
         sampleRepository.deleteAll();
         submissionStatusRepository.deleteAll();
+    }
+
+    @AfterClass
+    public static void shutdown() throws IOException {
+        Unirest.shutdown();
     }
 
     @Test
@@ -372,5 +371,13 @@ public abstract class ApiIntegrationTest {
 
         logger.info("samplePutResponse: {}", samplePutResponse.getBody());
         assertThat(samplePutResponse.getStatus(), is(equalTo(HttpStatus.OK.value())));
+    }
+
+    public Map<String,String> createGetHeaders () throws UnirestException {
+        return ApiIntegrationTestHelper.createStandardGetHeader();
+    }
+
+    public Map<String,String> createPostHeaders () throws UnirestException {
+        return ApiIntegrationTestHelper.createStandardPostHeader();
     }
 }
