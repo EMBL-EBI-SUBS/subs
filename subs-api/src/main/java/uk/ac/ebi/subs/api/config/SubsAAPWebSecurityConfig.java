@@ -31,17 +31,13 @@ import uk.ac.ebi.tsc.aap.client.security.TokenAuthenticationService;
  */
 @Configuration
 @EnableConfigurationProperties
-@ConditionalOnClass({ EnableWebSecurity.class, AuthenticationEntryPoint.class })
-@ConditionalOnMissingBean(WebSecurityConfiguration.class)
 @ConditionalOnWebApplication
 @EnableWebSecurity
 @ComponentScan("uk.ac.ebi.tsc.aap.client.security")
-public class SubsAAPWebSecurityConfig {
+@Order(SecurityProperties.BASIC_AUTH_ORDER - 15)
+public class SubsAAPWebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Configuration
-    @Order(SecurityProperties.BASIC_AUTH_ORDER - 15)
-    public static  class AAPWebSecurityConfig extends WebSecurityConfigurerAdapter {
-        private static final Logger LOGGER = LoggerFactory.getLogger(uk.ac.ebi.tsc.aap.client.security.AAPWebSecurityAutoConfiguration.AAPWebSecurityConfig.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(SubsAAPWebSecurityConfig.class);
 
         @Autowired
         private StatelessAuthenticationEntryPoint unauthorizedHandler;
@@ -57,13 +53,19 @@ public class SubsAAPWebSecurityConfig {
         @Override
         protected void configure(HttpSecurity httpSecurity) throws Exception {
             LOGGER.info("[StatelessAuthenticationEntryPoint]- " + unauthorizedHandler);
+
             httpSecurity
                     // we don't need CSRF because our token is invulnerable
                     .csrf().disable()
                     .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                     // don't create session
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                    .authorizeRequests().anyRequest().authenticated();
+                    .authorizeRequests().antMatchers("/api").permitAll()
+                    .antMatchers("/api/").permitAll()
+                    .antMatchers("/api/browser/**/*").permitAll()
+                    .anyRequest().authenticated();
+
+            //httpSecurity.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests().anyRequest().permitAll();
 
             httpSecurity.addFilterBefore(statelessAuthenticationFilterBean(),
                     UsernamePasswordAuthenticationFilter.class);
@@ -75,5 +77,5 @@ public class SubsAAPWebSecurityConfig {
         public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
             auth.userDetailsService(userDetailsService());
         }
-    }
+
 }
