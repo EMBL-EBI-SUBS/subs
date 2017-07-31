@@ -29,6 +29,12 @@ import org.springframework.security.web.access.expression.WebSecurityExpressionR
 @Order(1)
 public class TestWebSecurityConfig extends WebSecurityConfigurerAdapter {
 
+    public static final String USI_USER = "usi_user";
+    public static final String USI_PASSWORD = "password";
+    public static final String USI_ADMIN = "usi_admin";
+    public static final String USI_USER_ROLE = "user";
+    public static final String USI_ADMIN_ROLE = "admin";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(TestWebSecurityConfig.class);
 
     @Autowired
@@ -53,8 +59,8 @@ public class TestWebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public UserDetailsService userDetailsService() {
         InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-        manager.createUser(User.withUsername("usi_user").password("password").roles("user").build());
-        manager.createUser(User.withUsername("usi_admin").password("password").roles("admin","user").build());
+        manager.createUser(User.withUsername(USI_USER).password(USI_PASSWORD).roles(USI_USER_ROLE).build());
+        manager.createUser(User.withUsername(USI_ADMIN).password(USI_PASSWORD).roles(USI_ADMIN_ROLE,USI_USER_ROLE).build());
         return manager;
     }
 
