@@ -1,13 +1,11 @@
 package uk.ac.ebi.subs.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +22,7 @@ import uk.ac.ebi.subs.repository.repos.submittables.SampleRepository;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Map;
 
 import static org.mockito.Mockito.*;
 
@@ -58,9 +57,12 @@ public class SubmittableHandlerTest {
     @Before
     public void buildUp() throws URISyntaxException {
         rootUri = "http://localhost:" + port + "/api";
-
+        final Map<String, String> standardGetContentHeader = ApiIntegrationTestHelper.createStandardGetHeader();
+        standardGetContentHeader.putAll(ApiIntegrationTestHelper.createBasicAuthheaders(TestWebSecurityConfig.USI_USER,TestWebSecurityConfig.USI_PASSWORD));
+        final Map<String, String> standardPostContentHeader = ApiIntegrationTestHelper.createStandardGetHeader();
+        standardPostContentHeader.putAll(ApiIntegrationTestHelper.createBasicAuthheaders(TestWebSecurityConfig.USI_USER,TestWebSecurityConfig.USI_PASSWORD));
         testHelper = new ApiIntegrationTestHelper(objectMapper, rootUri,
-                Arrays.asList(submissionRepository, sampleRepository, submissionStatusRepository));
+                Arrays.asList(submissionRepository, sampleRepository, submissionStatusRepository),standardGetContentHeader,standardPostContentHeader);
     }
 
     @After
