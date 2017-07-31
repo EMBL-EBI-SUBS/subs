@@ -21,20 +21,17 @@ import java.util.Map;
 @ActiveProfiles("basic_auth")
 public class BasicAuthApiIntegrationTest extends ApiIntegrationTest {
 
-    public static String DEFAULT_USER = "usi_user";
-    public static String DEFAULT_PASSWORD = "password";
-
     @Override
     public Map<String, String> createGetHeaders() throws UnirestException {
         final Map<String, String> getHeaders = super.createGetHeaders();
-        getHeaders.putAll(ApiIntegrationTestHelper.createBasicAuthheaders());
+        getHeaders.putAll(ApiIntegrationTestHelper.createBasicAuthheaders(TestWebSecurityConfig.USI_USER,TestWebSecurityConfig.USI_PASSWORD));
         return getHeaders;
     }
 
     @Override
     public Map<String, String> createPostHeaders() throws UnirestException {
         final Map<String, String> postHeaders = super.createPostHeaders();
-        postHeaders.putAll(ApiIntegrationTestHelper.createBasicAuthheaders());
+        postHeaders.putAll(ApiIntegrationTestHelper.createBasicAuthheaders(TestWebSecurityConfig.USI_USER,TestWebSecurityConfig.USI_PASSWORD));
         return postHeaders;
     }
 
