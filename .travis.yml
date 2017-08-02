@@ -17,7 +17,7 @@ addons:
       - mongodb-org-server
       - mongodb-org-shell
 
-install: ./gradlew assemble
+install: ./gradlew assemble -PaapUsername=$appUsername -PaapPassword=$appPassword
 
 before_script:
   - sleep 15
