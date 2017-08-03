@@ -270,5 +270,9 @@ subprojects {
         }
     }
 
+    test {
+        testLogging.showStandardStreams = true
+    }
+
 
 }
