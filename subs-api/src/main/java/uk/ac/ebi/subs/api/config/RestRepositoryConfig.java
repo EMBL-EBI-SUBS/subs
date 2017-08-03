@@ -11,6 +11,9 @@ import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapter;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
+
+import javax.servlet.Filter;
 
 @Configuration
 @EnableMongoAuditing(auditorAwareRef = "auditorProvider")
@@ -47,4 +50,8 @@ public class RestRepositoryConfig {
         };
     }
 
+    @Bean
+    public Filter shallowEtagHeaderFilter() {
+        return new ShallowEtagHeaderFilter();
+    }
 }
