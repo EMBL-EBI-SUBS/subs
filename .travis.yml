@@ -22,7 +22,7 @@ install: ./gradlew assemble -PaapUsername=$appUsername -PaapPassword=$appPasswor
 before_script:
   - sleep 15
 
-script: ./gradlew externalCiTest
+script: ./gradlew externalCiTest -PaapUsername=$appUsername -PaapPassword=$appPassword
 
 after_success:
   - test $TRAVIS_BRANCH = "master" && ./gradlew subs-processing-model:uploadArchives
