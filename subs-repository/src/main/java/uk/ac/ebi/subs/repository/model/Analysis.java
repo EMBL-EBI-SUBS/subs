@@ -5,8 +5,12 @@ import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import uk.ac.ebi.subs.validator.data.ValidationResult;
+import uk.ac.ebi.subs.data.component.AbstractSubsRef;
 
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Stream;
 
 @CompoundIndexes({
         @CompoundIndex(background = true, name = "team_alias", def = "{ 'team.name': 1, 'alias': 1 }"),
@@ -15,6 +19,19 @@ import java.util.Date;
 })
 //@Document //TODO - there is a potential cyclic reference that is flagged up when you have @Document - reconsider design
 public class Analysis extends uk.ac.ebi.subs.data.submittable.Analysis implements StoredSubmittable {
+
+    @Override
+    public Stream<AbstractSubsRef> refs() {
+        List<AbstractSubsRef> refs = new LinkedList<>();
+
+        refs.addAll(this.getStudyRefs());
+        refs.addAll(this.getSampleRefs());
+        refs.addAll(this.getAssayRefs());
+        refs.addAll(this.getAssayDataRefs());
+        refs.addAll(this.getAnalysisRefs());
+
+        return refs.stream();
+    }
 
     @DBRef
     private ProcessingStatus processingStatus;

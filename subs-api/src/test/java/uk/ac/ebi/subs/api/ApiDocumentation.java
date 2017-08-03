@@ -43,6 +43,7 @@ import uk.ac.ebi.subs.repository.repos.SubmissionRepository;
 import uk.ac.ebi.subs.repository.repos.status.ProcessingStatusRepository;
 import uk.ac.ebi.subs.repository.repos.status.SubmissionStatusRepository;
 import uk.ac.ebi.subs.repository.repos.submittables.SampleRepository;
+import uk.ac.ebi.subs.repository.services.SubmissionHelperService;
 import uk.ac.ebi.subs.validator.data.ValidationResult;
 import uk.ac.ebi.subs.validator.data.ValidationStatus;
 import uk.ac.ebi.subs.validator.repository.ValidationResultRepository;
@@ -136,6 +137,8 @@ public class ApiDocumentation {
 
         }
     };
+    @Autowired
+    private SubmissionHelperService submissionHelperService;
 
     @Before
     public void setUp() {
@@ -144,6 +147,7 @@ public class ApiDocumentation {
 
         submissionEventHandler.setSubmissionEventService(fakeSubmissionEventService);
         submissionStatusEventHandler.setSubmissionEventService(fakeSubmissionEventService);
+        submissionEventHandler.setSubmissionHelperService(submissionHelperService);
 
         clearDatabases();
 

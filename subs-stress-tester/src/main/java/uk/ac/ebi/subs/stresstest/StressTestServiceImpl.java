@@ -68,7 +68,7 @@ public class StressTestServiceImpl implements StressTestService {
         pathStream(path)
                 .parallel()
                 .map(loadSubmission)
-                .forEachOrdered(submitSubmission)
+                .forEach(submitSubmission)
         ;
         logger.info("Submission count: {}", submissionCounter);
     }

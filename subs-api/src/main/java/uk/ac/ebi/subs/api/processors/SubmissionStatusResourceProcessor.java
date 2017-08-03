@@ -20,14 +20,12 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @Component
 public class SubmissionStatusResourceProcessor implements ResourceProcessor<Resource<SubmissionStatus>> {
 
-    private BasePathAwareLinks basePathAwareLinks;
     private ValidationResultService validationResultService;
     private RepositoryEntityLinks repositoryEntityLinks;
     private SubmissionRepository submissionRepository;
 
-    public SubmissionStatusResourceProcessor(BasePathAwareLinks basePathAwareLinks, ValidationResultService validationResultService,
+    public SubmissionStatusResourceProcessor(ValidationResultService validationResultService,
                                              RepositoryEntityLinks repositoryEntityLinks, SubmissionRepository submissionRepository) {
-        this.basePathAwareLinks = basePathAwareLinks;
         this.validationResultService = validationResultService;
         this.repositoryEntityLinks = repositoryEntityLinks;
         this.submissionRepository = submissionRepository;
@@ -47,10 +45,9 @@ public class SubmissionStatusResourceProcessor implements ResourceProcessor<Reso
 
     private void addStatusDescriptionRel(Resource<SubmissionStatus> resource) {
         resource.add(
-                basePathAwareLinks.underBasePath(
-                        linkTo(
-                                methodOn(StatusDescriptionController.class)
-                                        .submissionStatus(resource.getContent().getStatus()))
+                linkTo(
+                        methodOn(StatusDescriptionController.class)
+                                .submissionStatus(resource.getContent().getStatus())
                 ).withRel("statusDescription")
         );
     }
@@ -63,7 +60,7 @@ public class SubmissionStatusResourceProcessor implements ResourceProcessor<Reso
 
             Assert.notNull(submissionStatusResourceLink);
 
-            Link updateLink = submissionStatusResourceLink.withRel( "self" + LinkHelper.UPDATE_REL_SUFFIX );
+            Link updateLink = submissionStatusResourceLink.withRel("self" + LinkHelper.UPDATE_REL_SUFFIX);
             submissionStatusResource.add(updateLink);
         }
     }
@@ -74,10 +71,9 @@ public class SubmissionStatusResourceProcessor implements ResourceProcessor<Reso
 
         if (validationResultService.isValidationFinishedAndPassed(submissionStatus.getId())) {
             submissionStatusResource.add(
-                    basePathAwareLinks.underBasePath(
-                            linkTo(
-                                    methodOn(SubmissionStatusController.class)
-                                            .availableSubmissionStatuses(submission.getId()))
+                    linkTo(
+                            methodOn(SubmissionStatusController.class)
+                                    .availableSubmissionStatuses(submission.getId())
                     ).withRel("availableStatuses")
             );
         }

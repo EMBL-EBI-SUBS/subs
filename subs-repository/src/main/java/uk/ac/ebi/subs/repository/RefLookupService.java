@@ -3,6 +3,7 @@ package uk.ac.ebi.subs.repository;
 import uk.ac.ebi.subs.data.component.AbstractSubsRef;
 
 import uk.ac.ebi.subs.data.submittable.Submittable;
+import uk.ac.ebi.subs.repository.model.StoredSubmittable;
 
 import java.util.Collection;
 import java.util.Set;
@@ -12,7 +13,7 @@ import java.util.Set;
  */
 public interface RefLookupService {
 
-    <T extends  AbstractSubsRef> Submittable lookupRef(T ref);
+    <T extends  AbstractSubsRef> StoredSubmittable lookupRef(T ref);
 
-    <T extends  AbstractSubsRef> Set<? extends Submittable> lookupRefs(Collection<T> refs);
+    <T extends  AbstractSubsRef> Set<? extends StoredSubmittable> lookupRefs(Collection<T> refs);
 }

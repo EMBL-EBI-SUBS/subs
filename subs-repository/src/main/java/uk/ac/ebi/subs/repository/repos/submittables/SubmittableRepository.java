@@ -15,6 +15,7 @@ import uk.ac.ebi.subs.repository.security.PreAuthorizeParamTeamName;
 import uk.ac.ebi.subs.repository.security.PreAuthorizeSubmissionIdTeamName;
 import uk.ac.ebi.subs.repository.security.PreAuthorizeSubmittableTeamName;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 

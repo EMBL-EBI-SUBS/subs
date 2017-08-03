@@ -6,8 +6,12 @@ import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import uk.ac.ebi.subs.validator.data.ValidationResult;
+import uk.ac.ebi.subs.data.component.AbstractSubsRef;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Stream;
 
 @CompoundIndexes({
         @CompoundIndex(background = true, name = "team_alias", def = "{ 'team.name': 1, 'alias': 1 }"),
@@ -16,6 +20,12 @@ import java.util.Date;
 })
 @Document
 public class Project extends uk.ac.ebi.subs.data.submittable.Project implements StoredSubmittable {
+
+    @Override
+    public Stream<AbstractSubsRef> refs() {
+        List<AbstractSubsRef> refs = Collections.emptyList();
+        return refs.stream();
+    }
 
     @DBRef
     private ProcessingStatus processingStatus;

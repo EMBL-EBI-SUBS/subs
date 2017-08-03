@@ -4,9 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import uk.ac.ebi.subs.data.component.*;
-import uk.ac.ebi.subs.data.submittable.EgaDac;
-import uk.ac.ebi.subs.data.submittable.Submittable;
-import uk.ac.ebi.subs.repository.model.StoredSubmittable;
+import uk.ac.ebi.subs.repository.model.*;
 import uk.ac.ebi.subs.repository.repos.submittables.*;
 
 import java.util.Arrays;
@@ -77,5 +75,22 @@ public class RepoConfig {
         return referenceRepositoryMap;
     }
 
+    @Bean
+    public Map<Class<? extends StoredSubmittable>, SubmittableRepository<? extends StoredSubmittable>> submittableRepositoryMap() {
+        Map<Class<? extends StoredSubmittable>, SubmittableRepository<? extends StoredSubmittable>> map = new HashMap<>();
 
+        map.put(Analysis.class, analysisRepository);
+        map.put(AssayData.class, assayDataRepository);
+        map.put(Assay.class, assayRepository);
+        map.put(EgaDacPolicy.class, egaDacPolicyRepository);
+        map.put(EgaDac.class, egaDacRepository);
+        map.put(EgaDataset.class, egaDatasetRepository);
+        map.put(Project.class, projectRepository);
+        map.put(Protocol.class, protocolRepository);
+        map.put(SampleGroup.class, sampleGroupRepository);
+        map.put(Sample.class, sampleRepository);
+        map.put(Study.class, studyRepository);
+
+        return map;
+    }
 }
