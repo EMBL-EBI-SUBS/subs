@@ -61,8 +61,9 @@ public class SubsAAPWebSecurityConfig extends WebSecurityConfigurerAdapter {
                     // don't create session
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                     .authorizeRequests().antMatchers("/api").permitAll()
-                    .antMatchers("/api/").permitAll()
-                    .antMatchers("/api/browser/**/*").permitAll()
+                    .antMatchers("/").permitAll()
+                    .antMatchers("/browser/**/*").permitAll()
+                    .antMatchers("/docs/**/*").permitAll()
                     .anyRequest().authenticated();
 
             //httpSecurity.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests().anyRequest().permitAll();
