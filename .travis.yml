@@ -17,12 +17,12 @@ addons:
       - mongodb-org-server
       - mongodb-org-shell
 
-install: ./gradlew assemble -PaapUsername=$appUsername -PaapPassword=$appPassword
+install: ./gradlew assemble -PaapUsername=$aapUsername -PaapPassword=$aapPassword
 
 before_script:
   - sleep 15
 
-script: ./gradlew externalCiTest -PaapUsername=$appUsername -PaapPassword=$appPassword
+script: ./gradlew externalCiTest -PaapUsername=$aapUsername -PaapPassword=$aapPassword
 
 after_success:
   - test $TRAVIS_BRANCH = "master" && ./gradlew subs-processing-model:uploadArchives
