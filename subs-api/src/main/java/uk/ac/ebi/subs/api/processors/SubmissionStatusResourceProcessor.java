@@ -24,6 +24,8 @@ public class SubmissionStatusResourceProcessor implements ResourceProcessor<Reso
     private RepositoryEntityLinks repositoryEntityLinks;
     private SubmissionRepository submissionRepository;
 
+    public static final String AVAILABLE_STATUSES_REL = "availableStatuses";
+
     public SubmissionStatusResourceProcessor(ValidationResultService validationResultService,
                                              RepositoryEntityLinks repositoryEntityLinks, SubmissionRepository submissionRepository) {
         this.validationResultService = validationResultService;
@@ -69,13 +71,11 @@ public class SubmissionStatusResourceProcessor implements ResourceProcessor<Reso
         SubmissionStatus submissionStatus = submissionStatusResource.getContent();
         Submission submission = submissionRepository.findBySubmissionStatusId(submissionStatus.getId());
 
-        if (validationResultService.isValidationFinishedAndPassed(submissionStatus.getId())) {
-            submissionStatusResource.add(
-                    linkTo(
-                            methodOn(SubmissionStatusController.class)
-                                    .availableSubmissionStatuses(submission.getId())
-                    ).withRel("availableStatuses")
-            );
-        }
+        submissionStatusResource.add(
+                linkTo(
+                        methodOn(SubmissionStatusController.class)
+                                .availableSubmissionStatuses(submission.getId())
+                ).withRel(AVAILABLE_STATUSES_REL)
+        );
     }
 }
