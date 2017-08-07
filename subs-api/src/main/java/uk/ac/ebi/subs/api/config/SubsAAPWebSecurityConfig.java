@@ -3,6 +3,7 @@ package uk.ac.ebi.subs.api.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -37,23 +38,27 @@ import uk.ac.ebi.tsc.aap.client.security.TokenAuthenticationService;
 @Order(SecurityProperties.BASIC_AUTH_ORDER - 15)
 public class SubsAAPWebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-        private static final Logger LOGGER = LoggerFactory.getLogger(SubsAAPWebSecurityConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubsAAPWebSecurityConfig.class);
 
-        @Autowired
-        private StatelessAuthenticationEntryPoint unauthorizedHandler;
+    @Value("${aap.subs-api.secured}")
+    private boolean aapSubsSecured;
 
-        @Autowired
-        private TokenAuthenticationService tokenAuthenticationService;
+    @Autowired
+    private StatelessAuthenticationEntryPoint unauthorizedHandler;
 
-        private StatelessAuthenticationFilter statelessAuthenticationFilterBean() throws Exception {
-            LOGGER.info("this.tokenAuthenticationService: " + this.tokenAuthenticationService);
-            return new StatelessAuthenticationFilter(this.tokenAuthenticationService);
-        }
+    @Autowired
+    private TokenAuthenticationService tokenAuthenticationService;
 
-        @Override
-        protected void configure(HttpSecurity httpSecurity) throws Exception {
-            LOGGER.info("[StatelessAuthenticationEntryPoint]- " + unauthorizedHandler);
+    private StatelessAuthenticationFilter statelessAuthenticationFilterBean() throws Exception {
+        LOGGER.info("this.tokenAuthenticationService: " + this.tokenAuthenticationService);
+        return new StatelessAuthenticationFilter(this.tokenAuthenticationService);
+    }
 
+    @Override
+    protected void configure(HttpSecurity httpSecurity) throws Exception {
+        LOGGER.info("[StatelessAuthenticationEntryPoint]- " + unauthorizedHandler);
+
+        if (aapSubsSecured) {
             httpSecurity
                     // we don't need CSRF because our token is invulnerable
                     .csrf().disable()
@@ -65,18 +70,25 @@ public class SubsAAPWebSecurityConfig extends WebSecurityConfigurerAdapter {
                     .antMatchers("/browser/**/*").permitAll()
                     .antMatchers("/docs/**/*").permitAll()
                     .anyRequest().authenticated();
-
-            //httpSecurity.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests().anyRequest().permitAll();
-
-            httpSecurity.addFilterBefore(statelessAuthenticationFilterBean(),
-                    UsernamePasswordAuthenticationFilter.class);
-            // disable page caching
-            httpSecurity.headers().cacheControl();
+        } else {
+            httpSecurity
+                    .csrf().disable()
+                    .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    .and().authorizeRequests().anyRequest().permitAll();
         }
 
-        @Autowired
-        public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-            auth.userDetailsService(userDetailsService());
-        }
+        //httpSecurity.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests().anyRequest().permitAll();
+
+        httpSecurity.addFilterBefore(statelessAuthenticationFilterBean(),
+                UsernamePasswordAuthenticationFilter.class);
+        // disable page caching
+        httpSecurity.headers().cacheControl();
+    }
+
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userDetailsService());
+    }
 
 }
