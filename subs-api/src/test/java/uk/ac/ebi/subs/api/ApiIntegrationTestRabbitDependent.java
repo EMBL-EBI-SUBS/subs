@@ -21,6 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.subs.ApiApplication;
 import uk.ac.ebi.subs.RabbitMQDependentTest;
+import uk.ac.ebi.subs.api.processors.SubmissionStatusResourceProcessor;
 import uk.ac.ebi.subs.repository.model.Submission;
 import uk.ac.ebi.subs.repository.repos.SubmissionRepository;
 import uk.ac.ebi.subs.repository.repos.status.SubmissionStatusRepository;
@@ -131,6 +132,9 @@ public class ApiIntegrationTestRabbitDependent {
 
         assertThat(submissionStatusGetResponse.getStatus(), is(equalTo(HttpStatus.OK.value())));
         JSONObject statusPayload = submissionStatusGetResponse.getBody().getObject();
+
+        assertThat(statusPayload.getJSONObject("_links").has(SubmissionStatusResourceProcessor.AVAILABLE_STATUSES_REL),
+                is(equalTo(true)));
 
         rels = testHelper.relsFromPayload(statusPayload);
 
