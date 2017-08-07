@@ -10,7 +10,8 @@
         </filter>
     </appender>
 
-    <logger name="log4j.logger.org.springframework.security" level="INFO"/>
+    <logger name="log4j.logger.org.springframework.security" level="DEBUG"/>
+    <logger name="org.springframework.security" level="DEBUG"/>
 
     <root>
         <level value="INFO" />
