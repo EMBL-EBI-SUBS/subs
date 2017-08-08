@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -35,13 +36,12 @@ import uk.ac.ebi.tsc.aap.client.security.TokenAuthenticationService;
 @ConditionalOnWebApplication
 @EnableWebSecurity
 @ComponentScan("uk.ac.ebi.tsc.aap.client.security")
+@ConditionalOnProperty(prefix = "aap", name = "enabled", matchIfMissing = true)
 @Order(SecurityProperties.BASIC_AUTH_ORDER - 15)
 public class SubsAAPWebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubsAAPWebSecurityConfig.class);
 
-    @Value("${aap.subs-api.secured}")
-    private boolean aapSubsSecured;
 
     @Autowired
     private StatelessAuthenticationEntryPoint unauthorizedHandler;
@@ -58,25 +58,17 @@ public class SubsAAPWebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         LOGGER.info("[StatelessAuthenticationEntryPoint]- " + unauthorizedHandler);
 
-        if (aapSubsSecured) {
-            httpSecurity
-                    // we don't need CSRF because our token is invulnerable
-                    .csrf().disable()
-                    .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-                    // don't create session
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                    .authorizeRequests().antMatchers("/api").permitAll()
-                    .antMatchers("/").permitAll()
-                    .antMatchers("/browser/**/*").permitAll()
-                    .antMatchers("/docs/**/*").permitAll()
-                    .anyRequest().authenticated();
-        } else {
-            httpSecurity
-                    .csrf().disable()
-                    .sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                    .and().authorizeRequests().anyRequest().permitAll();
-        }
+        httpSecurity
+                // we don't need CSRF because our token is invulnerable
+                .csrf().disable()
+                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+                // don't create session
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+                .authorizeRequests().antMatchers("/api").permitAll()
+                .antMatchers("/").permitAll()
+                .antMatchers("/browser/**/*").permitAll()
+                .antMatchers("/docs/**/*").permitAll()
+                .anyRequest().authenticated();
 
         //httpSecurity.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests().anyRequest().permitAll();
 
