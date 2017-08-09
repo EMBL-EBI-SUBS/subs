@@ -11,11 +11,12 @@ dependencies {
 
     compile("org.springframework.boot:spring-boot-starter-data-mongodb")
     compile("org.springframework.boot:spring-boot-starter-data-rest")
-
+    
     testCompile("junit:junit")
     testCompile("org.springframework.boot:spring-boot-starter-test")
     testCompile project(':subs-test-categories')
 
+    compile 'org.springframework.security:spring-security-core'
 }
 
 bootRepackage.enabled = false

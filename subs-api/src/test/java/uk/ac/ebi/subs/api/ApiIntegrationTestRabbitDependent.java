@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.subs.ApiApplication;
 import uk.ac.ebi.subs.RabbitMQDependentTest;
@@ -38,6 +39,7 @@ import static org.junit.Assert.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ApiApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Category(RabbitMQDependentTest.class)
+@ActiveProfiles("basic_auth")
 public class ApiIntegrationTestRabbitDependent {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -64,9 +66,12 @@ public class ApiIntegrationTestRabbitDependent {
     @Before
     public void buildUp() throws URISyntaxException {
         rootUri = "http://localhost:" + port + "/api";
-
+        final Map<String, String> standardGetContentHeader = ApiIntegrationTestHelper.createStandardGetHeader();
+        standardGetContentHeader.putAll(ApiIntegrationTestHelper.createBasicAuthheaders(TestWebSecurityConfig.USI_USER,TestWebSecurityConfig.USI_PASSWORD));
+        final Map<String, String> standardPostContentHeader = ApiIntegrationTestHelper.createStandardGetHeader();
+        standardPostContentHeader.putAll(ApiIntegrationTestHelper.createBasicAuthheaders(TestWebSecurityConfig.USI_USER,TestWebSecurityConfig.USI_PASSWORD));
         testHelper = new ApiIntegrationTestHelper(objectMapper, rootUri,
-                Arrays.asList(submissionRepository, sampleRepository, submissionStatusRepository));
+                Arrays.asList(submissionRepository, sampleRepository, submissionStatusRepository),standardGetContentHeader,standardPostContentHeader);
     }
 
     @After
@@ -85,7 +90,7 @@ public class ApiIntegrationTestRabbitDependent {
 
         String submissionLocation = testHelper.submissionWithSamples(rootRels);
         HttpResponse<JsonNode> deleteResponse = Unirest.delete(submissionLocation)
-                .headers(testHelper.standardPostHeaders())
+                .headers(testHelper.getPostHeaders())
                 .asJson();
 
         assertThat(deleteResponse.getStatus(), equalTo(HttpStatus.NO_CONTENT.value()));
@@ -109,7 +114,7 @@ public class ApiIntegrationTestRabbitDependent {
 
         HttpResponse<JsonNode> submissionGetResponse = Unirest
                 .get(submissionLocation)
-                .headers(testHelper.standardGetHeaders())
+                .headers(testHelper.getGetHeaders())
                 .asJson();
 
         assertThat(submissionGetResponse.getStatus(), is(equalTo(HttpStatus.OK.value())));
@@ -122,7 +127,7 @@ public class ApiIntegrationTestRabbitDependent {
 
         HttpResponse<JsonNode> submissionStatusGetResponse = Unirest
                 .get(submissionStatusLocation)
-                .headers(testHelper.standardGetHeaders())
+                .headers(testHelper.getGetHeaders())
                 .asJson();
 
         assertThat(submissionStatusGetResponse.getStatus(), is(equalTo(HttpStatus.OK.value())));
@@ -139,10 +144,12 @@ public class ApiIntegrationTestRabbitDependent {
         //update the submission
         //create a new submission
         HttpResponse<JsonNode> submissionPatchResponse = Unirest.patch(submissionStatusLocation)
-                .headers(testHelper.standardPostHeaders())
+                .headers(testHelper.getPostHeaders())
                 .body("{\"status\": \"Submitted\"}")
                 .asJson();
 
         assertThat(submissionPatchResponse.getStatus(), is(equalTo(HttpStatus.BAD_REQUEST.value()))); //validation results required
     }
+
+
 }

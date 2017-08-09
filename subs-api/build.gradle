@@ -33,6 +33,9 @@ dependencies {
 
     testCompile project(':subs-test-categories')
     compile 'de.codecentric:spring-boot-admin-starter-client:1.4.6'
+    compile('uk.ac.ebi.tsc.aap.client:security:0.2.2-SNAPSHOT') {
+        changing=true
+    }
 }
 
 ext {

@@ -64,6 +64,11 @@ subprojects {
         }
     }
 
+    processTestResources {
+        filesMatching('application.properties') {
+            expand(project.properties)
+        }
+    }
 
     task('externalCiTest', type: Test) {
         useJUnit {
@@ -265,5 +270,8 @@ subprojects {
         }
     }
 
+    test {
+        testLogging.showStandardStreams = true
+    }
 
 }
