@@ -8,6 +8,7 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.http.utils.Base64Coder;
 
+import org.apache.http.HttpHeaders;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -195,21 +196,21 @@ public class ApiIntegrationTestHelper {
 
     public static Map<String, String> createBasicAuthheaders (String userName, String password) {
         Map<String, String> h = new HashMap<>();
-        h.put("Authorization", "Basic " + Base64Coder.encodeString(userName + ":" + password));
+        h.put(HttpHeaders.AUTHORIZATION, "Basic " + Base64Coder.encodeString(userName + ":" + password));
         return h;
     }
 
     public static Map<String, String> createStandardGetHeader() {
         Map<String, String> h = new HashMap<>();
-        h.put("accept", MediaTypes.HAL_JSON_VALUE);
-        h.put("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        h.put(HttpHeaders.ACCEPT, MediaTypes.HAL_JSON_VALUE);
+        h.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         return h;
     }
 
     public static Map<String, String> createStandardPostHeader() {
         Map<String, String> h = new HashMap<>();
         h.putAll(createStandardGetHeader());
-        h.put("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        h.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         return h;
     }
 
