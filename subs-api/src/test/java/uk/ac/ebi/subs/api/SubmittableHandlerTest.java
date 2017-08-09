@@ -3,6 +3,7 @@ package uk.ac.ebi.subs.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -67,10 +68,14 @@ public class SubmittableHandlerTest {
 
     @After
     public void tearDown() throws IOException {
-        Unirest.shutdown();
         submissionRepository.deleteAll();
         sampleRepository.deleteAll();
         submissionStatusRepository.deleteAll();
+    }
+
+    @AfterClass
+    public static void shutdown() throws IOException {
+        Unirest.shutdown();
     }
 
     @Test
