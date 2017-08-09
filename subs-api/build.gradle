@@ -8,11 +8,7 @@ apply plugin: 'application'
 mainClassName = "uk.ac.ebi.subs.ApiApplication"
 
 dependencies {
-    compile(project(':subs-repository')) {
-//        exclude module: 'org.springframework.boot:spring-boot-starter-security:1.5.1.RELEASE'
-//        exclude module: 'org.springframework.security:spring-security-config'
-    }
-
+    compile project(':subs-repository')
     compile project(':subs-processing-model')
 
     compile("uk.ac.ebi.subs:subs-data-model:1.0.3-SNAPSHOT")
