@@ -70,8 +70,6 @@ public class SubsAAPWebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/docs/**/*").permitAll()
                 .anyRequest().authenticated();
 
-        //httpSecurity.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests().anyRequest().permitAll();
-
         httpSecurity.addFilterBefore(statelessAuthenticationFilterBean(),
                 UsernamePasswordAuthenticationFilter.class);
         // disable page caching
