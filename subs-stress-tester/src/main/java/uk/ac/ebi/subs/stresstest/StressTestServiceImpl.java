@@ -199,6 +199,7 @@ public class StressTestServiceImpl implements StressTestService {
                 try {
                     availableStatusesLink = apiLinkDiscovery.discoverNamedLink(submissionLocation, "submissionStatus", "self", "availableStatuses");
                 } catch (IllegalStateException e) {
+                    logger.info("available status link is not present, may retry");
                 }
                 try {
                     Thread.sleep(3000);
