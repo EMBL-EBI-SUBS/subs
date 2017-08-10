@@ -8,7 +8,6 @@ import org.springframework.hateoas.Resources;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.ac.ebi.subs.api.processors.BasePathAwareLinks;
 import uk.ac.ebi.subs.api.services.ValidationResultService;
 import uk.ac.ebi.subs.data.status.StatusDescription;
 import uk.ac.ebi.subs.repository.model.Submission;
@@ -32,15 +31,13 @@ public class SubmissionStatusController {
     private SubmissionRepository submissionRepository;
     private ValidationResultService validationResultService;
     private ResourceAssembler<StatusDescription, Resource<StatusDescription>> submissionStatusResourceAssembler;
-    private BasePathAwareLinks basePathAwareLinks;
     private RepositoryEntityLinks repositoryEntityLinks;
 
-    public SubmissionStatusController(Map<String, StatusDescription> submissionStatusDescriptionMap, SubmissionRepository submissionRepository, ValidationResultService validationResultService, ResourceAssembler<StatusDescription, Resource<StatusDescription>> submissionStatusResourceAssembler, BasePathAwareLinks basePathAwareLinks, RepositoryEntityLinks repositoryEntityLinks) {
+    public SubmissionStatusController(Map<String, StatusDescription> submissionStatusDescriptionMap, SubmissionRepository submissionRepository, ValidationResultService validationResultService, ResourceAssembler<StatusDescription, Resource<StatusDescription>> submissionStatusResourceAssembler, RepositoryEntityLinks repositoryEntityLinks) {
         this.submissionStatusDescriptionMap = submissionStatusDescriptionMap;
         this.submissionRepository = submissionRepository;
         this.validationResultService = validationResultService;
         this.submissionStatusResourceAssembler = submissionStatusResourceAssembler;
-        this.basePathAwareLinks = basePathAwareLinks;
         this.repositoryEntityLinks = repositoryEntityLinks;
     }
 
@@ -68,12 +65,10 @@ public class SubmissionStatusController {
         Resources<Resource<StatusDescription>> resources = new Resources<>(statusResources);
 
         resources.add(
-                basePathAwareLinks.underBasePath(
-                        linkTo(
-                                methodOn(this.getClass())
-                                        .availableSubmissionStatuses(submissionId)
-                        )
-                ).withSelfRel()
+            linkTo(
+                methodOn(this.getClass())
+                    .availableSubmissionStatuses(submissionId)
+            ).withSelfRel()
         );
 
         resources.add(

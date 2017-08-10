@@ -1,0 +1,20 @@
+<configuration>
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %d %p [%c] - &lt;%m&gt;%n
+            </pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+    </appender>
+
+    <logger name="log4j.logger.org.springframework.security" level="INFO"/>
+    <logger name="org.springframework.security" level="INFO"/>
+
+    <root>
+        <level value="INFO" />
+        <appender-ref ref="stdout" />
+    </root>
+</configuration>

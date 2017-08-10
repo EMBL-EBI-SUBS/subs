@@ -1,5 +1,7 @@
 package uk.ac.ebi.subs.api;
 
+import com.mashape.unirest.http.Unirest;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +38,11 @@ public class SubmissionSerialisationTest {
         submissionEnvelope.getSubmission().getSubmitter().setEmail("test@example.ac.uk");
 
         exampleJson = "{\"submitter\":{\"email\":\"test@example.ac.uk\"},\"team\":{\"name\":\"exampleTeam\"}}";
+    }
+
+    @AfterClass
+    public static void shutdown() throws IOException {
+        Unirest.shutdown();
     }
 
     @Test

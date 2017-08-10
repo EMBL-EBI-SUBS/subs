@@ -6,6 +6,9 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.mashape.unirest.http.utils.Base64Coder;
+
+import org.apache.http.HttpHeaders;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -34,10 +37,18 @@ public class ApiIntegrationTestHelper {
 
     private ObjectMapper objectMapper;
     private String rootUri;
+    public static String DEFAULT_USER = "usi_user";
+    public static String DEFAULT_PASSWORD = "password";
 
-    public ApiIntegrationTestHelper(ObjectMapper objectMapper, String rootUri, List<MongoRepository> repositoriesToInit) {
+    private Map<String, String> getHeaders = new HashMap<>();
+    private Map<String, String> postHeaders = new HashMap<>();
+
+    public ApiIntegrationTestHelper(ObjectMapper objectMapper, String rootUri, List<MongoRepository> repositoriesToInit,
+                                    Map<String, String> getHeaders, Map<String, String> postHeaders) {
         this.objectMapper = objectMapper;
         this.rootUri = rootUri;
+        this.getHeaders = getHeaders;
+        this.postHeaders = postHeaders;
 
         Unirest.setObjectMapper(new com.mashape.unirest.http.ObjectMapper() {
             public <T> T readValue(String value, Class<T> valueType) {
@@ -63,7 +74,7 @@ public class ApiIntegrationTestHelper {
     public HttpResponse<JsonNode> postSubmission(Map<String, String> rootRels, Submission submission) throws UnirestException {
         //create a new submission
         HttpResponse<JsonNode> submissionResponse = Unirest.post(rootRels.get("submissions:create"))
-                .headers(standardPostHeaders())
+                .headers(postHeaders)
                 .body(submission)
                 .asJson();
 
@@ -88,7 +99,7 @@ public class ApiIntegrationTestHelper {
             sample.setSubmission(submissionLocation);
 
             HttpResponse<JsonNode> sampleResponse = Unirest.post(rootRels.get("samples:create"))
-                    .headers(standardPostHeaders())
+                    .headers(postHeaders)
                     .body(sample)
                     .asJson();
 
@@ -99,7 +110,7 @@ public class ApiIntegrationTestHelper {
         String submissionSamplesUrl = submissionRels.get("samples");
 
         HttpResponse<JsonNode> samplesQueryResponse = Unirest.get(submissionSamplesUrl)
-                .headers(standardGetHeaders())
+                .headers(getHeaders)
                 .asJson();
 
         assertThat(samplesQueryResponse.getStatus(), is(equalTo(HttpStatus.OK.value())));
@@ -127,7 +138,7 @@ public class ApiIntegrationTestHelper {
             study.setSubmission(submissionLocation);
 
             HttpResponse<JsonNode> studyResponse = Unirest.post(rootRels.get("studies:create"))
-                    .headers(standardPostHeaders())
+                    .headers(postHeaders)
                     .body(study)
                     .asJson();
 
@@ -138,7 +149,7 @@ public class ApiIntegrationTestHelper {
         String submissionStudiesUrl = submissionRels.get("studies");
 
         HttpResponse<JsonNode> studiesQueryResponse = Unirest.get(submissionStudiesUrl)
-                .headers(standardGetHeaders())
+                .headers(getHeaders)
                 .asJson();
 
         assertThat(studiesQueryResponse.getStatus(), is(equalTo(HttpStatus.OK.value())));
@@ -152,7 +163,7 @@ public class ApiIntegrationTestHelper {
 
     public Map<String, String> rootRels() throws UnirestException, IOException {
         HttpResponse<JsonNode> response = Unirest.get(rootUri)
-                .headers(standardGetHeaders())
+                .headers(getHeaders)
                 .asJson();
 
         assertThat(response.getStatus(), is(equalTo(HttpStatus.OK.value())));
@@ -182,16 +193,33 @@ public class ApiIntegrationTestHelper {
         return rels;
     }
 
-    public static Map<String, String> standardGetHeaders() {
+
+    public static Map<String, String> createBasicAuthheaders (String userName, String password) {
         Map<String, String> h = new HashMap<>();
-        h.put("accept", MediaTypes.HAL_JSON_VALUE);
+        h.put(HttpHeaders.AUTHORIZATION, "Basic " + Base64Coder.encodeString(userName + ":" + password));
         return h;
     }
 
-    public static Map<String, String> standardPostHeaders() {
+    public static Map<String, String> createStandardGetHeader() {
         Map<String, String> h = new HashMap<>();
-        h.put("accept", MediaTypes.HAL_JSON_VALUE);
-        h.put("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        h.put(HttpHeaders.ACCEPT, MediaTypes.HAL_JSON_VALUE);
+        h.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         return h;
     }
+
+    public static Map<String, String> createStandardPostHeader() {
+        Map<String, String> h = new HashMap<>();
+        h.putAll(createStandardGetHeader());
+        h.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        return h;
+    }
+
+    public Map<String, String> getGetHeaders() {
+        return getHeaders;
+    }
+
+    public Map<String, String> getPostHeaders() {
+        return postHeaders;
+    }
+
 }
