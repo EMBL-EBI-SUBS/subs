@@ -42,7 +42,7 @@ public class SubmissionSerialisationTest {
 
     @AfterClass
     public static void shutdown() throws IOException {
-        Unirest.shutdown();
+        //Unirest.shutdown();
     }
 
     @Test

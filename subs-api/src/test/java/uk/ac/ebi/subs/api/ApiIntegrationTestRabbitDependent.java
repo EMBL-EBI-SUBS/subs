@@ -76,7 +76,7 @@ public class ApiIntegrationTestRabbitDependent {
 
     @After
     public void tearDown() throws IOException {
-        Unirest.shutdown();
+        //Unirest.shutdown();
         submissionRepository.deleteAll();
         sampleRepository.deleteAll();
         submissionStatusRepository.deleteAll();
