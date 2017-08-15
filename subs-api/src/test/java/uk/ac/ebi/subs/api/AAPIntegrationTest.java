@@ -45,7 +45,7 @@ public class AAPIntegrationTest extends ApiIntegrationTest {
         return postHeaders;
     }
 
-    static String getJWTToken (String authURL, String username, String password) throws UnirestException {
+    String getJWTToken (String authURL, String username, String password) throws UnirestException {
         final HttpResponse<String> stringHttpResponse = Unirest.get(authURL).basicAuth(username, password).asString();
         return stringHttpResponse.getBody();
     }

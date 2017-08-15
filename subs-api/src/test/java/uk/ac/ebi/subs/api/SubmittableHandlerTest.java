@@ -73,11 +73,6 @@ public class SubmittableHandlerTest {
         submissionStatusRepository.deleteAll();
     }
 
-    @AfterClass
-    public static void shutdown() throws IOException {
-        Unirest.shutdown();
-    }
-
     @Test
     public void testValidationMessageSamplesOnSubmit() throws Exception {
         testHelper.submissionWithSamples(testHelper.rootRels());

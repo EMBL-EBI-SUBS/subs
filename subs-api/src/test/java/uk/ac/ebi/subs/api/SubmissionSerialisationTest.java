@@ -40,11 +40,6 @@ public class SubmissionSerialisationTest {
         exampleJson = "{\"submitter\":{\"email\":\"test@example.ac.uk\"},\"team\":{\"name\":\"exampleTeam\"}}";
     }
 
-    @AfterClass
-    public static void shutdown() throws IOException {
-        Unirest.shutdown();
-    }
-
     @Test
     public void testSerialize() throws Exception {
         assertThat(this.json.write(submissionEnvelope.getSubmission())).isEqualToJson(exampleJson);
