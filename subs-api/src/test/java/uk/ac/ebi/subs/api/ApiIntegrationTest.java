@@ -74,11 +74,6 @@ public abstract class ApiIntegrationTest {
         submissionStatusRepository.deleteAll();
     }
 
-    @AfterClass
-    public static void shutdown() throws IOException {
-       // Unirest.shutdown();
-    }
-
     @Test
     public void checkRootRels() throws UnirestException, IOException {
         Map<String, String> rootRels = testHelper.rootRels();
