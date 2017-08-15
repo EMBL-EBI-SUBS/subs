@@ -76,7 +76,7 @@ public abstract class ApiIntegrationTest {
 
     @AfterClass
     public static void shutdown() throws IOException {
-        Unirest.shutdown();
+       // Unirest.shutdown();
     }
 
     @Test
