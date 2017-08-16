@@ -64,8 +64,7 @@ public class SubsAAPWebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 // don't create session
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .authorizeRequests().antMatchers("/api").permitAll()
-                .antMatchers("/").permitAll()
+                .authorizeRequests().antMatchers("/").permitAll()
                 .antMatchers("/browser/**/*").permitAll()
                 .antMatchers("/docs/**/*").permitAll()
                 .anyRequest().authenticated();
