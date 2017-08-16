@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 dependencies {
-    compile("uk.ac.ebi.subs:subs-data-model:1.0.3-SNAPSHOT")
+    compile("uk.ac.ebi.subs:subs-data-model:0.0.1-SNAPSHOT")
     compileOnly("org.projectlombok:lombok:1.16.12")
 }
 

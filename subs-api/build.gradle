@@ -11,7 +11,7 @@ dependencies {
     compile project(':subs-repository')
     compile project(':subs-processing-model')
 
-    compile("uk.ac.ebi.subs:subs-data-model:1.0.3-SNAPSHOT")
+    compile("uk.ac.ebi.subs:subs-data-model:0.0.1-SNAPSHOT")
     compile("uk.ac.ebi.subs:subs-messaging:1.0.3-SNAPSHOT")
     compile("uk.ac.ebi.subs:validator-common:1.16.0-SNAPSHOT")
 
@@ -32,7 +32,7 @@ dependencies {
     testCompile("com.mashape.unirest:unirest-java:1.4.9")
 
     testCompile project(':subs-test-categories')
-    compile 'de.codecentric:spring-boot-admin-starter-client:1.4.6'
+    //compile 'de.codecentric:spring-boot-admin-starter-client:1.4.6'
     compile('uk.ac.ebi.tsc.aap.client:security:0.2.2-SNAPSHOT') {
         changing=true
     }

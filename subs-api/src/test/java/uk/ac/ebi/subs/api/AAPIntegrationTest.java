@@ -50,11 +50,4 @@ public class AAPIntegrationTest extends ApiIntegrationTest {
         return stringHttpResponse.getBody();
     }
 
-    @Override
-    public void checkRootRels() throws IOException, UnirestException {
-        final Map<String, String> standardGetHeader = ApiIntegrationTestHelper.createStandardGetHeader();
-        testHelper = new ApiIntegrationTestHelper(objectMapper, rootUri,
-                Arrays.asList(submissionRepository, sampleRepository, submissionStatusRepository),standardGetHeader,ApiIntegrationTestHelper.createStandardGetHeader());
-        super.checkRootRels();
-    }
 }
