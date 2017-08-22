@@ -215,7 +215,7 @@ public class Helpers {
     }
 
 
-    private static String TEAM_NAME = "my-team";
+    public static String TEAM_NAME = "usi-user";
 
     public static Submission generateTestSubmission() {
         Submission sub = new Submission();
