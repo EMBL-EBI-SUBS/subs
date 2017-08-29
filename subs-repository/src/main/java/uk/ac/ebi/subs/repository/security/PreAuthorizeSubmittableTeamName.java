@@ -7,6 +7,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-@PreAuthorize("hasAnyRole(@roleLookup.adminRole(),#submittable.team.name)")
+@PreAuthorize("hasAnyRole(@roleLookup.adminRole(),#entity.team.name)")
 public @interface PreAuthorizeSubmittableTeamName {
 }
