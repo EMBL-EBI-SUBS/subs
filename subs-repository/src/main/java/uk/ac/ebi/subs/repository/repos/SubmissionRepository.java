@@ -46,7 +46,7 @@ public interface SubmissionRepository extends MongoRepository<Submission, String
     @Override
     @RestResource(exported = true)
     @PreAuthorizeSubmissionTeamName
-    public void delete(@P("submission") Submission entity);
+    public void delete(@P("entity") Submission entity);
 
     @RestResource(exported = true, rel = "by-team", path = "by-team")
     @PreAuthorizeParamTeamName
