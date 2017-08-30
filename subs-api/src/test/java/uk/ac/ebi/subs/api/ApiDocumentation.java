@@ -1043,6 +1043,7 @@ public class ApiDocumentation {
                                         fieldWithPath("sampleRelationships").description(""),
                                         fieldWithPath("taxonId").description(""),
                                         fieldWithPath("taxon").description(""),
+                                        fieldWithPath("team").description("Team this sample belongs to"),
                                         fieldWithPath("attributes").description(""),
                                         fieldWithPath("createdDate").description(""),
                                         fieldWithPath("lastModifiedDate").description(""),
