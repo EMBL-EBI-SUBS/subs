@@ -220,7 +220,7 @@ public class Helpers {
     }
 
 
-    public final static String TEAM_NAME = "usi-user";
+    public final static String TEAM_NAME = "self.usi-user";
 
     public static Submission generateTestSubmission() {
         Submission sub = new Submission();
