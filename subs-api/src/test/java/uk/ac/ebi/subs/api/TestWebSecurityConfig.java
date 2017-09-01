@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.access.expression.SecurityExpressionOperations;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -21,10 +22,12 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
 import org.springframework.security.web.access.expression.WebSecurityExpressionRoot;
+import uk.ac.ebi.subs.repository.security.RoleLookup;
 
 @SuppressWarnings("SpringJavaAutowiringInspection")
 @Configuration
 @EnableWebSecurity(debug = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @Profile("basic_auth")
 @Order(1)
 public class TestWebSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -59,8 +62,8 @@ public class TestWebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public UserDetailsService userDetailsService() {
         InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-        manager.createUser(User.withUsername(USI_USER).password(USI_PASSWORD).roles(USI_USER_ROLE).build());
-        manager.createUser(User.withUsername(USI_ADMIN).password(USI_PASSWORD).roles(USI_ADMIN_ROLE,USI_USER_ROLE).build());
+        manager.createUser(User.withUsername(USI_USER).password(USI_PASSWORD).roles(Helpers.TEAM_NAME).build());
+        manager.createUser(User.withUsername(USI_ADMIN).password(USI_PASSWORD).roles(new RoleLookup().adminRole(),Helpers.TEAM_NAME).build());
         return manager;
     }
 

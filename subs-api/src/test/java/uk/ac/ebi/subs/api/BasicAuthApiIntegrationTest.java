@@ -24,14 +24,14 @@ public class BasicAuthApiIntegrationTest extends ApiIntegrationTest {
     @Override
     public Map<String, String> createGetHeaders() throws UnirestException {
         final Map<String, String> getHeaders = super.createGetHeaders();
-        getHeaders.putAll(ApiIntegrationTestHelper.createBasicAuthheaders(TestWebSecurityConfig.USI_USER,TestWebSecurityConfig.USI_PASSWORD));
+        getHeaders.putAll(ApiIntegrationTestHelper.createBasicAuthheaders(TestWebSecurityConfig.USI_ADMIN,TestWebSecurityConfig.USI_PASSWORD));
         return getHeaders;
     }
 
     @Override
     public Map<String, String> createPostHeaders() throws UnirestException {
         final Map<String, String> postHeaders = super.createPostHeaders();
-        postHeaders.putAll(ApiIntegrationTestHelper.createBasicAuthheaders(TestWebSecurityConfig.USI_USER,TestWebSecurityConfig.USI_PASSWORD));
+        postHeaders.putAll(ApiIntegrationTestHelper.createBasicAuthheaders(TestWebSecurityConfig.USI_ADMIN,TestWebSecurityConfig.USI_PASSWORD));
         return postHeaders;
     }
 

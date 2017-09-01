@@ -48,7 +48,7 @@ public class TeamController {
     }
 
 
-    @RequestMapping("/teams/{teamName}")
+    @RequestMapping("/teams/{teamName:.+}")
     @PreAuthorizeParamTeamName
     public Resource<Team> getTeam(@PathVariable @P("teamName") String teamName) {
         //TODO this is a stub, we should make sure that the Teams are real and that the user is authorised
@@ -74,5 +74,7 @@ public class TeamController {
 
         return resource;
     }
+
+
 
 }

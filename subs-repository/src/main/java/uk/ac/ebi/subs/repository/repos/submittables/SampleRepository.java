@@ -7,6 +7,7 @@ import org.springframework.security.access.method.P;
 import uk.ac.ebi.subs.repository.model.Sample;
 import uk.ac.ebi.subs.repository.projections.SubmittableWithStatus;
 import uk.ac.ebi.subs.repository.security.PreAuthorizeSubmissionTeamName;
+import uk.ac.ebi.subs.repository.security.PreAuthorizeSubmittableTeamName;
 
 @RepositoryRestResource(excerptProjection = SubmittableWithStatus.class)
 public interface SampleRepository extends SubmittableRepository<Sample> {
@@ -14,7 +15,4 @@ public interface SampleRepository extends SubmittableRepository<Sample> {
     @RestResource(exported = false)
     Sample findByAccession(String accession);
 
-    @Override
-    @PreAuthorizeSubmissionTeamName
-    <S extends Sample> S save(@P("submission") S submittable);
 }

@@ -38,19 +38,19 @@ public interface SubmittableRepository<T extends StoredSubmittable> extends Mong
     @Override
     @RestResource(exported = true)
     @PreAuthorizeSubmittableTeamName
-    public <S extends T> S save(@P("submittable") S submittable);
+    public <S extends T> S save(@P("entity") S entity);
 
     // controls POST /things
     @Override
     @RestResource(exported = true)
     @PreAuthorizeSubmittableTeamName
-    public <S extends T> S insert(@P("submittable") S s);
+    public <S extends T> S insert(@P("entity") S s);
 
     // exported as DELETE /things/:id
     @Override
     @RestResource(exported = true)
     @PreAuthorizeSubmittableTeamName
-    public void delete(@P("submittable") T submittable);
+    public void delete(@P("entity") T entity);
 
 
     @RestResource(exported = false)

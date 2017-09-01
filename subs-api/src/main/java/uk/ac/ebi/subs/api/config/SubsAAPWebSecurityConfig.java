@@ -35,6 +35,7 @@ import uk.ac.ebi.tsc.aap.client.security.TokenAuthenticationService;
 @EnableConfigurationProperties
 @ConditionalOnWebApplication
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @ComponentScan("uk.ac.ebi.tsc.aap.client.security")
 @ConditionalOnProperty(prefix = "aap", name = "enabled", matchIfMissing = true)
 @Order(SecurityProperties.BASIC_AUTH_ORDER - 15)

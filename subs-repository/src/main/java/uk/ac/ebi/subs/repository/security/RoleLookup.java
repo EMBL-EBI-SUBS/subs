@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class RoleLookup {
-    private static final String ADMIN_USER_DOMAIN_NAME = "usiAdmin";
+    private static final String ADMIN_USER_DOMAIN_NAME = "aap.admin";
 
 
     public String adminRole() {

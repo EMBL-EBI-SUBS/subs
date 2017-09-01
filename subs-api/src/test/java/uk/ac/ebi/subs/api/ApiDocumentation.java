@@ -22,6 +22,8 @@ import org.springframework.restdocs.mockmvc.MockMvcRestDocumentationConfigurer;
 import org.springframework.restdocs.operation.preprocess.ContentModifier;
 import org.springframework.restdocs.operation.preprocess.ContentModifyingOperationPreprocessor;
 import org.springframework.restdocs.payload.FieldDescriptor;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -77,6 +79,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ApiApplication.class)
 @Category(DocumentationProducer.class)
+@ActiveProfiles("basic_auth")
+@WithMockUser(username="usi_user",roles={Helpers.TEAM_NAME})
 public class ApiDocumentation {
 
     private static final String HOST = "submission-dev.ebi.ac.uk";
@@ -158,8 +162,10 @@ public class ApiDocumentation {
                 .withHost(HOST)
                 .withPort(80);
 
+
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.context)
                 .apply(docConfig)
+                .defaultRequest(get("/").contextPath("/api"))
                 .build();
     }
 
@@ -232,7 +238,7 @@ public class ApiDocumentation {
     private uk.ac.ebi.subs.data.Submission goodClientSubmission() {
         uk.ac.ebi.subs.data.Submission submission = new uk.ac.ebi.subs.data.Submission();
         submission.setTeam(new Team());
-        submission.getTeam().setName("my-team");
+        submission.getTeam().setName(Helpers.TEAM_NAME);
         submission.setSubmitter(new Submitter());
         submission.getSubmitter().setEmail("alice@test.org");
         return submission;
@@ -1025,7 +1031,9 @@ public class ApiDocumentation {
                                         validationresultLink(),
                                         linkWithRel("sample").description("Link to this sample"),
                                         linkWithRel("self:update").description("This sample can be updated"),
-                                        linkWithRel("self:delete").description("This sample can be deleted")
+                                        linkWithRel("self:delete").description("This sample can be deleted"),
+                                        linkWithRel("history").description("Collection of resources for samples with the same team and alias as this resource"),
+                                        linkWithRel("current-version").description("Current version of this sample, as identified by team and alias")
                                 ),
                                 responseFields( //TODO fill out the descriptions
                                         linksResponseField(),
@@ -1035,6 +1043,7 @@ public class ApiDocumentation {
                                         fieldWithPath("sampleRelationships").description(""),
                                         fieldWithPath("taxonId").description(""),
                                         fieldWithPath("taxon").description(""),
+                                        fieldWithPath("team").description("Team this sample belongs to"),
                                         fieldWithPath("attributes").description(""),
                                         fieldWithPath("createdDate").description(""),
                                         fieldWithPath("lastModifiedDate").description(""),
@@ -1129,7 +1138,7 @@ public class ApiDocumentation {
     public void rootEndpoint() throws Exception {
 
         this.mockMvc.perform(
-                get("/api")
+                get("/api/")
                         .accept(RestMediaTypes.HAL_JSON)
         ).andExpect(status().isOk())
                 .andDo(

@@ -34,19 +34,19 @@ public interface SubmissionRepository extends MongoRepository<Submission, String
     @Override
     @RestResource(exported = true)
     @PreAuthorizeSubmissionTeamName
-    public <S extends Submission> S save(@P("submission") S submission);
+    public <S extends Submission> S save(@P("entity") S entity);
 
     // Prevents POST /things and PATCH /things/:id
     @Override
     @RestResource(exported = true)
     @PreAuthorizeSubmissionTeamName
-    public <S extends Submission> S insert(@P("submission") S submission);
+    public <S extends Submission> S insert(@P("entity") S entity);
 
     // exported as DELETE /things/:id
     @Override
     @RestResource(exported = true)
     @PreAuthorizeSubmissionTeamName
-    public void delete(@P("submission") Submission submission);
+    public void delete(@P("entity") Submission entity);
 
     @RestResource(exported = true, rel = "by-team", path = "by-team")
     @PreAuthorizeParamTeamName

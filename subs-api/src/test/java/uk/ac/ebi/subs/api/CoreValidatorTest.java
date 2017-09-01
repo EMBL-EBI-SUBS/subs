@@ -8,6 +8,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -32,9 +33,11 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ApiApplication.class)
+@WithMockUser(username="usi_user",roles={CoreValidatorTest.TEST_TEAM_1})
 public class CoreValidatorTest {
 
 
+    public static final String TEST_TEAM_1 = "testTeam1";
     @Autowired
     SubmissionRepository submissionRepository;
     @Autowired
@@ -97,7 +100,7 @@ public class CoreValidatorTest {
     public void setUp(){
         tearDown();
 
-        team = Team.build("testTeam1");
+        team = Team.build(TEST_TEAM_1);
         submitter = Submitter.build("bob@ebi.ac.uk");
 
         submission = new Submission();
